@@ -14,6 +14,7 @@ interface Space {
   client_name?: string;
   updated_at?: string;
   created_at?: string;
+  category?: string;
 
 }
 
@@ -42,7 +43,7 @@ const Newspace = () => {
   const IMAGE_BASE_URL = "http://localhost:5000";
 
   return (
-    <div style={{ overflowX: "hidden" }} className='min-h-screen flex flex-col' >
+    <div style={{ overflowX: "hidden" }} className='min-h-screen flex flex-col select-none ' >
       <div>
         <Spacenav />
       </div>
@@ -53,7 +54,7 @@ const Newspace = () => {
             <Link
               href="/spacebusiness"
             >
-              <button className='flex rounded-[8px] bg-[#685BC7] text-[14px] text-white font-[500] items-center pt-[8px] pb-[8px] pr-[16px] pl-[16px]'>
+              <button className='flex rounded-[8px] bg-[#685BC7] text-[14px] text-white font-[500] items-center pt-[8px] pb-[8px] pr-[16px] pl-[16px] hover:cursor-pointer '>
                 Create New Space
               </button>
             </Link>
@@ -119,8 +120,8 @@ const Newspace = () => {
                             <li>
                               <img
                                 // src={`${IMAGE_BASE_URL}/${space.image}`}
-                                src="/profile-picture-4.png"
-                                alt={space.name}
+                                src={space.image}
+                                alt={space.image}
                                 className='w-[59px] h-[59px] absolute top-[75%] rounded-full'
                               />
 
@@ -143,8 +144,8 @@ const Newspace = () => {
                               </ul>
 
                               <ul>
-                                <li className='flex text-[#475467] -mt font-500 text-[12px] font-Inter'>
-                                  Hair salon
+                                <li className='flex text-[#475467] -mt font-500 text-[12px] font-Inter  '>
+                                  {space.category}
                                 </li>
                                 {/* <li className='flex text-[#0097A7] font-500 text-[12px] font-Inter'>
                                 Category
