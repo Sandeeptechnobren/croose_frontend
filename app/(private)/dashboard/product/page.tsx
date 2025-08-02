@@ -651,7 +651,7 @@ const id = activeTab === 'products' ? 'product_id' : 'service_id' ;
 <button
   ref={buttonRef}
   onClick={() => setShowBulkModal(true)}
-  className="flex items-center justify-center gap-2 px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 text-sm font-bold whitespace-nowrap"
+  className="flex items-center gap-1 px-5 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 text-sm font-medium leading-5 whitespace-nowrap hover:cursor-pointer "
   style={{
     fontWeight: 500,
     fontSize: "14px",
