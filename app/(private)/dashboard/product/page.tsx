@@ -5,13 +5,15 @@ import axios from "axios";
 import { Icon } from "@iconify/react";
 import { toast } from 'react-toastify';
 import Select from "react-select";
+
 import React, { useState, useEffect, useRef } from 'react';
-import { addProduct, addServices, deleteProduct, deleteService, getAllProducts, getAllServices, GetSpaceId, searchProducts, searchServices, updateProduct, updateServices, uploadBulkFile } from '@/app/Apis/publicapi';
+import { addProduct, addServices,  deleteProduct,  deleteService,  getAllProducts, getAllServices, GetSpaceId, searchProducts, searchServices, updateProduct, updateServices, uploadBulkFile } from '@/app/Apis/publicapi';
 import { FiSliders, FiExternalLink, FiSearch } from "react-icons/fi";
 
 import {BASE_URL} from '../../../Apis/publicapi';
 
 import Pagination from '../../components/pagination';
+import { Noto_Sans_Bhaiksuki } from 'next/font/google';
 //import MultiSelectDays from './components/MultiSelectDays';
 const initialData = {
   products: [],
@@ -28,12 +30,14 @@ const options = [
 ];
 
 
+
 const ProductServiceTabs = () => {
    const [menuOpen, setMenuOpen] = useState(false);
    const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showMainModal, setShowMainModal] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
   const [activeTab, setActiveTab] = useState<'products' | 'services'>('products');
   const [data, setData] = useState<any>(initialData);
@@ -228,6 +232,7 @@ const handleFileUpload = async () => {
   try {
     await uploadBulkFile(selectedFile, activeTab, formState.space_id);
     toast.success("Upload Processing...");
+     fetchItems();
     setShowBulkModal(false);
     setSelectedFile(null); // clear after upload
   } catch (err: any) {
@@ -294,6 +299,7 @@ const handleUpdateItem = async (e: React.FormEvent) => {
         )
       }));
     }
+    fetchItems();
     setShowUpdateModal(false);
     toast.success('Updated successfully!');
   } catch (err: any) {
@@ -396,7 +402,7 @@ product_id: '',
         available_days: [] as string[],
       
       });
-
+fetchItems();
       setShowModal(false);
     } catch (err: any) {
       alert(err?.response?.data?.message || err.message || 'Failed to add item.');
@@ -517,17 +523,18 @@ const id = activeTab === 'products' ? 'product_id' : 'service_id' ;
           setShowUpdateModal(true);
           setActiveMenuId(null);
         }}
-        className="block w-full px-4 py-2 text-left bg-[#685BC7] text-white hover:bg-gray-200  hover:text-gray-700"
+        className="block w-full px-4  py-2 text-left bg-[#685BC7] text-white "
       >
         Update
       </button>
+      <div className='flex border-b border-black '/>
       <button
         onClick={() => {
           setFormState(item);
           setShowDeleteModal(true);
           setActiveMenuId(null);
         }}
-        className="block w-full px-4 py-2 text-left bg-[#F9F5FF]  hover:bg-violet-200 text-black"
+        className="block w-full   px-4 py-2 text-left bg-[#F9F5FF]  text-black"
       >
         Delete
       </button>
@@ -604,67 +611,73 @@ const id = activeTab === 'products' ? 'product_id' : 'service_id' ;
   }>Products/Services</h1>
 </div>
 <div className="px-4 text-sm text-[#475467]">
-  <div className="flex justify-between items-center">
-    <div className="flex gap-2">
-      <button
-        className={`px-4 rounded font-medium ${
-          activeTab === 'products' ? 'bg-[#685BC7] text-white' : 'bg-gray-200 text-gray-700'
-        }`}
-        onClick={() => setActiveTab('products')}>
-        Products
-      </button>
-      <button
-        className={`px-4 py-2 rounded font-medium ${
-          activeTab === 'services' ? 'bg-[#685BC7] text-white' : 'bg-gray-200 text-gray-700'
-        }`}
-        onClick={() => setActiveTab('services')}>
-        Services
-      </button>
-    </div>
+ <div className="flex justify-between items-center w-full">
+  {/* Left Side: Products & Services Buttons */}
+  <div className="flex gap-2">
     <button
-      className="bg-[#F9F5FF]  text-sm font-medium text-[#685BC7] hover:bg-violet-200 px-4 py-2 rounded-md"
- onClick={() => setShowModal(true)}
-      style={
-            {
-              fontFamily: "Inter",
-              fontWeight: "600",
-              fontSize: "14px",
-              lineHeight: "20px",
-              letterSpacing: "0%",
-
-            }}>
-      Add {activeTab === 'products' ? 'Product' : 'Service'}
+      className={`px-4 py-2 rounded font-medium ${
+        activeTab === 'products'
+          ? 'bg-[#685BC7] text-white'
+          : 'bg-gray-200 text-gray-700'
+      }`}
+      onClick={() => setActiveTab('products')}
+    >
+      Products
+    </button>
+    <button
+      className={`px-4 py-2 rounded font-medium ${
+        activeTab === 'services'
+          ? 'bg-[#685BC7] text-white'
+          : 'bg-gray-200 text-gray-700'
+      }`}
+      onClick={() => setActiveTab('services')}
+    >
+      Services
     </button>
   </div>
+
+
+  <div className="flex gap-4 items-center">
+    <button
+      className="bg-[#F9F5FF] text-[#685BC7] hover:bg-violet-200 px-4 py-2 rounded-md whitespace-nowrap"
+      onClick={() => setShowModal(true)}
+      style={{
+        display: 'flex',
+        fontWeight: '600',
+        fontSize: '14px',  
+        lineHeight: '20px',
+        letterSpacing: '0%',
+        color: '#685BC7'
+  
+      }}
+    >
+      Add {activeTab === 'products' ? 'Product' : 'Service'}
+    </button>
+
+    <div className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm text-[#344054] bg-white w-full max-w-xs shadow-sm">
+      <input
+        type="text"
+        placeholder="Search"
+        className="flex-1 outline-none bg-transparent text-sm text-gray-700"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <Icon icon="mynaui:search" width="20" height="20" style={{ color: '#344054' }} />
+    </div>
+  </div>
+</div>
+
+
   <p className="mt-2 font-normal">
     All the details about your customers
   </p>
+
+  
+
 </div>
 
-<div className="flex justify-between items-center flex-wrap gap-4 p-4">
-  <div className="flex flex-row gap-3 items-center ml-auto">
-    <div className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm text-[#344054] bg-white w-full max-w-xs shadow-sm">
-      <input type="text" placeholder="Search" className="flex-1 outline-none bg-transparent text-sm text-gray-700" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
-      <Icon icon="mynaui:search" width="20" height="20" style={{ color: "#344054" }} />
-    </div>
-    
-<button
-  ref={buttonRef}
-  onClick={() => setShowBulkModal(true)}
-  className="flex items-center gap-1 px-5 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 text-sm font-medium leading-5 whitespace-nowrap hover:cursor-pointer "
-  style={{
-    fontWeight: 500,
-    fontSize: "14px",
-    lineHeight: "20px",
-    letterSpacing: "0%",
-  }}
->
-  <img src="/icons/bulk_uplod.svg" alt="" className="w-4 h-4" />
-  Bulk upload
-</button>
 
-  </div>
-</div>
+
 
 
       <table className="min-w-full text-sm text-left border  text-gray-900 bg-white rounded-md overflow-hidden p-4">
@@ -699,298 +712,279 @@ const id = activeTab === 'products' ? 'product_id' : 'service_id' ;
           </thead>
           <tbody><RenderTableRows items={items} /></tbody>
         </table>
-        {showModal && (
-          <div className="fixed inset-0 bg-[#9999] bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 relative">
-              <div className="flex justify-between items-center mb-4 border-b border-[#F1F2F3] pb-1">
-              <h3 className="flex text-lg font-semibold mb-4">New {activeTab === 'products' ? 'Product' : 'Service'}</h3>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="flex text-black  bg-[#F6F8FA] rounded-full p-1 border border-[#F1F2F3]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <form onSubmit={handleAddItem} className="grid grid-cols-2 gap-4">
-              <select
-                className="col-span-2 border border-bg-gray-100 rounded px-3 py-3"
-                value={formState.space_id}
-                onChange={(e) => {
-                  const space_id = e.target.value;
-                  const selectedSpace = spaces.find((s) => String(s.id) === space_id);
-                  setFormState((f) => ({
-                    ...f,
-                    space_id,
-                    space_name: selectedSpace?.name || '',
-                  }));
-                }}
-              >
-                <option value="">Select Space Name</option>
-                {spaces.map((space) => (
-                  <option key={space.id} value={String(space.id)}>
-                    {space.name}
-                  </option>
-                ))}
-              </select>
-      <label className="col-span-2">
-  <span>Name</span>
-  <input
-    value={formState.name}
-    onChange={(e) =>
-      setFormState((f) => ({ ...f, name: e.target.value }))
-    }
-    type="text"
-    required
-    className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1"
-  />
-</label>
-  {activeTab === 'products' && (
-  <>
-  <label>
-  <span>Type</span>
-  <select value={formState.type}
-  onChange={(e) => setFormState(f => ({ ...f, type: e.target.value }))} 
-  name="type" className="border border-bg-gray-100 p-2 py-4 rounded w-full mt-1"
-  >
-    <option value="">Select Type</option>
-  {productTypes.map((type) => (
-    <option key={type} value={type}>
-      {type}
-    </option>
-    ))}
-  </select>
-</label>
-                  <label>
-                    <span>Stock</span>
-                    <input value={formState.product_stock} onChange={(e) => setFormState(f => ({ ...f, product_stock: e.target.value }))} type="text" className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1" />
-                  </label>
-                   <label>
- 
-            
+{showModal && (
+  <div className="fixed inset-0 bg-[#9999] bg-opacity-30 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl h-[80vh] overflow-y-auto p-6 relative transition-all duration-300">
 
-                <span>Price</span>
-                <input value={formState.product_price} onChange={(e) => setFormState(f => ({ ...f, product_price: e.target.value }))} type="text" required className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1" />
-              </label>
-                  <label className="col-span-2">
-                    <span>Image</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setFormState(f => ({ ...f, image: file }));
-                        }
-                      }}
-                      className="border  border-bg-gray-100 px-2 py-3 rounded w-full mt-1"
-                      required
-                    />
-                  </label>
-                </>
-              )}
-
-      
-              {activeTab === 'services' && (
-                <>
-
-
-
-
-                  <label>
-                    <span>Duration (minutes)</span>
-                    <input value={formState.service_duration} onChange={(e) => setFormState(f => ({ ...f, service_duration: e.target.value }))} type="number" className="border border-bg-gray-100 px-2 py-3  rounded w-full mt-1" />
-                  </label>
-                  <label >
-                    <span>Category</span>
-
-                    <input
-                      value={formState.service_category}
-                      onChange={(e) =>
-                        setFormState((f) => ({ ...f, service_category: e.target.value }))
-                      }
-                      type="text"
-                      required
-                      className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1"
-                    />
-                  </label>
-                   <label>
-
-                <span>Price</span>
-                <input value={formState.service_price} onChange={(e) => setFormState(f => ({ ...f, service_price: e.target.value }))} type="text" required className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1" />
-              </label>
-               
-                  <label className="col-span-2">
-                    <span>Available Days</span>
-                    <Select
-                      className="border border-bg-gray-100 "
-                      isMulti
-                      options={options}
-                      value={options.filter(o => formState?.available_days?.includes(o.value))}
-                      onChange={opts =>
-                        setFormState(f => ({
-                          ...f,
-                          available_days: opts.map(o => o.value)
-                        }))
-                      }
-                    />
-
-          
-                  </label>
-
-
-
-                </>
-              )}
-
-              <div className="col-span-2 flex justify-end gap-2 mt-4">
-                <button type="button" onClick={() => setShowModal(false)} className="px-12 py-2 bg-gray-200 rounded-md">Cancel</button>
-                <button type="submit" className="px-12 py-2 bg-[#685BC7] text-white rounded-md">Save</button>
-
-              </div>
-
-            </form>
-          </div>
+      {/* Header with slider */}
+      <div className="flex justify-between items-center border-b border-[#F1F2F3] p-4 mb-4">
+        <div className="relative inline-flex items-center bg-gray-100 rounded-full p-1 transition-all duration-300">
+          <button
+            onClick={() => setShowBulkModal(false)}
+            className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+              !showBulkModal ? 'bg-[#685BC7] text-white shadow' : 'text-gray-500'
+            }`}
+          >
+            Add {activeTab === 'products' ? 'Product' : 'Service'}
+          </button>
+          <button
+            onClick={() => setShowBulkModal(true)}
+            className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+              showBulkModal ? 'bg-[#685BC7] text-white shadow' : 'text-gray-500'
+            }`}
+          >
+            Bulk Upload
+          </button>
         </div>
-      )}
-      {/* Bulk Modal */}
-   {showBulkModal && (
-<div className="fixed inset-0  bg-opacity-30 flex items-center justify-end z-50">
-    <div className="w-[416px] bg-white rounded-lg shadow-lg p-6 relative mr-4">
-            <div className="flex justify-between items-center mb-4 border-b border-[#F1F2F3] pb-1">
-              <h2 className="flex text-lg font-semibold mb-4">Bulk upload</h2>
-              <button
-                onClick={() => setShowBulkModal(false)}
-                className="flex text-black  bg-[#F6F8FA] rounded-full p-1 border border-[#F1F2F3]"
-              >
-                <X className="w-4 h-4" />
+
+        <button
+          type="button"
+          onClick={() => setShowModal(false)}
+          className="flex items-center justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
+        >
+          <X className="w-4 h-4 text-gray-600" />
+        </button>
+      </div>
+
+      {/* Content Section (Sliding effect) */}
+      <div className="transition-all duration-300 ease-in-out overflow-hidden">
+        {!showBulkModal ? (
+          <form onSubmit={handleAddItem} className="grid grid-cols-2 gap-4">
+            <select
+              className="col-span-2 border border-bg-gray-100 rounded px-3 py-3"
+              value={formState.space_id}
+              onChange={(e) => {
+                const space_id = e.target.value;
+                const selectedSpace = spaces.find((s) => String(s.id) === space_id);
+                setFormState((f) => ({
+                  ...f,
+                  space_id,
+                  space_name: selectedSpace?.name || '',
+                }));
+              }}
+            >
+              <option value="">Select Space Name</option>
+              {spaces.map((space) => (
+                <option key={space.id} value={String(space.id)}>
+                  {space.name}
+                </option>
+              ))}
+            </select>
+
+            <label className="col-span-2">
+              <span>Name</span>
+              <input
+                value={formState.name}
+                onChange={(e) => setFormState((f) => ({ ...f, name: e.target.value }))}
+                type="text"
+                required
+                className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1"
+              />
+            </label>
+
+            {activeTab === 'products' && (
+              <>
+                <label>
+                  <span>Type</span>
+                  <select
+                    value={formState.type}
+                    onChange={(e) => setFormState((f) => ({ ...f, type: e.target.value }))}
+                    className="border border-bg-gray-100 p-2 py-4 rounded w-full mt-1"
+                  >
+                    <option value="">Select Type</option>
+                    {productTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  <span>Stock</span>
+                  <input
+                    value={formState.product_stock}
+                    onChange={(e) => setFormState((f) => ({ ...f, product_stock: e.target.value }))}
+                    type="text"
+                    className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1"
+                  />
+                </label>
+
+                <label>
+                  <span>Price</span>
+                  <input
+                    value={formState.product_price}
+                    onChange={(e) => setFormState((f) => ({ ...f, product_price: e.target.value }))}
+                    type="text"
+                    required
+                    className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1"
+                  />
+                </label>
+
+                <label className="col-span-2">
+                  <span>Image</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setFormState((f) => ({ ...f, image: file }));
+                      }
+                    }}
+                    className="border border-bg-gray-100 px-2 py-3 rounded w-full mt-1"
+                    required
+                  />
+                </label>
+              </>
+            )}
+
+            {activeTab === 'services' && (
+              <>
+                <label>
+                  <span>Duration (minutes)</span>
+                  <input
+                    value={formState.service_duration}
+                    onChange={(e) => setFormState((f) => ({ ...f, service_duration: e.target.value }))}
+                    type="number"
+                    className="border border-bg-gray-100 px-2 py-3 rounded w-full mt-1"
+                  />
+                </label>
+
+                <label>
+                  <span>Category</span>
+                  <input
+                    value={formState.service_category}
+                    onChange={(e) => setFormState((f) => ({ ...f, service_category: e.target.value }))}
+                    type="text"
+                    required
+                    className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1"
+                  />
+                </label>
+
+                <label>
+                  <span>Price</span>
+                  <input
+                    value={formState.service_price}
+                    onChange={(e) => setFormState((f) => ({ ...f, service_price: e.target.value }))}
+                    type="text"
+                    required
+                    className="border border-bg-gray-100 p-2 py-3 rounded w-full mt-1"
+                  />
+                </label>
+
+                <label className="col-span-2">
+                  <span>Available Days</span>
+                  <Select
+                    isMulti
+                    options={options}
+                    value={options.filter((o) => formState.available_days?.includes(o.value))}
+                    onChange={(opts) =>
+                      setFormState((f) => ({
+                        ...f,
+                        available_days: opts.map((o) => o.value),
+                      }))
+                    }
+                    className="border border-bg-gray-100 rounded"
+                  />
+                </label>
+              </>
+            )}
+
+            <div className="col-span-2 flex justify-end gap-2 mt-4">
+              <button type="button" onClick={() => setShowModal(false)} className="px-12 py-2 bg-gray-200 rounded-md">
+                Cancel
+              </button>
+              <button type="submit" className="px-12 py-2 bg-[#685BC7] text-white rounded-md">
+                Save
               </button>
             </div>
-            <div className='flex p-4  '>
-              <div className="bg-[#F8FAFC] p-4 border border-[#F1F5F9] rounded-lg mb-4 ">
-                <p className="font-medium mb-2 text-[#020617]"
-                  style={
-                    {
-                      fontWeight: "500",
-                      fontSize: "14px",
-                      lineHeight: "14px",
-                      letterSpacing: "0%",
-                    }}>Before you proceed</p>
-                {activeTab === "services" && (
-                  <>
-                    <p className="text-[#0F172A]  mb-3"
-                      style={
-                        {
-                          fontWeight: "400",
-                          fontSize: "14px",
-                          lineHeight: "20px",
-                          letterSpacing: "0%",
-                        }}>
-                      Please download our template below to help you organize and upload your services in bulk.
-                    </p>
-                  </>
-                )}
-                {activeTab === "products" && (
-                  <>
-                    <p className="text-[#0F172A]  mb-3"
-                      style={
-                        {
-                          fontWeight: "400",
-                          fontSize: "14px",
-                          lineHeight: "20px",
-                          letterSpacing: "0%",
-                        }}>
-                      Please download our template below to help you organize and upload your products in bulk.
-                    </p>
-                  </>
-                )}
-                <a
-                  href={templateUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 font-sans font-medium text-sm text-[#0F172A] bg-white mt-3 border border-[#E2E8F0] rounded shadow transition block text-center"
-                >
-                  Download template
-                </a>
-              </div>
+          </form>
+        ) : (
+          <>
+            <div className="bg-[#F8FAFC] p-10 border border-[#F1F5F9] rounded-lg mb-4">
+              <p className="font-medium mb-2 text-[#020617] text-md">Before you proceed</p>
+              <p className="text-[#0F172A] text-md mb-7  ">
+                Please download our template below to help you organize and upload your{' '}
+                {activeTab === 'products' ? 'products' : 'services'} in bulk.
+              </p>
+              <a
+                href={templateUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3   text-[#0F172A] bg-white border border-[#E2E8F0] rounded shadow block text-center"
+              >
+                Download template
+              </a>
             </div>
 
-            {/* <p className="text-xs font-semibold font-sans text-[#94A3B8] mb-4">
-              DATE & TIME
-            </p> */}
-
-            <p className="text-sm text-[#0F172A] mb-6"
-              style={
-                {
-                  fontWeight: "400",
-                  fontSize: "14px",
-                  lineHeight: "20px",
-                  letterSpacing: "0%",
-
-                }}>
+            <p className="text-md text-[#0F172A] mb-6 mt-10 pl-5">
               If you have done that already, then you can proceed to do your Bulk upload.
             </p>
-  <select className="w-full border border-bg-gray-100 rounded px-3 py-3 mb-6"
-                value={formState.space_id}
-                onChange={(e) => {
-                  const space_id = e.target.value;
-                  const selectedSpace = spaces.find((s) => String(s.id) === space_id);
-                  setFormState((f) => ({
-                    ...f,
-                    space_id,
-                    space_name: selectedSpace?.name || '',
-                  }));
-                }}
-              >
 
-                <option value="">Select Space Name</option>
-                {spaces.map((space) => (
-                  <option key={space.id} value={String(space.id)}>
-                    {space.name}
-                  </option>
-                ))}
-              </select>
-          {selectedFile && (
-            <p className="text-green-600 text-xs mb-2">Selected File: {selectedFile.name}</p>
-          )}
+            <select
+              className="w-full border border-bg-gray-100 rounded px-3 py-4 mb-6"
+              value={formState.space_id}
+              onChange={(e) => {
+                const space_id = e.target.value;
+                const selectedSpace = spaces.find((s) => String(s.id) === space_id);
+                setFormState((f) => ({
+                  ...f,
+                  space_id,
+                  space_name: selectedSpace?.name || '',
+                }));
+              }}
+            >
+              <option value="">Select Space Name</option>
+              {spaces.map((space) => (
+                <option key={space.id} value={String(space.id)}>
+                  {space.name}
+                </option>
+              ))}
+            </select>
+
+            {selectedFile && <p className="text-green-600 text-xs mb-2">Selected File: {selectedFile.name}</p>}
+
             <div className="flex flex-row gap-2">
-  <button
-    onClick={() => setShowBulkModal(false)}
-    className="w-full py-2 bg-[#F1F5F9] rounded-lg hover:bg-gray-200"
-  >
-    Cancel
-  </button>
+              <button onClick={() =>  setShowModal(false)} className="w-full py-3 bg-[#F1F5F9] rounded-lg hover:bg-gray-200">
+                Cancel
+              </button>
 
-  <label className="w-full">
-    <input
-      type="file"
-      accept=".xlsx,.xls,.csv"
-      onChange={handleFileChange}
-      hidden
-      id="file-upload"
-    />
+              <label className="w-full">
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileChange}
+                  hidden
+                  id="file-upload"
+                />
+                <button
+                  type="button"
+                  className={`w-full py-3 rounded text-white ${
+                    selectedFile ? 'bg-[#685BC7] hover:bg-purple-700' : 'bg-gray-500 cursor-pointer'
+                  }`}
+                  onClick={() => {
+                    if (!selectedFile) {
+                      document.getElementById('file-upload')?.click();
+                    } else {
+                      handleFileUpload();
+                    }
+                  }}
+                >
+                  {selectedFile ? 'Upload' : 'Select File'}
+                </button>
+              </label>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
-    <button
-      type="button"
-      className={`w-full py-2 rounded text-white ${
-        selectedFile ? 'bg-[#685BC7] hover:bg-purple-700' : 'bg-gray-500 cursor-pointer'
-      }`}
-      onClick={() => {
-        if (!selectedFile) {
-          document.getElementById('file-upload')?.click();
-        } else {
-          handleFileUpload();
-        }
-      }}
-    >
-      {selectedFile ? 'Upload' : 'Select File'}
-    </button>
-  </label>
-</div>
 
-          </div>
-        </div>
-      )}
+
+
       {message && (
         <div className="text-sm text-green-600">
           {message}
@@ -1186,6 +1180,7 @@ const id = activeTab === 'products' ? 'product_id' : 'service_id' ;
                   ),
                 }));
               }
+              fetchItems();
               setShowDeleteModal(false);
             } catch (err) {
               console.error(err);
@@ -1200,6 +1195,24 @@ const id = activeTab === 'products' ? 'product_id' : 'service_id' ;
     </div>
   </div>
 )}
+{/* {showMainModal && (
+  <div className="fixed inset-0 bg-[#9999] bg-opacity-30 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+      <div className="flex justify-between items-center mb-4 border-b border-[#F1F2F3] pb-1">
+        <h3 className="text-lg font-semibold">Choose Action</h3>
+        <button
+          type="button"
+          onClick={() => setShowMainModal(false)}
+          className="flex text-black bg-[#F6F8FA] rounded-full p-1 border border-[#F1F2F3]"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+     
+    </div>
+  </div>
+)} */}
 
 
   <Pagination
