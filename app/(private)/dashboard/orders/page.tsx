@@ -168,7 +168,7 @@ const OrdersTable = () => {
                                         <td className="px-4 py-2">
                                             <button
                                                 onClick={() => handleOrderStatusUpdate(order.id, order.status)}
-                                                className="px-3 py-1 bg-[#685BC7] text-white rounded text-xs"
+                                                className="px-3 py-1 bg-[#685BC7] text-white rounded text-xs hover:cursor-pointer"
                                             >
                                                 Update Status
                                             </button>
