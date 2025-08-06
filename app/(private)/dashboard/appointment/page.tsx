@@ -311,9 +311,9 @@ const subheading = {
         </div>
 
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center  z-50">
             <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-              <h3 className="text-lg font-semibold mb-4">New Appointment</h3>
+              <h3 className="text-lg  font-semibold mb-4">New Appointment</h3>
               <form className="space-y-4">
                 <input type="text" required placeholder="Customer Name" className="w-full border p-2 rounded-md"
                   value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
@@ -322,7 +322,7 @@ const subheading = {
 
 
                 {/* DateTime input */}
-                <select className="w-full border p-2 rounded-md"
+                <select className="w-full border p-2  font-Inter rounded-md"
                   value={formData.service} onChange={(e) => setFormData({ ...formData, service: e.target.value })}>
                   <option>Dental Cleaning</option>
                   <option>Eye Checkup</option>
@@ -407,22 +407,22 @@ const subheading = {
 
               <tr>
 
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-['Inter']">
+                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-Inter">
                   Space Name
                 </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-['Inter']">
+                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
                   Customer Name
                 </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-['Inter']">
+                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
                   Status
                 </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-['Inter']">
+                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
                   Phone Number
                 </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-['Inter']">
+                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
                   Service Name
                 </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-['Inter']">
+                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
                   Appointment Time
                 </th>
 
@@ -541,23 +541,23 @@ const subheading = {
               <X size={18}  />
             </button>
 
-  <div className="w-12 h-12 border-[rgba(0, 0, 0, 0.08)] rounded-full bg-[#F2F4F7] flex items-center justify-center text-lg font-semibold text-gray-700 mx-8 mb-2">
+  <div className="w-12 h-12 border-[rgba(0, 0, 0, 0.08)] rounded-full bg-[#F2F4F7] flex items-center justify-center text-lg font-semibold font-Inter text-gray-700 mx-8 mb-2">
           {selectedAppointment.customer_name.charAt(0)}
         </div>
       <div className="flex items-center gap-4 mb-4 mx-10">
        
         <div>
-          <h3 className="text-[#101828]"
+          <h3 className="text-[#101828]   font-Inter "
           style={{
-            fontFamily: 'Inter',
+            
             fontWeight: 500,
             fontSize: '14px',
             lineHeight: '20px',
             letterSpacing: '0%'
           }}>{selectedAppointment.customer_name}</h3>
-          <p className=" text-[#475467]"
+          <p className=" text-[#475467]  font-Inter "
              style={{
-            fontFamily: 'Inter',
+           
             fontWeight: 400,
             fontSize: '14px',
             lineHeight: '20px',
@@ -575,27 +575,27 @@ const subheading = {
       </div>
 
       {/* Details Section */}
-      <div className="w-[690px] h-[108px] grid grid-cols-3 gap-4 mb-6 bg-[#F2F4F7] rounded-lg p-4 mx-10">
-        <div className='gap-2 flex-col flex'>
-          <p 
-       style={subheading}>Appointment Day</p>
-          <p className="text-[#475467]"
-        style={datainside} >{selectedAppointment.date}</p>
+      <div className="w-[690px] h-[108px] grid grid-cols-3 gap-4 mb-6 bg-[#F2F4F7]  font-Inter rounded-lg p-4 mx-10">
+        <div className='gap-2 flex-col  flex'>
+          <p className=' font-Inter'
+       >Appointment Day</p>
+          <p className="text-[#475467]  font-Inter  "
+         >{selectedAppointment.date}</p>
         </div>
-        <div className='gap-2 flex-col flex'>
-          <p  style={subheading} >Date created</p>
-          <p className=' text-[#475467]' style={datainside}>{selectedAppointment.date_created}</p>
+        <div className='gap-2  font-Inter flex-col flex'>
+          <p   >Date created</p>
+          <p className=' text-[#475467]' >{selectedAppointment.date_created}</p>
         </div>
-        <div className='gap-2 flex-col flex'>
-          <p style={subheading}>Service type</p>
-          <p className=' text-[#475467]' style={datainside}>{selectedAppointment.service_name}</p>
+        <div className='gap-2 flex-col flex font-Inter '>
+          <p >Service type</p>
+          <p className=' text-[#475467]' >{selectedAppointment.service_name}</p>
         </div>
       </div>
 
       {/* Notes */}
       <div className="mb-4 mx-10">
         <p className="mb-1"
-        style={subheading}>Notes</p>
+        >Notes</p>
         <p className=" text-[#344054]">{selectedAppointment.notes ||
        "No notes available"}</p>
       </div>
