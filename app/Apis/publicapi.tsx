@@ -957,7 +957,9 @@ export const getQr = (space_id: string) => {
     },
     params: { space_id },
     responseType: 'blob'
-  });
+    
+  }),
+  console.log('this si the instance data')
 };
 
 
