@@ -25,6 +25,7 @@ const Myspace = () => {
   const [activationStatus, setActivationStatus] = useState(null);
   const [underReviewPopupOpen, setUnderReviewPopupOpen] = useState(false);
   const [showLiveAgent, setShowLiveAgent] = useState(false);
+  const [instanceData, setInstanceData] = useState<any>()
   const searchParams: any = useSearchParams();
   const id = searchParams.get('id');
   const uuid = searchParams.get('uuid');
@@ -90,6 +91,8 @@ const Myspace = () => {
       const response = await RunAgent(id);
       const status = response?.data?.payment_status;
       const instanceActivationStatus = response?.data?.instance_activation_status;
+     setInstanceData(response)
+     console.log('instance data is here:',instanceData)
 
       setActivationStatus(instanceActivationStatus);
 
@@ -113,6 +116,17 @@ const Myspace = () => {
       console.error('Failed to run agent', err);
     }
   };
+
+  useEffect(()=>{
+    try{
+      if(instanceData){
+        console.log("Instance Data:", instanceData);
+      }
+
+    }catch(err){
+      console.log(err)
+    }
+  },[instanceData])
 
   useEffect(() => {
     const handleActivationStatus = async () => {
@@ -348,7 +362,7 @@ const Myspace = () => {
 
       {docopen ? <Documentpopup setDocopen={setDocopen} /> : ""}
 
-      {proopen ? <Upgradetopro setProopen={setProopen} /> : ""}
+      {proopen ? <Upgradetopro setProopen={setProopen} instanceData={instanceData} /> : ""}
 
       {scanopen ? <Scanqrpage setScanopen={setScanopen} space_id={id} /> : ""}
 

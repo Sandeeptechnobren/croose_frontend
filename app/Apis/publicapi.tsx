@@ -422,6 +422,8 @@ export const getSpacePrompt = async (spaceId: number) => {
   });
 };
 
+
+
 export const updateSpacePrompt = async (spaceId: number, promptContent: string) => {
   const token = localStorage.getItem("token");
 
@@ -957,7 +959,9 @@ export const getQr = (space_id: string) => {
     },
     params: { space_id },
     responseType: 'blob'
-  });
+    
+  }),
+  console.log('this si the instance data')
 };
 
 
