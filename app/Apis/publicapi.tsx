@@ -422,6 +422,8 @@ export const getSpacePrompt = async (spaceId: number) => {
   });
 };
 
+
+
 export const updateSpacePrompt = async (spaceId: number, promptContent: string) => {
   const token = localStorage.getItem("token");
 
