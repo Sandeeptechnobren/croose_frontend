@@ -959,9 +959,9 @@ export const getQr = (space_id: string) => {
     },
     params: { space_id },
     responseType: 'blob'
-    
+
   }),
-  console.log('this si the instance data')
+    console.log('this si the instance data')
 };
 
 
@@ -979,9 +979,28 @@ export const InstanceActivationStatus = async (spaceId: number) => {
         space_id: spaceId
       },
     })
-    
+
 
   } catch (err) {
     console.log(err)
   }
 }
+
+
+export const findAccountByEmail = async (email: string) => {
+  try {
+    let res = await axiosRequest({
+      method: "post", // Using POST method as specified
+      url: `${BASE_URL}/api/find_account/${email}`, // Email as path parameter
+      headers: {
+        'Content-Type': 'application/json',
+      }
+      // No body needed since email is in the URL path
+    });
+
+    return res;
+  } catch (err) {
+    console.error('findAccountByEmail API error:', err);
+    throw err;
+  }
+};
