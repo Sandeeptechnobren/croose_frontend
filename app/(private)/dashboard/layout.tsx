@@ -60,7 +60,7 @@ export default function Layout({
 
   
       {!show && (
-        <div className="fixed top-4 left-4 z-50">
+        <div className="fixed bottom-[60px] left-4 z-50">
           <button 
             className="cursor-pointer bg-purple-100 hover:bg-purple-200 p-2 rounded-lg shadow-md transition-colors"
             onClick={() => setShow(true)}
