@@ -1106,8 +1106,8 @@ export const fetchPaymentApi = async () => {
     const token = localStorage.getItem('token');
 
     const res = await axios.post(
-      `${BASE_URL}/api/payment_details`, 
-      {}, 
+      `${BASE_URL}/api/payment_details`,
+      {},
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1282,6 +1282,8 @@ export const BussinessCategories = async () => {
     console.log(err);
   }
 };
+
+
 export const updateAppointmentStatus = async (id: number, status: string) => {
   try {
     const token = localStorage.getItem("token");
@@ -1303,29 +1305,7 @@ export const updateAppointmentStatus = async (id: number, status: string) => {
   }
 };
 
-export const GetSpaceId = async () => {
-  try {
-    const token = localStorage.getItem("token");
 
-    if (!token) {
-      throw new Error("Token not found in localStorage");
-    }
-
-    const res = await axiosRequest({
-      method: "get",
-      url: `${BASE_URL}/api/space`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("Fetched spaces from API →", res); // Log just the data
-    return res; // ✅ Only return the data part
-  } catch (err) {
-    console.error("Error fetching space data:", err);
-    throw err;
-  }
-};
 
 
 export const addProduct = async (formData: FormData) => {
@@ -1836,7 +1816,7 @@ export const OrderStatistics = async (data: any) => {
     let token = localStorage.getItem("token")
     let res = await axiosRequest({
       method: "get",
-      url: `${BASE_URL}/api/order_statistics`,
+      url: `c`,
       headers: {
         Authorization: `Bearer ${token}`
       },
@@ -1882,7 +1862,7 @@ export const spaceChats = async (spaceId: number) => {
 
     })
 
-  
+
 
     return res.data
 
@@ -1949,7 +1929,28 @@ export const RunAgent = async (spaceid: number) => {
 }
 
 
-export const PayApi = async (uuid:any) => {
+export const RunAgentInfo = async (uuid: any, space_id: any) => {
+  try {
+    const token = localStorage.getItem("token")
+    const res = await axios.get(`https://api.joincroose.com/croose/api/run_agent/${uuid}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: { space_id },
+      responseType: 'blob'
+    })
+
+
+    return res
+
+
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+
+export const PayApi = async (uuid: any) => {
   try {
     const res = await axios.get(`https://api.joincroose.com/croose/api/paystack/whapi/${uuid}`);
     return res;
@@ -1967,6 +1968,80 @@ export const getQr = (space_id: string) => {
     params: { space_id },
     responseType: 'blob'
   });
+}
+
+export const GetSpaceId = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("Token not found in localStorage");
+    }
+
+    const res = await axiosRequest({
+      method: "get",
+      url: `${BASE_URL}/api/space`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Fetched spaces from API →", res);
+    return res; 
+  } catch (err) {
+    console.error("Error fetching space data:", err);
+    throw err;
+  }
 };
 
 
+export const getProductsBySpace = async (spaceId: number) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/getProductBySpace`, {
+      params: {
+        space_id: spaceId
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching products by space:', error);
+    throw error;
+  }
+};
+
+export const ManualOrder = async (orderData: any) => {
+  try {
+    const res = await axios.post(`${BASE_URL}/api/createmanualorder`, orderData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error('Error creating manual order:', error);
+    throw error;
+  }
+};
+
+export const getCustomerByPhoneAPi = async (whatsappNumber: number) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/getCustomerByPhone`, {
+      params: {
+        whatsapp_number: whatsappNumber
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching customer by phone:', error);
+    throw error;
+  }
+};
