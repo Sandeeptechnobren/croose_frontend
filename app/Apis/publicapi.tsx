@@ -987,23 +987,23 @@
 // // }
 
 
-// export const findAccountByEmail = async (email: string) => {
-//   try {
-//     let res = await axiosRequest({
-//       method: "post", // Using POST method as specified
-//       url: `${BASE_URL}/api/find_account/${email}`, // Email as path parameter
-//       headers: {
-//         'Content-Type': 'application/json',
-//       }
-//       // No body needed since email is in the URL path
-//     });
+export const findAccountByEmail = async (email: string) => {
+  try {
+    let res = await axiosRequest({
+      method: "post", // Using POST method as specified
+      url: `${BASE_URL}/api/find_account/${email}`, // Email as path parameter
+      headers: {
+        'Content-Type': 'application/json',
+      }
+      // No body needed since email is in the URL path
+    });
 
-//     return res;
-//   } catch (err) {
-//     console.error('findAccountByEmail API error:', err);
-//     throw err;
-//   }
-// };
+    return res;
+  } catch (err) {
+    console.error('findAccountByEmail API error:', err);
+    throw err;
+  }
+};
 
 
 
