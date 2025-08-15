@@ -125,7 +125,7 @@ const Customers = () => {
                                     </div>
                                 </li>
                                 <li className='w-full  lg:w-[32.1%] border-[2px] rounded-[12px] border-[#EAECF0] p-[24px] ' >
-                                    <p className='text-[#475467] text-[14px] font-medium font-Inter' >Dormant Customers</p>
+                                    <p className='text-[#475467] text-[14px] font-medium font-Inter' >Highest Customer Value</p>
                                     <div className='flex items-center gap-[16px] justify-between  '>
                                         <p className='font-semibold text-[#101828] text-[30px] ' >{customerStatistic.highest_order_value}</p>
                                         <img className='w-[71px] ' src={"/100.png"} alt='badge' />

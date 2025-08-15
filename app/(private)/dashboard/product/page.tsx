@@ -140,8 +140,8 @@ price: '',
 
   const templateUrl =
     activeTab === 'services'
-      ? 'http://68.183.108.227/croose/public/storage/Bulk_upload_templates/new_services_template.xlsx'
-      : 'http://68.183.108.227/croose/public/storage/Bulk_upload_templates/New_products_template.xlsx';
+      ? 'https://68.183.108.227/croose/public/storage/Bulk_upload_templates/new_services_template.xlsx'
+      : 'https://68.183.108.227/croose/public/storage/Bulk_upload_templates/New_products_template.xlsx';
 
   useEffect(() => {
     const fetchData = async () => {
