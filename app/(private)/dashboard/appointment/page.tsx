@@ -238,14 +238,7 @@ const subheading = {
                 Dive deep into who your customers are
               </p>
             </div>
-            <div className='border-none' >
-              {/* <DateSelectButton
-
-
-          appointmentTime={formData.appointmentTime}
-          setDate={setDate}
-        /> */}
-            </div>
+           
 
 
           </div>

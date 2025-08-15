@@ -22,7 +22,8 @@ const navItems = [
   { label: 'Appointments', href: '/dashboard/appointment', icon: <Icon icon="uil:calender" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
   { label: 'Orders', href: '/dashboard/orders', icon: <Icon icon="lets-icons:order" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
   { label: 'Product/Services', href: '/dashboard/product', icon: <Icon icon="uil:calender" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
-
+  { label: 'Subscriptions', href: '/dashboard/subscription', icon: <Icon icon="uil:calender" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
+ 
 ];
 
 
