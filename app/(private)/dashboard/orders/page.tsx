@@ -44,8 +44,8 @@ interface Product {
 interface Customer {
   customer_name?: string;
   name?: string;
-  address?: string;
-  email?: string;
+  customer_address?: string;
+  customer_email?: string;
 }
 
 interface NewOrder {
@@ -399,8 +399,8 @@ const OrdersTable: React.FC = () => {
             
             if (customerData) {
                 const customerName = customerData.customer_name || customerData.name || '';
-                const address = customerData.address || '';
-                const email = customerData.email || '';
+                const address = customerData.customer_address || '';
+                const email = customerData.customer_email || '';
                 
                 console.log('Setting customer data:', { customerName, address, email }); // Debug log
                 
@@ -484,7 +484,7 @@ const OrdersTable: React.FC = () => {
                 closeModal();
                 getOrders();
             } else {
-                const errorMessage = response?.message || 'Unknown error occurred';
+                const errorMessage = response|| 'Unknown error occurred';
                 alert('Failed to create order: ' + errorMessage);
             }
         } catch (err) {
@@ -539,7 +539,7 @@ const OrdersTable: React.FC = () => {
 
                 {/* Add Order Popup Modal */}
                 {showmodel && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-[#9999] h-[700px] bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-900">Add New Order</h3>
@@ -708,11 +708,7 @@ const OrdersTable: React.FC = () => {
                                         rows={2}
                                     />
                                     {/* Debug info */}
-                                    {process.env.NODE_ENV === 'development' && (
-                                        <small className="text-xs text-gray-400">
-                                            Debug: "{newOrder.address}"
-                                        </small>
-                                    )}
+                                   
                                 </div>
 
                                 {/* Email - FIXED: Force key prop for re-render */}
@@ -729,12 +725,8 @@ const OrdersTable: React.FC = () => {
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#685BC7] focus:border-transparent"
                                         placeholder="Enter customer email"
                                     />
-                                    {/* Debug info */}
-                                    {process.env.NODE_ENV === 'development' && (
-                                        <small className="text-xs text-gray-400">
-                                            Debug: "{newOrder.email}"
-                                        </small>
-                                    )}
+                                    
+                                   
                                 </div>
 
                                 {/* Action Buttons */}

@@ -10,7 +10,7 @@
 // import { useParams, useSearchParams } from 'next/navigation';
 // import { useIq } from '../Iqcontext'
 // import LiveAgent2 from './liveagent2'
-// import Link from 'next/link'
+
 // const Myspace = () => {
 //   const [spaceiqopen, setSpaceiqopen] = useState(false)
 //   const [docopen, setDocopen] = useState(false)
@@ -386,6 +386,7 @@ import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi } from "@/ap
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
+import Link from 'next/link'
 const Myspace = () => {
   const [spaceiqopen, setSpaceiqopen] = useState(false)
   const [docopen, setDocopen] = useState(false)
@@ -426,6 +427,7 @@ const Myspace = () => {
     }
   };
   const spaceName = searchParams.get('name');
+    const imageUrl = searchParams.get('image')
   useEffect(() => {
     const fetchSpaceChats = async () => {
       try {
@@ -486,17 +488,21 @@ const handleRunAgent = async () => {
       <Spacenav />
       <div className="h-auto w-full bg-[#FFFFFF] relative mt-[15px] flex flex-col gap-5  items-center">
         <div className="w-[100%]  items-center mt-[-17px]   flex flex-row h-[64px] " style={{ borderBottom: "1px solid #EAECF0" }}>
-          <img
+          <Link href={'/dashboard/createnewspace'} >
+         <img
             src="/arrow.png"
             alt="arrow"
             className="h-[20px] ml-[10px] m-[-1px] w-[20px]"
           />
+          </Link>
           <div className="w-[48px] ml-[10px] h-[48px]">
-            <img
-              src="/facebg.png"
-              alt="face imge"
-              className="w-[48px] h-[48px] top-[8px]"
-            ></img>
+             {imageUrl && (
+              <img
+                src={decodeURIComponent(imageUrl)}
+                alt="Space image"
+                className="w-[48px]  h-[48px] rounded-full"
+              />
+            )}
           </div>
           <div className="w-[50%] sm:w-[70%] text-[13px] sm:text-[1.125rem] text-[#101828] ml-[18px] font-sans font-semibold text-lg leading-7 tracking-normal align-middle h-[28px]">
             {spaceName}
