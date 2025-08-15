@@ -9,228 +9,228 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // TypeScript interfaces
 interface Order {
-  id: number;
-  space_name: string;
-  customer_name: string;
-  customer_number: string;
-  product_name: string;
-  order_amount: number | string;
-  payment_status: string;
-  order_date: string;
-  status: string;
+    id: number;
+    space_name: string;
+    customer_name: string;
+    customer_number: string;
+    product_name: string;
+    order_amount: number | string;
+    payment_status: string;
+    order_date: string;
+    status: string;
 }
 
 interface OrderStatistics {
-  total_new_orders: number;
-  total_new_orders_growth: number;
-  total_orders: number;
-  total_orders_growth: number;
-  cancelled_orders: number;
-  cancelled_orders_growth: number;
+    total_new_orders: number;
+    total_new_orders_growth: number;
+    total_orders: number;
+    total_orders_growth: number;
+    cancelled_orders: number;
+    cancelled_orders_growth: number;
 }
 
 interface Space {
-  id: number;
-  name?: string;
-  space_name?: string;
+    id: number;
+    name?: string;
+    space_name?: string;
 }
 
 interface Product {
-  id: number;
-  name?: string;
-  product_name?: string;
+    id: number;
+    name: string;
+    product_name: string;
+    price?: number;
+    original_string?: string;
 }
 
 interface Customer {
-  customer_name?: string;
-  name?: string;
-  customer_address?: string;
-  customer_email?: string;
+    customer_name?: string;
+    name?: string;
+    customer_address?: string;
+    customer_email?: string;
 }
 
 interface NewOrder {
-  customerName: string;
-  spaceId: string;
-  productId: string;
-  whatsappNumber: string;
-  orderQuantity: number;
-  address: string;
-  email: string;
+    customerName: string;
+    spaceId: string;
+    productId: string;
+    whatsappNumber: string;
+    orderQuantity: number;
+    address: string;
+    email: string;
 }
 
 interface ApiResponse<T> {
-  success?: boolean;
-  data?: T;
-  message?: string;
+    success?: boolean;
+    data?: T;
+    message?: string;
 }
 
 // API Functions
 const fetchOrders = async (): Promise<Order[]> => {
-  try {
-    const res = await axios.get(`${BASE_URL}/api/orders`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return res.data?.data || res.data || [];
-  } catch (err) {
-    console.error("Failed to fetch orders:", err);
-    throw err;
-  }
+    try {
+        const res = await axios.get(`${BASE_URL}/api/orders`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return res.data?.data || res.data || [];
+    } catch (err) {
+        console.error("Failed to fetch orders:", err);
+        throw err;
+    }
 };
 
 const OrderStatistics = async (): Promise<OrderStatistics> => {
-  try {
-    const res = await axios.get(`${BASE_URL}/api/order_statistics`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return res.data?.data || res.data || {};
-  } catch (err) {
-    console.error("Failed to fetch order stats:", err);
-    throw err;
-  }
+    try {
+        const res = await axios.get(`${BASE_URL}/api/order_statistics`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return res.data?.data || res.data || {};
+    } catch (err) {
+        console.error("Failed to fetch order stats:", err);
+        throw err;
+    }
 };
 
 const OrdersStatus = async (data: { id: number; status: string }): Promise<ApiResponse<any>> => {
-  try {
-    const res = await axios.put(`${BASE_URL}/api/order-status`, data, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return res.data;
-  } catch (err) {
-    console.error("Failed to update order status:", err);
-    throw err;
-  }
+    try {
+        const res = await axios.put(`${BASE_URL}/api/order-status`, data, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return res.data;
+    } catch (err) {
+        console.error("Failed to update order status:", err);
+        throw err;
+    }
 };
 
 const GetSpaceId = async (): Promise<Space[]> => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token not found");
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Token not found");
 
-    const res = await axios.get(`${BASE_URL}/api/space`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    
-    const spacesData = res.data?.data || res.data?.spaces || res.data || [];
-    return Array.isArray(spacesData) ? spacesData : [];
-  } catch (err) {
-    console.error("Error fetching space data:", err);
-    throw err;
-  }
+        const res = await axios.get(`${BASE_URL}/api/space`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const spacesData = res.data?.data || res.data?.spaces || res.data || [];
+        return Array.isArray(spacesData) ? spacesData : [];
+    } catch (err) {
+        console.error("Error fetching space data:", err);
+        throw err;
+    }
 };
 
-// FIXED: Updated getProductsBySpace function with better response parsing
+// FIXED: Updated function to handle the actual API response format
 const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
-  try {
-    console.log(`Fetching products for space ID: ${spaceId}`);
-    
-    const res = await axios.get(`${BASE_URL}/api/getProductBySpace`, {
-      params: { space_id: spaceId },
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      timeout: 10000,
-    });
-    
-    console.log('Raw API response:', res.data);
-    
-    // Parse the response more carefully - the API is returning an array of products
-    let productsData = [];
-    
-    if (res.data?.data) {
-      // Check if data is an array of products
-      if (Array.isArray(res.data.data)) {
-        productsData = res.data.data;
-      } else if (res.data.data.products && Array.isArray(res.data.data.products)) {
-        productsData = res.data.data.products;
-      } else {
-        // Try to extract from the message field if it contains product data
-        const messageData = res.data.data.message || res.data.message;
-        if (typeof messageData === 'string') {
-          try {
-            const parsed = JSON.parse(messageData);
-            if (Array.isArray(parsed)) {
-              productsData = parsed;
-            }
-          } catch (e) {
-            console.warn('Failed to parse message as JSON');
-          }
+    try {
+        console.log(`Fetching products for space ID: ${spaceId}`);
+
+        const res = await axios.get(`${BASE_URL}/api/getProductBySpace`, {
+            params: { space_id: spaceId },
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            timeout: 10000,
+        });
+
+        console.log('Raw API response:', res.data);
+
+        // Parse the response based on your actual API structure
+        let productsData = [];
+
+        if (res.data?.data && Array.isArray(res.data.data)) {
+            productsData = res.data.data;
+        } else if (Array.isArray(res.data)) {
+            productsData = res.data;
+        } else if (res.data?.message === "Products List according to the space" && res.data?.data) {
+            productsData = res.data.data;
         }
-      }
-    } else if (Array.isArray(res.data)) {
-      productsData = res.data;
+
+        console.log('Raw products data:', productsData);
+
+        // Transform the product strings into proper objects
+        const formattedProducts = productsData.map((productString: string, index: number) => {
+            // Extract product name and price from string like "Bodywave 2 tone HD 6by 6 wig(4060.00 )"
+            const match = productString.match(/^(.+?)\(([0-9.]+)\s*\)$/);
+
+            let productName = productString;
+            let price = 0;
+
+            if (match) {
+                productName = match[1].trim();
+                price = parseFloat(match[2]);
+            }
+
+            return {
+                id: index + 1, // Generate sequential IDs
+                name: productName,
+                product_name: productName,
+                price: price,
+                original_string: productString // Keep original for reference
+            };
+        });
+
+        console.log('Formatted products:', formattedProducts);
+        return formattedProducts;
+
+    } catch (error) {
+        console.error('Error fetching products by space:', error);
+        return [];
     }
-    
-    console.log('Parsed products data:', productsData);
-    
-    // Ensure each product has proper structure
-    const formattedProducts = productsData.map((product: any, index: number) => ({
-      id: product.id || product.product_id || index,
-      name: product.name || product.product_name || product.title || `Product ${product.id || index}`,
-      product_name: product.product_name || product.name || product.title || `Product ${product.id || index}`
-    }));
-    
-    console.log('Formatted products:', formattedProducts);
-    return formattedProducts;
-    
-  } catch (error) {
-    console.error('Error fetching products by space:', error);
-    return [];
-  }
 };
 
 const ManualOrder = async (orderData: any): Promise<ApiResponse<any>> => {
-  try {
-    const res = await axios.post(`${BASE_URL}/api/createmanualorder`, orderData, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    return res.data;
-  } catch (error) {
-    console.error('Error creating manual order:', error);
-    throw error;
-  }
+    try {
+        const res = await axios.post(`${BASE_URL}/api/createmanualorder`, orderData, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error('Error creating manual order:', error);
+        throw error;
+    }
 };
 
 const getCustomerByPhoneAPi = async (whatsappNumber: string): Promise<Customer | null> => {
-  try {
-    const res = await axios.get(`${BASE_URL}/api/getCustomerByPhone`, {
-      params: { whatsapp_number: whatsappNumber },
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    
-    const customerData = res.data?.data || res.data?.customer || res.data;
-    return customerData || null;
-  } catch (error) {
-    console.error('Error fetching customer by phone:', error);
-    return null;
-  }
+    try {
+        const res = await axios.get(`${BASE_URL}/api/getCustomerByPhone`, {
+            params: { whatsapp_number: whatsappNumber },
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        const customerData = res.data?.data || res.data?.customer || res.data;
+        return customerData || null;
+    } catch (error) {
+        console.error('Error fetching customer by phone:', error);
+        return null;
+    }
 };
 
 const OrdersTable: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [OrdersStatistics, setOrdersStatistics] = useState<OrderStatistics>({
-      total_new_orders: 0,
-      total_new_orders_growth: 0,
-      total_orders: 0,
-      total_orders_growth: 0,
-      cancelled_orders: 0,
-      cancelled_orders_growth: 0,
+        total_new_orders: 0,
+        total_new_orders_growth: 0,
+        total_orders: 0,
+        total_orders_growth: 0,
+        cancelled_orders: 0,
+        cancelled_orders_growth: 0,
     });
     const [showmodel, setShowModel] = useState<boolean>(false);
 
-    // FIXED: Ensure proper state initialization
     const [newOrder, setNewOrder] = useState<NewOrder>({
         customerName: '',
         spaceId: '',
@@ -257,12 +257,12 @@ const OrdersTable: React.FC = () => {
             try {
                 const res = await OrderStatistics();
                 setOrdersStatistics(res || {
-                  total_new_orders: 0,
-                  total_new_orders_growth: 0,
-                  total_orders: 0,
-                  total_orders_growth: 0,
-                  cancelled_orders: 0,
-                  cancelled_orders_growth: 0,
+                    total_new_orders: 0,
+                    total_new_orders_growth: 0,
+                    total_orders: 0,
+                    total_orders_growth: 0,
+                    cancelled_orders: 0,
+                    cancelled_orders_growth: 0,
                 });
             } catch (err) {
                 console.error("Failed to fetch order stats:", err);
@@ -282,7 +282,7 @@ const OrdersTable: React.FC = () => {
         try {
             const spacesData = await GetSpaceId();
             console.log("Fetched spaces:", spacesData);
-            
+
             if (Array.isArray(spacesData) && spacesData.length > 0) {
                 setSpaces(spacesData);
             } else {
@@ -299,22 +299,21 @@ const OrdersTable: React.FC = () => {
         }
     };
 
-    // FIXED: Improved fetchProducts function with better error handling
     const fetchProducts = async (spaceId: number) => {
         if (!spaceId) {
             setProducts([]);
             setProductError('');
             return;
         }
-        
+
         setLoadingProducts(true);
         setProductError('');
-        
+
         try {
             console.log(`Fetching products for space ID: ${spaceId}`);
             const productsData = await getProductsBySpace(spaceId);
             console.log("Fetched products:", productsData);
-            
+
             if (Array.isArray(productsData) && productsData.length > 0) {
                 setProducts(productsData);
                 setProductError('');
@@ -363,15 +362,14 @@ const OrdersTable: React.FC = () => {
         }
     };
 
-    // FIXED: Better input change handler with proper state updates
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        
-        console.log(`Input change - ${name}: ${value}`); // Debug log
-        
+
+        console.log(`Input change - ${name}: ${value}`);
+
         setNewOrder(prev => {
             const updated = { ...prev, [name]: value };
-            console.log('Updated newOrder state:', updated); // Debug log
+            console.log('Updated newOrder state:', updated);
             return updated;
         });
 
@@ -385,25 +383,24 @@ const OrdersTable: React.FC = () => {
         }
     };
 
-    // FIXED: Better customer search with proper state updates
     const searchCustomerByPhone = async (phoneNumber: string) => {
         if (phoneNumber.length < 10) {
             setCustomerFound(false);
             return;
         }
-        
+
         setSearchingCustomer(true);
         try {
             const customerData = await getCustomerByPhoneAPi(phoneNumber);
             console.log("Customer data:", customerData);
-            
+
             if (customerData) {
                 const customerName = customerData.customer_name || customerData.name || '';
                 const address = customerData.customer_address || '';
                 const email = customerData.customer_email || '';
-                
-                console.log('Setting customer data:', { customerName, address, email }); // Debug log
-                
+
+                console.log('Setting customer data:', { customerName, address, email });
+
                 setNewOrder(prev => {
                     const updated = {
                         ...prev,
@@ -411,13 +408,12 @@ const OrdersTable: React.FC = () => {
                         address,
                         email
                     };
-                    console.log('Updated order with customer data:', updated); // Debug log
+                    console.log('Updated order with customer data:', updated);
                     return updated;
                 });
                 setCustomerFound(true);
             } else {
                 setCustomerFound(false);
-                // Reset customer fields if not found
                 setNewOrder(prev => ({
                     ...prev,
                     customerName: '',
@@ -444,29 +440,33 @@ const OrdersTable: React.FC = () => {
         }
     };
 
-    // FIXED: Better textarea handler for address
     const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        console.log(`Textarea change - ${name}: ${value}`); // Debug log
-        
+        console.log(`Textarea change - ${name}: ${value}`);
+
         setNewOrder(prev => {
             const updated = { ...prev, [name]: value };
-            console.log('Updated newOrder from textarea:', updated); // Debug log
+            console.log('Updated newOrder from textarea:', updated);
             return updated;
         });
     };
 
     const handleSubmitOrder = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!newOrder.customerName || !newOrder.spaceId || !newOrder.productId || !newOrder.whatsappNumber) {
             alert('Please fill in all required fields');
             return;
         }
 
         try {
+            // FIXED: Send the actual product name string instead of just ID
+            const selectedProduct = products.find(p => p.id.toString() === newOrder.productId);
+            const productName = selectedProduct ? selectedProduct.original_string || selectedProduct.name : '';
+
             const orderData = {
                 space_id: parseInt(newOrder.spaceId),
+                product_name: productName, // Send the full product string
                 product_id: parseInt(newOrder.productId),
                 order_quantity: parseInt(newOrder.orderQuantity.toString()),
                 whatsapp_number: newOrder.whatsappNumber,
@@ -475,7 +475,7 @@ const OrdersTable: React.FC = () => {
                 email: newOrder.email
             };
 
-            console.log('Submitting order:', orderData); // Debug log
+            console.log('Submitting order:', orderData);
 
             const response = await ManualOrder(orderData);
 
@@ -484,7 +484,7 @@ const OrdersTable: React.FC = () => {
                 closeModal();
                 getOrders();
             } else {
-                const errorMessage = response|| 'Unknown error occurred';
+                const errorMessage = response || 'Unknown error occurred';
                 alert('Failed to create order: ' + errorMessage);
             }
         } catch (err) {
@@ -581,7 +581,7 @@ const OrdersTable: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Customer Name - FIXED: Ensure proper value binding */}
+                                {/* Customer Name */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Customer Name *
@@ -589,7 +589,7 @@ const OrdersTable: React.FC = () => {
                                     <input
                                         type="text"
                                         name="customerName"
-                                        value={newOrder.customerName || ''} // FIXED: Ensure not undefined
+                                        value={newOrder.customerName || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#685BC7] focus:border-transparent"
                                         placeholder="Enter customer name"
@@ -605,17 +605,17 @@ const OrdersTable: React.FC = () => {
                                     <div className="relative">
                                         <select
                                             name="spaceId"
-                                            value={newOrder.spaceId || ''} // FIXED: Ensure not undefined
+                                            value={newOrder.spaceId || ''}
                                             onChange={handleInputChange}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#685BC7] focus:border-transparent"
                                             required
                                             disabled={loadingSpaces}
                                         >
                                             <option value="">
-                                                {loadingSpaces ? "Loading spaces..." : 
-                                                 spaceError ? spaceError :
-                                                 spaces.length === 0 ? "No spaces available" : 
-                                                 "Select a space"}
+                                                {loadingSpaces ? "Loading spaces..." :
+                                                    spaceError ? spaceError :
+                                                        spaces.length === 0 ? "No spaces available" :
+                                                            "Select a space"}
                                             </option>
                                             {spaces.map((space) => (
                                                 <option key={space.id} value={space.id}>
@@ -634,7 +634,7 @@ const OrdersTable: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Product Dropdown - FIXED: Better error handling */}
+                                {/* Product Dropdown - FIXED: Now shows actual product names */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Product *
@@ -642,17 +642,17 @@ const OrdersTable: React.FC = () => {
                                     <div className="relative">
                                         <select
                                             name="productId"
-                                            value={newOrder.productId || ''} // FIXED: Ensure not undefined
+                                            value={newOrder.productId || ''}
                                             onChange={handleInputChange}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#685BC7] focus:border-transparent"
                                             required
                                             disabled={!newOrder.spaceId || loadingProducts}
                                         >
                                             <option value="">
-                                                {!newOrder.spaceId 
-                                                    ? "Select a space first" 
-                                                    : loadingProducts 
-                                                        ? "Loading products..." 
+                                                {!newOrder.spaceId
+                                                    ? "Select a space first"
+                                                    : loadingProducts
+                                                        ? "Loading products..."
                                                         : productError
                                                             ? productError
                                                             : products.length === 0
@@ -660,8 +660,8 @@ const OrdersTable: React.FC = () => {
                                                                 : "Select a product"}
                                             </option>
                                             {products.map((product) => (
-                                                <option key={product.id} value={product.id}>
-                                                    {product.name || product.product_name || `Product ${product.id}`}
+                                                <option key={product.id} value={product.id} title={`Price: ₹${product.price}`}>
+                                                    {product.name} {product.price ? `(₹${product.price})` : ''}
                                                 </option>
                                             ))}
                                         </select>
@@ -674,6 +674,20 @@ const OrdersTable: React.FC = () => {
                                     {productError && (
                                         <p className="text-sm text-red-600 mt-1">{productError}</p>
                                     )}
+                                    {/* Show selected product details */}
+                                    {newOrder.productId && products.length > 0 && (
+                                        <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
+                                            {(() => {
+                                                const selectedProduct = products.find(p => p.id.toString() === newOrder.productId);
+                                                return selectedProduct ? (
+                                                    <div>
+                                                        <strong>Selected:</strong> {selectedProduct.name}
+                                                        {selectedProduct.price && <span className="ml-2 text-green-600">₹{selectedProduct.price}</span>}
+                                                    </div>
+                                                ) : null;
+                                            })()}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Order Quantity */}
@@ -684,7 +698,7 @@ const OrdersTable: React.FC = () => {
                                     <input
                                         type="number"
                                         name="orderQuantity"
-                                        value={newOrder.orderQuantity || 1} // FIXED: Ensure not undefined
+                                        value={newOrder.orderQuantity || 1}
                                         onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#685BC7] focus:border-transparent"
                                         placeholder="Enter quantity"
@@ -693,40 +707,36 @@ const OrdersTable: React.FC = () => {
                                     />
                                 </div>
 
-                                {/* Address - FIXED: Force key prop for re-render */}
+                                {/* Address */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Address
                                     </label>
                                     <textarea
-                                        key={`address-${newOrder.whatsappNumber}`} // Force re-render when customer changes
+                                        key={`address-${newOrder.whatsappNumber}`}
                                         name="address"
-                                        value={newOrder.address || ''} 
+                                        value={newOrder.address || ''}
                                         onChange={handleTextareaChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#685BC7] focus:border-transparent"
                                         placeholder="Enter customer address"
                                         rows={2}
                                     />
-                                    {/* Debug info */}
-                                   
                                 </div>
 
-                                {/* Email - FIXED: Force key prop for re-render */}
+                                {/* Email */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Email
                                     </label>
                                     <input
-                                        key={`email-${newOrder.whatsappNumber}`} // Force re-render when customer changes
+                                        key={`email-${newOrder.whatsappNumber}`}
                                         type="email"
                                         name="email"
-                                        value={newOrder.email || ''} 
+                                        value={newOrder.email || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#685BC7] focus:border-transparent"
                                         placeholder="Enter customer email"
                                     />
-                                    
-                                   
                                 </div>
 
                                 {/* Action Buttons */}
