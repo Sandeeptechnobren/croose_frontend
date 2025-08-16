@@ -805,8 +805,8 @@ const OrdersTable: React.FC = () => {
                                                                 : "Select a product"}
                                             </option>
                                             {products.map((product) => (
-                                                <option key={product.id} value={product.id} title={`ID: ${product.id} - Price: ₹${product.price}`}>
-                                                    {product.name} {product.price ? `(₹${product.price})` : ''} 
+                                                <option key={product.id} value={product.id} title={`ID: ${product.id} - Price: ${product.price}`}>
+                                                    {product.name} {product.price ? `(${product.price} GHS)` : ''} 
                                                 </option>
                                             ))}
                                         </select>
@@ -827,7 +827,7 @@ const OrdersTable: React.FC = () => {
                                                 return selectedProduct ? (
                                                     <div>
                                                         <strong>Selected:</strong> {selectedProduct.name}
-                                                        {selectedProduct.price && <span className="ml-2 text-green-600">₹{selectedProduct.price}</span>}
+                                                        {selectedProduct.price && <span className="ml-2 text-green-600">{selectedProduct.price} GHS</span>}
                                                         <br />
                                                     </div>
                                                 ) : null;
