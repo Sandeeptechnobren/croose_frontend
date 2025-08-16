@@ -41,6 +41,7 @@ interface Product {
     product_name: string;
     price?: number;
     original_string?: string;
+    label?: string;
 }
 
 interface Customer {
@@ -97,7 +98,7 @@ const OrderStatistics = async (): Promise<OrderStatistics> => {
 
 const OrdersStatus = async (data: { id: number; status: string }): Promise<ApiResponse<any>> => {
     try {
-        const res = await axios.put(`${BASE_URL}/api/order-status`, data, {
+        const res = await axios.post(`${BASE_URL}/api/orders_status_update`, data, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
@@ -126,7 +127,7 @@ const GetSpaceId = async (): Promise<Space[]> => {
     }
 };
 
-// FIXED: Updated function to handle the actual API response format
+// FIXED: Updated function to handle the actual API response format with proper IDs
 const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
     try {
         console.log(`Fetching products for space ID: ${spaceId}`);
@@ -155,26 +156,61 @@ const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
 
         console.log('Raw products data:', productsData);
 
-        // Transform the product strings into proper objects
-        const formattedProducts = productsData.map((productString: string, index: number) => {
-            // Extract product name and price from string like "Bodywave 2 tone HD 6by 6 wig(4060.00 )"
-            const match = productString.match(/^(.+?)\(([0-9.]+)\s*\)$/);
+        // Handle the actual API response structure with proper IDs and labels
+        const formattedProducts = productsData.map((product: any) => {
+            // If product is already an object with id and label
+            if (typeof product === 'object' && product.id && product.label) {
+                // Extract product name and price from label like "Bodywave 2 tone HD 6by 6 wig (4060.00 GHS)"
+                const match = product.label.match(/^(.+?)\s*\(([0-9.]+)\s*(GHS|₹)?\s*\)$/);
+                
+                let productName = product.label;
+                let price = 0;
 
-            let productName = productString;
-            let price = 0;
+                if (match) {
+                    productName = match[1].trim();
+                    price = parseFloat(match[2]);
+                }
 
-            if (match) {
-                productName = match[1].trim();
-                price = parseFloat(match[2]);
+                return {
+                    id: product.id, // Use the actual ID from API
+                    name: productName,
+                    product_name: productName,
+                    price: price,
+                    original_string: product.label, // Keep original label for reference
+                    label: product.label // Keep the label field
+                };
             }
+            // If product is a string (fallback for old format)
+            else if (typeof product === 'string') {
+                // Extract product name and price from string like "Bodywave 2 tone HD 6by 6 wig(4060.00 )"
+                const match = product.match(/^(.+?)\(([0-9.]+)\s*\)$/);
 
-            return {
-                id: index + 1, // Generate sequential IDs
-                name: productName,
-                product_name: productName,
-                price: price,
-                original_string: productString // Keep original for reference
-            };
+                let productName = product;
+                let price = 0;
+
+                if (match) {
+                    productName = match[1].trim();
+                    price = parseFloat(match[2]);
+                }
+
+                return {
+                    id: productsData.indexOf(product) + 1, // Generate sequential IDs for string format
+                    name: productName,
+                    product_name: productName,
+                    price: price,
+                    original_string: product // Keep original for reference
+                };
+            }
+            // Handle any other format
+            else {
+                return {
+                    id: product.id || productsData.indexOf(product) + 1,
+                    name: product.name || product.product_name || 'Unknown Product',
+                    product_name: product.name || product.product_name || 'Unknown Product',
+                    price: product.price || 0,
+                    original_string: product.label || product.name || 'Unknown Product'
+                };
+            }
         });
 
         console.log('Formatted products:', formattedProducts);
@@ -201,6 +237,7 @@ const ManualOrder = async (orderData: any): Promise<ApiResponse<any>> => {
     }
 };
 
+// FIXED: Updated getCustomerByPhoneAPi with better validation
 const getCustomerByPhoneAPi = async (whatsappNumber: string): Promise<Customer | null> => {
     try {
         const res = await axios.get(`${BASE_URL}/api/getCustomerByPhone`, {
@@ -211,8 +248,19 @@ const getCustomerByPhoneAPi = async (whatsappNumber: string): Promise<Customer |
             },
         });
 
+        console.log('Raw customer API response:', res.data);
+
         const customerData = res.data?.data || res.data?.customer || res.data;
-        return customerData || null;
+        
+        // Check if we actually have valid customer data
+        if (customerData && 
+            typeof customerData === 'object' && 
+            (customerData.customer_name || customerData.name) &&
+            (customerData.customer_name?.trim() !== '' || customerData.name?.trim() !== '')) {
+            return customerData;
+        }
+        
+        return null;
     } catch (error) {
         console.error('Error fetching customer by phone:', error);
         return null;
@@ -251,6 +299,9 @@ const OrdersTable: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingSpaces, setLoadingSpaces] = useState<boolean>(false);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
+
+    // FIXED: Add state to track pending status updates
+    const [pendingStatusUpdates, setPendingStatusUpdates] = useState<{[key: number]: string}>({});
 
     useEffect(() => {
         const fetchOrderStatistics = async () => {
@@ -342,23 +393,81 @@ const OrdersTable: React.FC = () => {
         }
     };
 
+    // FIXED: Updated handleStatusChange to track pending changes
     const handleStatusChange = (orderId: number, newStatus: string) => {
+        // Update the local state immediately for better UX
         setOrders(prevOrders =>
             prevOrders.map(order =>
                 order.id === orderId ? { ...order, status: newStatus } : order
             )
         );
+        
+        // Track that this order has a pending status change
+        setPendingStatusUpdates(prev => ({
+            ...prev,
+            [orderId]: newStatus
+        }));
     };
 
-    const handleOrderStatusUpdate = async (orderId: number, status: string) => {
+    // FIXED: Updated handleOrderStatusUpdate to use pending changes
+    const handleOrderStatusUpdate = async (orderId: number) => {
         try {
-            const res = await OrdersStatus({ id: orderId, status });
+            // Get the pending status change for this order
+            const newStatus = pendingStatusUpdates[orderId];
+            if (!newStatus) {
+                console.log("No pending status change for order:", orderId);
+                return;
+            }
+            
+            console.log(`Updating order ${orderId} status to: ${newStatus}`);
+            
+            const res = await OrdersStatus({ id: orderId, status: newStatus });
+            
             if (res?.success) {
-                console.log("Order status updated successfully");
+                console.log("Order status updated successfully in backend");
+                
+                // Remove from pending updates since it's now confirmed
+                setPendingStatusUpdates(prev => {
+                    const updated = { ...prev };
+                    delete updated[orderId];
+                    return updated;
+                });
+                
+                // Ensure the status is set correctly in the orders state
+                setOrders(prevOrders =>
+                    prevOrders.map(order =>
+                        order.id === orderId ? { ...order, status: newStatus } : order
+                    )
+                );
+                
+                console.log(`Order ${orderId} status confirmed as: ${newStatus}`);
+                
+            } else {
+                console.error("Failed to update order status:", res);
+                // Remove from pending updates
+                setPendingStatusUpdates(prev => {
+                    const updated = { ...prev };
+                    delete updated[orderId];
+                    return updated;
+                });
+                // Refresh orders to get the correct status from backend
                 getOrders();
+                alert('Failed to update order status. Please try again.');
             }
         } catch (err) {
             console.error("Order update error:", err);
+            
+            // Remove from pending updates and revert
+            setPendingStatusUpdates(prev => {
+                const updated = { ...prev };
+                delete updated[orderId];
+                return updated;
+            });
+            
+            // Refresh orders to get the correct status from backend
+            getOrders();
+            
+            alert('Error updating order status. Please try again.');
         }
     };
 
@@ -383,9 +492,17 @@ const OrdersTable: React.FC = () => {
         }
     };
 
+    // FIXED: Updated searchCustomerByPhone with stricter validation
     const searchCustomerByPhone = async (phoneNumber: string) => {
         if (phoneNumber.length < 10) {
             setCustomerFound(false);
+            // Clear customer data when phone number is too short
+            setNewOrder(prev => ({
+                ...prev,
+                customerName: '',
+                address: '',
+                email: ''
+            }));
             return;
         }
 
@@ -394,7 +511,11 @@ const OrdersTable: React.FC = () => {
             const customerData = await getCustomerByPhoneAPi(phoneNumber);
             console.log("Customer data:", customerData);
 
-            if (customerData) {
+            // More strict validation for customer existence
+            if (customerData && 
+                (customerData.customer_name || customerData.name) && 
+                (customerData.customer_name?.trim() !== '' || customerData.name?.trim() !== '')) {
+                
                 const customerName = customerData.customer_name || customerData.name || '';
                 const address = customerData.customer_address || '';
                 const email = customerData.customer_email || '';
@@ -404,15 +525,17 @@ const OrdersTable: React.FC = () => {
                 setNewOrder(prev => {
                     const updated = {
                         ...prev,
-                        customerName,
-                        address,
-                        email
+                        customerName: customerName.trim(),
+                        address: address.trim(),
+                        email: email.trim()
                     };
                     console.log('Updated order with customer data:', updated);
                     return updated;
                 });
                 setCustomerFound(true);
             } else {
+                // Customer not found or invalid data
+                console.log('Customer not found or invalid customer data');
                 setCustomerFound(false);
                 setNewOrder(prev => ({
                     ...prev,
@@ -424,6 +547,12 @@ const OrdersTable: React.FC = () => {
         } catch (error) {
             console.error('Error searching customer:', error);
             setCustomerFound(false);
+            setNewOrder(prev => ({
+                ...prev,
+                customerName: '',
+                address: '',
+                email: ''
+            }));
         } finally {
             setSearchingCustomer(false);
         }
@@ -433,10 +562,20 @@ const OrdersTable: React.FC = () => {
         const phoneNumber = e.target.value;
         setNewOrder(prev => ({ ...prev, whatsappNumber: phoneNumber }));
 
+        // Reset customer found status when phone number changes
+        setCustomerFound(false);
+
         if (phoneNumber.length >= 10) {
             searchCustomerByPhone(phoneNumber);
         } else {
             setCustomerFound(false);
+            // Clear customer data when phone number is invalid
+            setNewOrder(prev => ({
+                ...prev,
+                customerName: '',
+                address: '',
+                email: ''
+            }));
         }
     };
 
@@ -451,6 +590,7 @@ const OrdersTable: React.FC = () => {
         });
     };
 
+    // Updated handleSubmitOrder function to use actual product ID
     const handleSubmitOrder = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -460,14 +600,13 @@ const OrdersTable: React.FC = () => {
         }
 
         try {
-            // FIXED: Send the actual product name string instead of just ID
+            // FIXED: Send the actual product ID and name
             const selectedProduct = products.find(p => p.id.toString() === newOrder.productId);
-            const productName = selectedProduct ? selectedProduct.original_string || selectedProduct.name : '';
-
+            
             const orderData = {
                 space_id: parseInt(newOrder.spaceId),
-                product_name: productName, // Send the full product string
-                product_id: parseInt(newOrder.productId),
+                product_name: selectedProduct?.label || selectedProduct?.original_string || selectedProduct?.name || '', // Send the full product label/string
+                product_id: selectedProduct ? selectedProduct.id : parseInt(newOrder.productId), // Use actual product ID from API
                 order_quantity: parseInt(newOrder.orderQuantity.toString()),
                 whatsapp_number: newOrder.whatsappNumber,
                 customer_name: newOrder.customerName,
@@ -475,7 +614,7 @@ const OrdersTable: React.FC = () => {
                 email: newOrder.email
             };
 
-            console.log('Submitting order:', orderData);
+            console.log('Submitting order with actual product ID:', orderData);
 
             const response = await ManualOrder(orderData);
 
@@ -579,6 +718,12 @@ const OrdersTable: React.FC = () => {
                                             Customer found! Details auto-filled.
                                         </p>
                                     )}
+                                    {!customerFound && newOrder.whatsappNumber.length >= 10 && !searchingCustomer && (
+                                        <p className="text-sm text-red-600 mt-1 flex items-center">
+                                            <Icon icon="mdi:close-circle" className="w-4 h-4 mr-1" />
+                                            Customer not found. Please enter details manually.
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Customer Name */}
@@ -634,7 +779,7 @@ const OrdersTable: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Product Dropdown - FIXED: Now shows actual product names */}
+                                {/* Product Dropdown - FIXED: Now shows actual product names with proper IDs */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Product *
@@ -660,8 +805,8 @@ const OrdersTable: React.FC = () => {
                                                                 : "Select a product"}
                                             </option>
                                             {products.map((product) => (
-                                                <option key={product.id} value={product.id} title={`Price: ₹${product.price}`}>
-                                                    {product.name} {product.price ? `(₹${product.price})` : ''}
+                                                <option key={product.id} value={product.id} title={`ID: ${product.id} - Price: ₹${product.price}`}>
+                                                    {product.name} {product.price ? `(₹${product.price})` : ''} 
                                                 </option>
                                             ))}
                                         </select>
@@ -683,6 +828,7 @@ const OrdersTable: React.FC = () => {
                                                     <div>
                                                         <strong>Selected:</strong> {selectedProduct.name}
                                                         {selectedProduct.price && <span className="ml-2 text-green-600">₹{selectedProduct.price}</span>}
+                                                        <br />
                                                     </div>
                                                 ) : null;
                                             })()}
@@ -851,10 +997,15 @@ const OrdersTable: React.FC = () => {
                                         </td>
                                         <td className="px-4 py-2">
                                             <button
-                                                onClick={() => handleOrderStatusUpdate(order.id, order.status)}
-                                                className="px-3 py-1 bg-[#685BC7] text-white rounded text-xs hover:cursor-pointer hover:bg-[#5748B8]"
+                                                onClick={() => handleOrderStatusUpdate(order.id)}
+                                                disabled={!pendingStatusUpdates[order.id]}
+                                                className={`px-3 py-1 rounded text-xs hover:cursor-pointer transition-colors ${
+                                                    pendingStatusUpdates[order.id] 
+                                                        ? 'bg-[#685BC7] text-white hover:bg-[#5748B8]' 
+                                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                }`}
                                             >
-                                                Update Status
+                                                {pendingStatusUpdates[order.id] ? 'Update Status' : 'No Changes'}
                                             </button>
                                         </td>
                                     </tr>
