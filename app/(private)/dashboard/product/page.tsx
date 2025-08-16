@@ -578,16 +578,43 @@ const ProductServiceTabs = () => {
                   Active
                 </span>
               </td>
-              <td className="px-4 py-3">
+            <td className="px-4 py-3 relative">
+
                 <button
-                  onClick={() => {
-                    setFormState(item);
-                    setShowUpdateModal(true);
-                  }}
-                  className="bg-[#685BC7] text-white px-4 py-2 rounded"
+                  onClick={() =>
+                    setActiveMenuId(activeMenuId === item[id] ? null : item[id])
+                  }
+                  className="p-2 rounded hover:bg-gray-100"
                 >
-                  Update
+                  <HiDotsVertical size={20} />
                 </button>
+
+
+                {activeMenuId === item[id] && (
+                  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-50">
+                    <button
+                      onClick={() => {
+                        setFormState(item);
+                        setShowUpdateModal(true);
+                        setActiveMenuId(null);
+                      }}
+                      className="block w-full px-4  py-2 text-left bg-[#685BC7] text-white "
+                    >
+                      Update
+                    </button>
+                    <div className='flex border-b border-black ' />
+                    <button
+                      onClick={() => {
+                        setFormState(item);
+                        setShowDeleteModal(true);
+                        setActiveMenuId(null);
+                      }}
+                      className="block w-full   px-4 py-2 text-left bg-[#F9F5FF]  text-black"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </td>
             </>
           )}
