@@ -3,6 +3,8 @@ import { Icon } from "@iconify/react";
 import React from 'react';
 import Navbar from "../../components/Navbar";
 import { useState } from 'react';
+import { X } from 'lucide-react';
+import SubscriptionModal from "./SubscriptionModal";
 
 const Subscription = () => {
       const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,7 +44,7 @@ const Subscription = () => {
           </div>
         </div>
 
-        {/* Middle Section - Subscription Cards */}
+       
         <div className='w-full'>
           <ul className='w-full flex flex-col lg:flex-row gap-4'>
             <li className='w-full lg:w-1/3 border-2 rounded-xl border-[#EAECF0] p-6'>
@@ -80,7 +82,7 @@ const Subscription = () => {
           </ul>
         </div>
 
-        {/* Bottom Section */}
+      
         <div className="flex flex-col justify-center items-center w-full py-20 px-4 text-center">
           <h3 className="text-xl font-semibold mb-2  text-[#101828]">Earn recurring revenue</h3>
           <p className="text-[#475467] mb-6 max-w-md">
@@ -92,27 +94,26 @@ const Subscription = () => {
             New Subscription
           </button>
         </div>
-        {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          {/* Modal Container */}
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Modal Header */}
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">New Subscription</h2>
+        {/* {isModalOpen && (
+ 
+  <div className="fixed inset-0 bg-[#9999] bg-opacity-30 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl h-[80vh] overflow-y-auto p-6 relative transition-all duration-300">
+  <form onSubmit={handleSubmit} className=" space-y-6">
+          <div className="flex justify-between items-center border-b border-[#F1F2F3] p-4 mb-4">
+       <h2 className="text-xl font-bold">New Subscription</h2>
                  <div className="flex flex-col justify-center items-center w-full py-20 px-4 text-center">
      
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <Icon icon="mdi:close" width={24} />
-                </button>
+                 <button
+                          type="button"
+                          onClick={() => setIsModalOpen(false)}
+                          className="flex items-center justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
+                        >
+                          <X className="w-4 h-4 text-gray-600" />
+                        </button>
                 </div>
               </div>
 
-              {/* Form Content - Same as before */}
+           
               <div className="space-y-4">
                 <div>
                   <label className="block font-medium">Subscription Name</label>
@@ -142,7 +143,7 @@ const Subscription = () => {
                 </div>
               </div>
 
-              {/* ... (rest of your form fields from previous example) ... */}
+             
 
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3">Access Settings</h3>
@@ -157,12 +158,10 @@ const Subscription = () => {
                       id="free"
                     />
                     <label htmlFor="free">Free access to all products/services</label>
-                  </div>
-                  {/* Other radio options... */}
-                </div>
+                  </div>  </div>
               </div>
 
-              {/* Form Footer */}
+       
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
@@ -181,7 +180,11 @@ const Subscription = () => {
             </form>
           </div>
         </div>
-      )}
+      )} */}
+       <SubscriptionModal
+        isModalOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
       </div>
     </div>
   );

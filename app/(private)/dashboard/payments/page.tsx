@@ -7,11 +7,11 @@ import React, { useEffect, useState } from 'react';
 type Payment = {
   type: string;
   reference_id: string;
-  amount: number;
+  amount: string;
   payment_origin?: string;
   payment_method: string;
   transaction_status: string;
-  transaction_id: string;
+  created_at: string;
 };
 
 const Payments = () => {
@@ -48,7 +48,7 @@ const Payments = () => {
           payment_origin: item.payment_origin || "N/A",
           payment_method: item.payment_method,
           transaction_status: item.transaction_status,
-          transaction_id: item.transaction_id,
+          created_at: item.created_at,
         }));
 
         setPayments(mappedData);
@@ -127,7 +127,7 @@ const Payments = () => {
     <th className="px-6 py-3">Payment Origin</th>
     <th className="px-6 py-3">Payment Method</th>
     <th className="px-6 py-3">Transaction Status</th>
-    <th className="px-6 py-3">Transaction ID</th>
+    <th className="px-6 py-3">Transaction Date</th>
     {/* <th className="px-6 py-3">Actions</th> */}
   </tr>
           </thead>
@@ -136,7 +136,7 @@ const Payments = () => {
     <tr key={index} className="hover:bg-gray-50 border-b border-[#EAECF0]">
       <td className="px-6 py-4">{payment.type}</td>
       <td className="px-6 py-4">{payment.reference_id}</td>
-      <td className="px-6 py-4">₵{payment.amount}</td>
+      <td className="px-6 py-4">{payment.amount}</td>
       <td className="px-6 py-4">{payment.payment_origin || "N/A"}</td>
       <td className="px-6 py-4">{payment.payment_method}</td>
       <td className="px-6 py-4 capitalize">
@@ -154,7 +154,7 @@ const Payments = () => {
 </span>
 
       </td>
-      <td className="px-6 py-4">{payment.transaction_id}</td>
+      <td className="px-6 py-4">{payment.created_at}</td>
       {/* <td className="px-6 py-4 text-[#475467]">
         <Icon icon="bi:three-dots-vertical" width="16" height="16" />
       </td> */}
