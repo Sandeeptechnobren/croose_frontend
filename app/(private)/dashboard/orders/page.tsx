@@ -14,7 +14,7 @@ interface Order {
     customer_name: string;
     customer_number: string;
     product_name: string;
-    order_amount: number | string;
+    order_amount:  string;
     payment_status: string;
     order_date: string;
     status: string;
@@ -949,10 +949,9 @@ const OrdersTable: React.FC = () => {
                 </div>
 
                 {/* Orders Table */}
-                <div className="overflow-x-auto rounded-[10px] px-8">
-                    <table className="min-w-full rounded-[10px] border-[1px] border-[#F9FAFB] text-sm text-left">
-                        <thead className="bg-[#F9FAFB] rounded-[10px] border-[1px] border-[#EAECF0] text-[#475467] font-medium">
-                            <tr>
+              <div className="overflow-x-auto rounded-lg border border-[#EAECF0]">
+  <table className="min-w-full text-sm text-left">
+    <thead className="bg-[#F9FAFB] text-[#475467] font-medium">  <tr>
                                 <th className="px-4 py-3">ID</th>
                                 <th className="px-4 py-3">Space</th>
                                 <th className="px-4 py-3">Customer</th>
@@ -975,7 +974,7 @@ const OrdersTable: React.FC = () => {
                                         <td className="px-4 py-2">{order.customer_number || 'N/A'}</td>
                                         <td className="px-4 py-2">{order.product_name || 'N/A'}</td>
                                         <td className="px-4 py-2">
-                                            ₹{order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
+                                            {order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
                                         </td>
                                         <td className="px-4 py-2 capitalize">{order.payment_status || 'pending'}</td>
                                         <td className="px-4 py-2">

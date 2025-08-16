@@ -25,7 +25,7 @@ const fetchQrImage = async () => {
   setLoading(true);
 
   try {
-    const response = await getQr(space_id);
+    const response:any = await getQr(space_id);
 
     // Detect if response is JSON (already linked) instead of Blob (QR image)
     const contentType = response?.headers?.['content-type'];
