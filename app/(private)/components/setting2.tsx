@@ -54,11 +54,11 @@ const SettingTwo = () => {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+const [confirmPass, setConfirmPass] = useState('');
 
   const [oldPass, setOldPass] = useState('');
   const [newPass, setNewPass] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
+  
   const [msg, setMsg] = useState('');
 
   const handleSubmit = async () => {
