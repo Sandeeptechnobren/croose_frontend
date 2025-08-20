@@ -1,5 +1,5 @@
 'use client';
-import { Search, Bell, X } from 'lucide-react';
+import {  X } from 'lucide-react';
 import { HiDotsVertical } from "react-icons/hi";
 import axios from "axios";
 import { Icon } from "@iconify/react";
