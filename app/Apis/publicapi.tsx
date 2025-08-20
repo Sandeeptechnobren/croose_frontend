@@ -965,26 +965,26 @@
 // };
 
 
-// // export const InstanceActivationStatus = async (spaceId: number) => {
-// //   try {
-// //     let token = localStorage.getItem("token")
-// //     return await axios({
-// //       method: "get",
-// //       url: `${BASE_URL}/api/whapi/instance_activation_status`,
-// //       headers: {
-// //         Authorization: `Bearer ${token}`
-// //       },
+export const InstanceActivationStatus = async (spaceId: number) => {
+  try {
+    let token = localStorage.getItem("token")
+    return await axios({
+      method: "get",
+      url: `${BASE_URL}/api/whapi/instance_activation_status`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
 
-// //       params: {
-// //         space_id: spaceId
-// //       },
-// //     })
+      params: {
+        space_id: spaceId
+      },
+    })
 
 
-// //   } catch (err) {
-// //     console.log(err)
-// //   }
-// // }
+  } catch (err) {
+    console.log(err)
+  }
+}
 
 
 export const findAccountByEmail = async (email: string) => {
@@ -1929,25 +1929,74 @@ export const RunAgent = async (spaceid: number) => {
 }
 
 
-export const RunAgentInfo = async (uuid: any, space_id: any) => {
+// export const RunAgentInfo = async (uuid: any, space_id: any) => {
+//   try {
+//     const token = localStorage.getItem("token")
+//     const res = await axios.get(`https://api.joincroose.com/croose/api/run_agent/${uuid}`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`
+//       },
+//       params: { space_id },
+//       responseType: 'blob'
+//     })
+
+
+//     return res
+
+
+//   } catch (err) {
+//     console.log(err)
+//   }
+// }
+
+export const RunAgentInfo = async (uuid: string) => {
   try {
-    const token = localStorage.getItem("token")
-    const res = await axios.get(`https://api.joincroose.com/croose/api/run_agent/${uuid}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      params: { space_id },
-      responseType: 'blob'
-    })
+    const token = localStorage.getItem("token");
 
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
 
-    return res
+    if (!uuid || uuid.trim() === "") {
+      throw new Error("UUID is required before calling RunAgentInfo");
+    }
 
+    console.log(`Making RunAgentInfo call with UUID: ${uuid}`);
 
-  } catch (err) {
-    console.log(err)
+    const res = await axios.get(
+      `https://api.joincroose.com/croose/api/run_agent/${uuid}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        timeout: 30000,
+      }
+    );
+
+    console.log("RunAgentInfo success:", res);
+    return res;
+  } catch (err: any) {
+    console.error("RunAgentInfo error:", err);
+
+    if (err?.code === "ERR_NETWORK") {
+      console.error(
+        "Network error. This might be a CORS issue or server connectivity problem."
+      );
+    } else if (err?.response?.status === 404) {
+      console.error("Agent not found. Please verify the UUID is correct.");
+    } else if (err?.response?.status === 401) {
+      console.error("Unauthorized. Please check your authentication token.");
+    } else if (err?.response?.status === 403) {
+      console.error("Forbidden. You may not have permission to access this resource.");
+    } else if (err?.code === "ECONNABORTED") {
+      console.error("Request timeout. The server took too long to respond.");
+    }
+
+    throw err;
   }
-}
+};
 
 
 export const PayApi = async (uuid: any) => {
@@ -2045,3 +2094,7 @@ export const getCustomerByPhoneAPi = async (whatsappNumber: number) => {
     throw error;
   }
 };
+
+
+
+
