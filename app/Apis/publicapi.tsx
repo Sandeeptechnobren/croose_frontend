@@ -2036,7 +2036,7 @@ export const GetSpaceId = async () => {
     });
 
     console.log("Fetched spaces from API →", res);
-    return res; 
+    return res;
   } catch (err) {
     console.error("Error fetching space data:", err);
     throw err;
@@ -2095,6 +2095,23 @@ export const getCustomerByPhoneAPi = async (whatsappNumber: number) => {
   }
 };
 
-
-
-
+export const resetPassword = async (email: string, securityQuestion: string, securityAnswer: string, newPassword: string, phoneNumber: string) => {
+  try {
+    return await axios({
+      method: 'post',
+      url: `${BASE_URL}/api/reset_password`,
+      data: {
+        email,
+        phone_number: phoneNumber, // Now using actual phone number
+        security_question: securityQuestion,
+        security_answer: securityAnswer,
+        password: newPassword,
+        password_confirmation: newPassword
+      }
+    });
+  
+  } catch (err) {
+    console.log('Reset password error:', err);
+    throw err;
+  }
+};
