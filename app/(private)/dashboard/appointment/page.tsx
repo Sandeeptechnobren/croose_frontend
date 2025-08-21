@@ -229,7 +229,7 @@ const subheading = {
         <Navbar heading="Appointments" />
 
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 ">
 
           <div className="flex justify-between items-start px-8">
             <div>
@@ -244,7 +244,7 @@ const subheading = {
           </div>
 
 
-          <div className='w-full h-full flex flex-wrap flex-col gap-[64px]  ' >
+          <div className='w-full h-full flex flex-wrap flex-col gap-[6px]  ' >
             <div className='w-full h-auto p-[32px] flex flex-col gap-[24px] '>
 
               <ul className=' w-[full] flex flex-wrap gap-[16px] ' >

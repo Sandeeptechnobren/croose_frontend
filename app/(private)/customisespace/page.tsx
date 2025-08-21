@@ -164,30 +164,41 @@ const Customisespace = () => {
                         <div className="flex flex-col gap-3 w-full">
                             <label className="font-medium text-sm text-gray-700">Upload Image</label>
 
+
                             {/* Styled upload area */}
                             <label
                                 htmlFor="file-upload"
                                 className="flex flex-col items-center justify-center w-full h-40 px-4 transition bg-white border-2 border-dashed rounded-xl cursor-pointer border-gray-300 hover:border-[#685BC7] hover:bg-purple-100"
                             >
-                                <svg
-                                    className="w-10 h-10 mb-2 text-gray-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M3 16.5V16.5a4.5 4.5 0 014.5-4.5h1.379a1 1 0 00.948-.684l.55-1.649a4 4 0 017.586-.242l.656 1.67a1 1 0 00.938.655H20.5a2.5 2.5 0 010 5H4a1 1 0 010-2h.5"
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setImage(e.target.files[0]);
+                                        }
+                                    }}
+                                />
+
+                                {image && (
+                                    <img
+                                        src={URL.createObjectURL(image)}
+                                        alt="Preview"
+                                        className="w-25  h-25 object-cover rounded-lg  shadow-sm"
                                     />
-                                </svg>
-                                <span className="text-sm text-gray-500">
-                                    <span className="font-medium text-[#685BC7]">Click to upload</span> or drag & drop
-                                </span>
+                                )}
                                 {image && (
                                     <span className="mt-2 text-sm text-green-600 font-medium">{image.name}</span>
                                 )}
+
+                                <span className="text-sm text-gray-500">
+                                    <span className="font-medium text-[#685BC7]">Click to upload</span> or drag & drop
+                                </span>
+
+
+
                             </label>
 
                             {/* Hidden input */}
@@ -204,13 +215,7 @@ const Customisespace = () => {
                             />
 
                             {/* Optional preview */}
-                            {image && (
-                                <img
-                                    src={URL.createObjectURL(image)}
-                                    alt="Preview"
-                                    className="mt-3 w-40 h-40 object-cover rounded-lg border shadow-sm"
-                                />
-                            )}
+
                         </div>
                     </div>
 
@@ -220,7 +225,7 @@ const Customisespace = () => {
                 </div>
             </div>
             <div className='w-full flex flex-wrap justify-end gap-[15px] p-[30px] mt-[40px]'>
-                
+
                 <button className='w-[100px] py-[10px] px-[14px] border-2 border-[#D0D5DD] rounded-[8px] font-semibold font-inter text-[14px] bg-white text-[#344054] hover:cursor-pointer'>
                     Previous
                 </button>
