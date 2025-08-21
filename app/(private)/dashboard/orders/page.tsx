@@ -981,18 +981,26 @@ const OrdersTable: React.FC = () => {
                                             {order.order_date ? new Date(order.order_date).toLocaleDateString() : 'N/A'}
                                         </td>
                                         <td className="px-4 py-2 capitalize">
-                                            <select
-                                                value={order.status || 'pending'}
-                                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                                                className="border rounded px-2 py-1 text-xs"
-                                            >
-                                                <option value="pending">Pending</option>
-                                                <option value="cancelled">Cancelled</option>
-                                                <option value="processing">Processing</option>
-                                                <option value="delivered">Delivered</option>
-                                                <option value="returned">Returned</option>
-                                                <option value="refunded">Refunded</option>
-                                            </select>
+                                      <select
+  value={order.status || "pending"}
+  onChange={(e) => handleStatusChange(order.id, e.target.value)}
+  className={`border rounded px-2 py-1 text-xs capitalize
+    ${order.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
+    ${order.status === "cancelled" ? "bg-red-100 text-red-800" : ""}
+    ${order.status === "processing" ? "bg-blue-100 text-blue-800" : ""}
+    ${order.status === "delivered" ? "bg-green-100 text-green-800" : ""}
+    ${order.status === "returned" ? "bg-purple-100 text-purple-800" : ""}
+    ${order.status === "refunded" ? "bg-gray-200 text-gray-800" : ""}
+  `}
+>
+  <option value="pending">Pending</option>
+  <option value="cancelled">Cancelled</option>
+  <option value="processing">Processing</option>
+  <option value="delivered">Delivered</option>
+  <option value="returned">Returned</option>
+  <option value="refunded">Refunded</option>
+</select>
+
                                         </td>
                                         <td className="px-4 py-2">
                                             <button

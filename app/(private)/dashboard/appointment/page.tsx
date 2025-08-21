@@ -403,33 +403,20 @@ const subheading = {
 
         <div className="mt-6 overflow-x-auto bg-white border border-[#EAECF0] rounded-lg">
           <table className="min-w-full text-sm text-left text-gray-700">
-            <thead className="bg-[#F9FAFB]">
+            
 
-              <tr>
+                <thead className="bg-[#F9FAFB] text-[#475467] max-w-full font-medium">  <tr>
+                                <th className="px-4 py-3"> Space Name</th>
+                                <th className="px-4 py-3">Customer Name</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3"> Phone Number</th>
+                                <th className="px-4 py-3">Service Name</th>
+                                <th className="px-4 py-3">Appointment Time</th>
+                                
+                            </tr>
+                        </thead>
 
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0] font-Inter">
-                  Space Name
-                </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
-                  Customer Name
-                </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
-                  Phone Number
-                </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
-                  Service Name
-                </th>
-                <th className="px-4 py-3 text-[#475467] font-medium text-[12px] leading-[18px] tracking-[0]  font-Inter">
-                  Appointment Time
-                </th>
-
-
-              </tr>
-
-            </thead>
+            
             <tbody>
               {currentAppointments.map((appt: any) => (
                 <tr key={appt.id}
