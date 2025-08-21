@@ -1,16 +1,33 @@
 import React, { useState, useEffect , Fragment } from "react";
 import { X ,  ChevronDown  , Check} from "lucide-react";
-import { getAllProducts, getAllServices, GetSpaceId } from "@/app/Apis/publicapi";
+import { getAllProducts, getAllServices, getProductsBySpace, getServicesBySpace, GetSpaceId } from "@/app/Apis/publicapi";
 import { Listbox, Transition } from "@headlessui/react";
+import { Icon } from "@iconify/react";
 interface SubscriptionModalProps {
   isModalOpen: boolean;
   onClose: () => void;
+    onSave: (subscription: any) => void;
   spaceName?: string; // optional, to prefill a space name
 }
 const initialData = {
   products: [],
   services: [],
 };
+interface Space {
+    id: number;
+    name: string;
+}
+
+interface Product {
+    id: number;
+    name: string;
+    price: number;
+}
+
+interface Service {
+    id: number;
+    name: string;
+}
 interface SubscriptionOption {
   value: string;
   title: string;
@@ -50,8 +67,16 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 }) => {
   const [spaces, setSpaces] = useState<{ id: number; name: string }[]>([]);
  const [data, setData] = useState<any>(initialData);
-  
-  // ✅ one single form state object
+      const [products, setProducts] = useState([]);
+   const [services, setServices] = useState([]);
+
+    // State for loading and errors
+    const [loadingSpaces, setLoadingSpaces] = useState(false);
+    const [loadingProducts, setLoadingProducts] = useState(false);
+    const [loadingServices, setLoadingServices] = useState(false);
+    const [spaceError, setSpaceError] = useState('');
+    const [productError, setProductError] = useState('');
+    const [serviceError, setServiceError] = useState('');
   const [formState, setFormState] = useState({
     space_id: "",
     space_name: spaceName,
@@ -66,48 +91,117 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
      productId: "",
   serviceId: "",
   });
+ // Handle space dropdown change
+    const handleSpaceChange = (e : any) => {
+        const spaceId = e.target.value;
+        const selectedSpace = spaces.find(s => String(s.id) === spaceId);
+        setFormState(f => ({
+            ...f,
+            space_id: spaceId,
+            space_name: selectedSpace?.name || "",
+            productId: "", // Reset product/service selection on space change
+            serviceId: "",
+        }));
+    };
+  // Handle subscription type change (General, Product, Service)
+    const handleSubscriptionTypeChange = (value : any) => {
+        setFormState(f => ({
+            ...f,
+            subscriptionType: value,
+            productId: "", // Reset product/service selection on type change
+            serviceId: "",
+        }));
+    };
+ useEffect(() => {
+        const fetchSpaces = async () => {
+            setLoadingSpaces(true);
+            setSpaceError('');
+            try {
+                const res = await GetSpaceId();
+                const spaceArray = res?.spaces;
+                if (Array.isArray(spaceArray) && spaceArray.length > 0) {
+                    const simplified = spaceArray.map(item => ({ id: item.id, name: item.name }));
+                    setSpaces(simplified);
+                    if (spaceName) {
+                        const spaceToSelect = simplified.find(s => s.name === spaceName);
+                        if (spaceToSelect) {
+                            setFormState(f => ({ ...f, space_id: String(spaceToSelect.id), space_name: spaceToSelect.name }));
+                        }
+                    }
+                } else {
+                    setSpaceError('No spaces available');
+                }
+            } catch (err) {
+                setSpaceError('Failed to load spaces. Please try again.');
+            } finally {
+                setLoadingSpaces(false);
+            }
+        };
 
-  useEffect(() => {
-    const GetSpaceID = async () => {
-      try {
-        const res = await GetSpaceId();
-        const spaceArray = res?.spaces;
+        if (isModalOpen) {
+            fetchSpaces();
+        }
+    }, [isModalOpen, spaceName]);// DEPENDENCY: This hook runs whenever the modal state changes.
 
-        if (!Array.isArray(spaceArray)) {
-          console.warn("Expected array response but got:", spaceArray);
-          return;
+useEffect(() => {
+        const spaceIdNum = Number(formState.space_id);
+        const subscriptionType = formState.subscriptionType;
+
+        // Clear products/services if no space is selected or type is General
+        if (!spaceIdNum || subscriptionType === "General") {
+            setProducts([]);
+            setServices([]);
+            return;
         }
 
-        const simplified = spaceArray.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-        }));
+        const fetchData = async () => {
+            if (subscriptionType === "Product") {
+                setLoadingProducts(true);
+                setProductError('');
+                setServices([]); // Clear services list
+                try {
+                    const productsData = await getProductsBySpace(spaceIdNum);
+                    setProducts(productsData);
+                    if (productsData.length === 0) {
+                        setProductError('No products available for this space.');
+                    }
+                } catch (err) {
+                    setProductError('Failed to load products. Please try again.');
+                } finally {
+                    setLoadingProducts(false);
+                }
+            } else if (subscriptionType === "Service") {
+                setLoadingServices(true);
+                setServiceError('');
+                setProducts([]); // Clear products list
+                try {
+                    const servicesData = await getServicesBySpace(spaceIdNum);
+                    setServices(servicesData);
+                    if (servicesData.length === 0) {
+                        setServiceError('No services available for this space.');
+                    }
+                } catch (err) {
+                    setServiceError('Failed to load services. Please try again.');
+                } finally {
+                    setLoadingServices(false);
+                }
+            }
+        };
 
-        setSpaces(simplified);
-      } catch (err) {
-        console.error("Failed to load space IDs", err);
-      }
-    };
-    GetSpaceID();
-  }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productList, serviceList] = await Promise.all([
-          getAllProducts(),
-          getAllServices(),
-        ]);
-        setData({
-          products: productList?.data || [],
-          services: serviceList?.data || [],
-        });
-      } catch (err) {
-        console.error('Failed to fetch data', err);
-      }
-    };
+        fetchData();
+    }, [formState.space_id, formState.subscriptionType]);
+//  if (!isModalOpen) return null;
+//   useEffect(() => {
+//   const fetchDataForSpace = async () => {
+    
+//     if (formState.space_id && formState.subscriptionType === "Product") {
 
-    fetchData();
-  }, []);
+//     } else if (formState.space_id && formState.subscriptionType === "Service") {
+
+//     }
+//   };
+//   fetchDataForSpace();
+// }, [formState.space_id, formState.subscriptionType]);
   return (
     <>
       {isModalOpen && (
@@ -139,29 +233,20 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   Space Name
                 </label>
                 <div className="relative">
-                <select
-                   className="w-full p-2.5 pr-10 rounded-lg border text-[#98A2B3] border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-  
-                  value={formState.space_id}
-                  onChange={(e) => {
-                    const space_id = e.target.value;
-                    const selectedSpace = spaces.find(
-                      (s) => String(s.id) === space_id
-                    );
-                    setFormState((f) => ({
-                      ...f,
-                      space_id,
-                      space_name: selectedSpace?.name || "",
-                    }));
-                  }}
-                >
-                  <option value="">Select Space Name</option>
-                  {spaces.map((space) => (
-                    <option key={space.id} value={String(space.id)}>
-                      {space.name}
-                    </option>
-                  ))}
-                </select>
+                
+              <select
+                                className="w-full p-2.5 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                                value={formState.space_id}
+                                onChange={handleSpaceChange}
+                                disabled={loadingSpaces}
+                            >
+                                <option value="">
+                                    {loadingSpaces ? "Loading spaces..." : "Select Space Name"}
+                                </option>
+                                {spaces.map(space => (
+                                    <option key={space.id} value={String(space.id)}>{space.name}</option>
+                                ))}
+                            </select>
               
   <ChevronDown
     className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600"
@@ -186,8 +271,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         }))
       }
       placeholder="Enter name"
-      className="w-full p-2.5 rounded-lg border border-[#D0D5DD] text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
-    />
+    className="w-full p-2.5 rounded-lg border border-[#D0D5DD] text-black placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+/>
   </div>
 
   {/* Subscription Type */}
@@ -200,8 +285,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
  <Listbox
         value={formState.subscriptionType}
-        onChange={(val) =>
-          setFormState((f: any) => ({ ...f, subscriptionType: val }))
+        onChange={handleSubscriptionTypeChange
         }
       >
        <div className="relative">
@@ -260,31 +344,29 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   </div>
 </div>
 
-{formState.subscriptionType === "Product" && (
-  <div className="mt-4">
-    <label className="block text-sm font-medium mb-1">Select Product</label>
-    <div className="relative">
-      <select
-        value={formState.productId || ""}
-        onChange={(e) =>
-          setFormState((f) => ({ ...f, productId: e.target.value }))
-        }
-        className="w-full p-2.5 pr-10 rounded-lg border text-[#98A2B3] border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-      >
-        <option value="">Select a product</option>
-        {data.products.map((product: any) => (
-          <option key={product.id} value={product.id}>
-            {product.name}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600"
-        size={22}
-      />
-    </div>
-  </div>
-)}
+        {formState.subscriptionType === "Product" && (
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                            <div className="relative">
+                                <select
+                                    value={formState.productId}
+                                    onChange={(e) => setFormState(f => ({ ...f, productId: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                                    disabled={!formState.space_id || loadingProducts}
+                                >
+                                    <option value="">
+                                        {!formState.space_id ? "Select a space first" : loadingProducts ? "Loading products..." : productError || (products.length === 0 ? "No products available" : "Search or select product from your inventory")}
+                                    </option>
+                                  {products?.map((product: any) => (
+                                        <option key={product.id} value={product.id}>{product.name}</option>
+                                    ))}
+                                </select>
+                                {loadingProducts && <div className="absolute right-8 top-2.5"><Icon icon="eos-icons:loading" className="w-5 h-5 animate-spin text-indigo-500" /></div>}
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600" size={20} />
+                            </div>
+                            {productError && <p className="text-sm text-red-600 mt-1">{productError}</p>}
+                        </div>
+                    )}
 
 {formState.subscriptionType === "Service" && (
   <div className="mt-4">
@@ -298,7 +380,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         className="w-full p-2.5 pr-10 rounded-lg border text-[#98A2B3] border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
       >
         <option value="">Select a service</option>
-        {data.services.map((service: any) => (
+        {services?.map((service: any) => (
           <option key={service.id} value={service.id}>
             {service.name}
           </option>
@@ -328,7 +410,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     }))
                   }
                   placeholder="Describe the service or benefits the members get"
-                  className="w-full p-2.5 rounded-lg border border-[#D0D5DD] text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2.5 rounded-lg border border-[#D0D5DD] text-black placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   rows={3}
                 />
               </div>
@@ -345,7 +427,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       variant: e.target.value,
                     }))
                   }
-                className="w-full p-2.5 pr-10 rounded-lg border text-[#98A2B3] border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full p-2.5 pr-10 rounded-lg border text-black placeholder:text-[#98A2B3]border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
   >
                   <option value="Monthly">Monthly</option>
                   <option value="Yearly">Yearly</option>
@@ -371,7 +453,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         onChange={(e) =>
           setFormState((f) => ({ ...f, currency: e.target.value }))
         }
-        className="w-full p-2.5 pr-10 rounded-lg border border-[#D0D5DD] text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+        className="w-full p-2.5 pr-10 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
       >
         <option value="USD">USD ($)</option>
         <option value="EUR">EUR (€)</option>
@@ -402,7 +484,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           setFormState((f) => ({ ...f, price: e.target.value }))
         }
         placeholder=""
-        className="w-full pl-8 pr-10 p-2.5 rounded-lg border border-[#D0D5DD] text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full pl-8 pr-10 p-2.5 rounded-lg border border-[#D0D5DD] text-black placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
 
       {/* /mo on right */}

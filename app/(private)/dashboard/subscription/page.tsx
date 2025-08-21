@@ -8,7 +8,7 @@ import SubscriptionModal from "./SubscriptionModal";
 
 const Subscription = () => {
       const [isModalOpen, setIsModalOpen] = useState(false);
-      const [subscriptions, setSubscriptions] = useState([]);
+      const [subscriptions, setSubscriptions] = useState<any[]>([]);
  
   const subscriptionData = [
     {
@@ -48,17 +48,10 @@ const Subscription = () => {
       accessSetting: 'Private'
     },
   ];
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-  //   const { name, value } = e.target;
-  //   setSubscriptionData(prev => ({ ...prev, [name]: value }));
-  // };
-
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   console.log('New subscription:', subscriptionData);
-  //   setIsModalOpen(false);
-  
-  // };
+  // handle adding subscription
+  const handleSaveSubscription = (newSub: any) => {
+    setSubscriptions((prev) => [...prev, newSub]);
+  };
   return (
     <div className='select-none relative'>
       <Navbar heading="Subscription" />
@@ -137,7 +130,7 @@ const Subscription = () => {
         </div>
         
 
-             {subscriptions.length > 0 && (
+             
   <div className="overflow-x-auto rounded-[10px] mt-8">
     <table className="min-w-[700px] w-full border border-[#EAECF0] text-sm text-left bg-white">
       <thead className="text-xs text-[#475467] bg-[#F9FAFB] font-medium">
@@ -166,10 +159,11 @@ const Subscription = () => {
       </tbody>
     </table>
   </div>
-)}
 
        <SubscriptionModal
         isModalOpen={isModalOpen} 
+          onSave={handleSaveSubscription}
+          
         onClose={() => setIsModalOpen(false)} 
       />
       </div>
