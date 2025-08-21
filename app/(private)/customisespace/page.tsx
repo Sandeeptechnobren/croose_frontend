@@ -123,7 +123,7 @@ const Customisespace = () => {
                                 <input
                                     className={`w-full p-[16px] border-2 rounded-[16px] ${startError ? 'border-red-500' : 'border-[#D0D5DD]'
                                         }`}
-                                    type="text"
+                                    type="time"
                                     placeholder="Enter Start time (e.g., 02:00)"
                                     value={StartTime}
                                     onChange={handleStartChange}
