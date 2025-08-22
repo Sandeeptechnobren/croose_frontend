@@ -34,7 +34,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Content>{children}</Content>
           </Settingprovider>
         </IqProvider>
-        <ToastContainer />
+            <ToastContainer 
+        position="top-right"
+        autoClose={3000} // closes after 3 sec
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       </body>
     </html>
   );

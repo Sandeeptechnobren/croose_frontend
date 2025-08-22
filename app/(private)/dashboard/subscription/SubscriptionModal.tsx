@@ -1,5 +1,6 @@
 import React, { useState, useEffect , Fragment } from "react";
 import { X ,  ChevronDown  , Check} from "lucide-react";
+import { toast } from "react-toastify";
 import { getAllProducts, getAllServices, getProductsBySpace, getServicesBySpace, GetSpaceId } from "@/app/Apis/publicapi";
 import { Listbox, Transition } from "@headlessui/react";
 import { Icon } from "@iconify/react";
@@ -92,8 +93,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
  price_per_month: "",
     access_type: "",
     discount_rate : "",
-     product_ids: "",
- service_ids: "",
+     product_ids: [] as number[],
+  service_ids: [] as number[],
   });
  // Handle space dropdown change
     const handleSpaceChange = (e : any) => {
@@ -103,8 +104,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             ...f,
             space_id: spaceId,
             space_name: selectedSpace?.name || "",
-            product_ids: "", // Reset product/service selection on space change
-           service_ids: "",
+          product_ids: [], // ✅ fix here
+    service_ids: [],
         }));
     };
   // Handle subscription type change (General, Product, Service)
@@ -112,8 +113,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         setFormState(f => ({
             ...f,
             subscription_type: value,
-            product_ids: "", // Reset product/service selection on type change
-           service_ids: "",
+           product_ids: [], 
+    service_ids: [],
         }));
     };
  useEffect(() => {
@@ -223,10 +224,12 @@ useEffect(() => {
       access_setting: formState.access_type,
     };
     
-    if(formState.subscription_type!=="general"){
-      payload.product_ids = formState.product_ids;
-      payload.service_ids = formState.service_ids;
-    }
+ if (formState.subscription_type === "Product") {
+  payload.product_ids = formState.product_ids ? formState.product_ids : [];
+} else if (formState.subscription_type === "Service") {
+  payload.service_ids = formState.service_ids ? formState.service_ids: [];
+}
+
     console.log("Submitting payload:", payload);
     
     setLoading(true);
@@ -244,9 +247,12 @@ useEffect(() => {
       );
       
       console.log("API response:", res.data);
+          toast.success("Subscription saved successfully");
       const newSub = res.data.subscription || res.data; 
       onSave(newSub); 
       onClose(); 
+      
+
     } catch (err: any) {
       console.error("API error:", err);
       alert(
@@ -254,6 +260,7 @@ useEffect(() => {
           err.message ||
           "Failed to create subscription."
       );
+       toast.error("Failed to save subscription ");
     } finally {
       setLoading(false);
     }
@@ -309,10 +316,10 @@ useEffect(() => {
                                 ))}
                             </select>
               
-  <ChevronDown
+  {/* <ChevronDown
     className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600"
     size={22}
-  />
+  /> */}
               </div></div>
 
           {/* Subscription Name + Type in one row */}
@@ -410,9 +417,16 @@ useEffect(() => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
                             <div className="relative">
                                 <select
-                                    value={formState.product_ids}
-                                    onChange={(e) => setFormState(f => ({ ...f, product_ids: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                                  multiple
+  value={formState.product_ids.map(String)}
+  onChange={(e) =>{
+    console.log( Array.from(e.target.selectedOptions, opt => Number(opt.value)),'418');
+  setFormState(f => ({
+      ...f,
+      product_ids: Array.from(e.target.selectedOptions, opt => Number(opt.value)),
+    }))}
+  }
+     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
                                     disabled={!formState.space_id || loadingProducts}
                                 >
                                     <option value="">
@@ -434,10 +448,18 @@ useEffect(() => {
     <label className="block text-sm font-medium mb-1">Select Service</label>
     <div className="relative">
       <select
-        value={formState.service_ids || ""}
-        onChange={(e) =>
-          setFormState((f) => ({ ...f,service_ids: e.target.value }))
-        }
+      
+  value={formState.service_ids.map(String)}
+onChange={(e) => {
+  const values = Array.from(e.target.selectedOptions, opt => Number(opt.value));
+  console.log("Converted service_ids:", values, values.map(v => typeof v));
+  setFormState(f => ({
+    ...f,
+    service_ids: values,
+  }));
+}}
+
+
         className="w-full p-2.5 pr-10 rounded-lg border text-[#98A2B3] border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
       >
         <option value="">Select a service</option>

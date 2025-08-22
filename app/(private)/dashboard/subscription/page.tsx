@@ -283,7 +283,7 @@ interface ApiResponse {
                
                 <td className="px-4 py-3 ">{s.customer_name}</td>
                         <td className="px-4 py-3">
-  <StatusBadge status={s.status}  />
+  <StatusBadge status={s.status?.toLowerCase() || ""}  />
 </td>
 <td className="px-4 py-3 text-[#101828] font-inter font-semibold ">{s.subscription_amount}</td>
       
@@ -324,10 +324,14 @@ interface ApiResponse {
         onClose={() => setIsModalOpen(false)} 
       />
 
-     {isManageModalOpen ? (
+  {isManageModalOpen ? (
   <ManageSubModal
     isOpen={isManageModalOpen}
     onClose={() => setIsManageModalOpen(false)}
+    onNewSubscription={() => {
+      setIsManageModalOpen(false);
+      setTimeout(() => setIsSubscriptionModalOpen(true), 50);
+    }}
   />
 ) : isSubscriptionModalOpen ? (
   <SubscriptionModal
