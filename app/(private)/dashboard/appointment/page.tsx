@@ -229,7 +229,7 @@ const subheading = {
         <Navbar heading="Appointments" />
 
 
-        <div className="p-6 ">
+        <div className="mt-6 ">
 
           <div className="flex justify-between items-start px-8">
             <div>
@@ -401,8 +401,9 @@ const subheading = {
 
       </div> */}
 
-        <div className="mt-6 overflow-x-auto bg-white border border-[#EAECF0] rounded-lg">
-          <table className="min-w-full text-sm text-left text-gray-700">
+<section className='w-full flex justify-center'>
+        <div className="mt-6 overflow-x-auto  w-[95%] border border-[#EAECF0] rounded-lg">
+          <table className="min-w-full text-sm  text-left text-gray-700">
             
 
                 <thead className="bg-[#F9FAFB] text-[#475467] max-w-full font-medium">  <tr>
@@ -472,6 +473,13 @@ const subheading = {
           </table>
 
         </div>
+</section>
+
+
+
+
+
+
       </div>
       <div className="flex justify-center gap-[20px] items-center mt-4">
         <button

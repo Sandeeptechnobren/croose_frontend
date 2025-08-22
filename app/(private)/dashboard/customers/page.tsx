@@ -149,9 +149,9 @@ const Customers = () => {
                 <p className='font-semibold text-[#101828] text-[16px] mb-2'>Customer Insights</p>
                 <p className='text-[#475467] text-[14px] mb-4'>All the details about your customers</p>
 
-                <div className="overflow-x-auto rounded-[10px]">
-                    <table className="min-w-[700px] w-full border border-[#EAECF0] text-sm text-left bg-white">
-                        <thead className="bg-[#F9FAFB] text-[#475467] border-t-2 max-w-full border-[#EAECF0] font-medium">
+                <div className="overflow-x-auto  rounded-[10px]">
+                    <table className="min-w-[700px] w-[100%] border border-[#EAECF0] text-sm text-left ">
+                        <thead className="bg-[#F9FAFB] text-[#475467]  max-w-full  font-medium">
                             <tr>
                                 <th className="px-6 py-3">Customer</th>
                                 <th className="px-6 py-3">Status</th>
