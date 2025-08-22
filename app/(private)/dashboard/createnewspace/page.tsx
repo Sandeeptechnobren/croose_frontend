@@ -60,15 +60,15 @@ const Newspace = () => {
         <Spacenav />
       </div>
 
-      <section className='flex flex-wrap justify-center'>
-        <div className='w-[90%] min-h-[100vh] flex flex-col gap-[40px] mt-[30px]'>
+      <section className='flex  flex-wrap justify-center'>
+        <div className='w-[95%] min-h-[100vh]  flex flex-col gap-[40px] mt-[30px]'>
 
           <div className='w-full flex flex-col justify-center -mt-[10px]'>
             <div className='flex justify-between items-center w-[100%] h-auto'>
               <h1 className='text-[#121217] font-[600] text-[24px] font-sans'>
                 Assistants you have created
               </h1>
-              <ul className='flex gap-[10px] mr-[70px] gap-[20px] items-center'>
+              <ul className='flex gap-[10px] mr-[110px] gap-[20px] items-center'>
                 <div className='flex items-center gap-[10px] ' >
                   <li 
                     onClick={() => handleFilterChange('all')}
@@ -112,17 +112,17 @@ const Newspace = () => {
             </div>
           </div>
 
-          <div className='w-full flex flex-col gap-[30px]'>
-            <ul className='flex flex-wrap gap-[30px]'>
+          <div className='w-[100%]  flex items-center justify-center  flex-col gap-[30px]'>
+            <ul className='flex flex-wrap  justify-between items-center gap-[30px]'>
               {loading ? (
-                <div className="flex justify-center items-center w-full h-64">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 border-2 border-[#685BC7] border-t-transparent rounded-full animate-spin"></div>
+                <div className="flex justify-center  items-center w-full h-64">
+                  <div className="flex items-center  gap-2">
+                    <div className="w-6 h-6 border-2  border-[#685BC7] border-t-transparent rounded-full animate-spin"></div>
                     <span className="text-gray-500">Loading...</span>
                   </div>
                 </div>
               ) : filteredSpaceData.length === 0 && spaceData.length > 0 && activeFilter === 'active' ? (
-                <div className="flex flex-col justify-center items-center w-full h-64">
+                <div className="flex flex-col justify-center  items-center w-full h-64">
                   <div className="text-gray-400 mb-4">
                     <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2m16-7H4" />
@@ -132,7 +132,7 @@ const Newspace = () => {
                   <p className="text-gray-500 text-center">There are no active spaces to display at the moment.</p>
                 </div>
               ) : filteredSpaceData.length === 0 ? (
-                <div className="flex flex-col justify-center items-center w-full h-64">
+                <div className="flex flex-col  justify-center items-center w-full h-64">
                   <div className="text-gray-400 mb-4">
                     <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2m16-7H4" />
@@ -147,8 +147,8 @@ const Newspace = () => {
                     key={space.id}
                     href={`/dashboard/space?name=${encodeURIComponent(space.name)}&id=${space.id}&image=${encodeURIComponent(space.image || '')}`}
                   >
-                    <li className='w-[352px] list-none h-auto rounded-[16px] border-[1px] border-[#EAECF0] hover:shadow-lg transition-shadow duration-200'>
-                      <div>
+                    <li className='w-[352px]  items-center flex justify-center list-none h-auto rounded-[16px] border-[1px] border-[#EAECF0] hover:shadow-lg transition-shadow duration-200'>
+                      <div >
                         <div className='flex w-[352px] flex-col relative justify-end p-[20px] w-[289px] rounded-t-[16px] h-[127px] bg-[#9E77ED]'>
                           <ul className='flex -space-x-4 rtl:space-x-reverse'>
                             <li>

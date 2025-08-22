@@ -118,8 +118,8 @@ const Payments = () => {
       <div className='w-full p-6' >
       
       <div className="w-full overflow-x-auto  border-2  border-[#EAECF0]  rounded-[10px]  ">
-       <table className="min-w-full text-sm text-left border  text-gray-900 bg-white rounded-md overflow-hidden p-4">
-        <thead className="bg-[#F9FAFB] text-[#475467] text-xs font-medium">  
+       <table className="min-w-full text-sm text-left   text-gray-900 bg-white rounded-md overflow-hidden p-4">
+        <thead className="bg-[#F9FAFB] text-[#475467]  max-w-full border-[#EAECF0] font-medium">  
            <tr>
     <th className="px-6 py-3">Type</th>
     <th className="px-6 py-3">Reference ID</th>
@@ -133,7 +133,7 @@ const Payments = () => {
           </thead>
          <tbody>
   {filteredPayments.map((payment, index) => (
-    <tr key={index} className="hover:bg-gray-50 border-b border-[#EAECF0]">
+    <tr key={index} className="hover:bg-gray-50 text-[#475467] border-b border-[#EAECF0]">
       <td className="px-6 py-4">{payment.type}</td>
       <td className="px-6 py-4">{payment.reference_id}</td>
       <td className="px-6 py-4">{payment.amount}</td>
