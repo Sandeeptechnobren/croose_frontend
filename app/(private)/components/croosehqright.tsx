@@ -104,10 +104,10 @@ const CroosehqRigtFull= ({open, setOpen}:any): React.ReactElement => {
         // Header
         React.createElement(
           'div',
-          { className: 'p-4 border-b flex justify-between items-center' },
+          { className: 'p-4  flex justify-between items-center' },
           React.createElement(
             'span',
-            { className: 'flex gap-[8px] font-sans font-semibold text-gray-700' },
+            { className: 'flex gap-[8px] font-sans font-semibold text-[black]' },
             React.createElement(Icon, {
               icon: 'material-symbols:menu-rounded',
               width: 20,
