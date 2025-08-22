@@ -41,10 +41,11 @@ const Croosehq = (props:any) => {
                         }
     return (
         // <div className='w-full min-h-screen bg-[#18181B1F] flex items-end justify-end p-4 md:p-6'>
-            <div className="w-[90%] sm:w-[90%] md:w-[70%] lg:w-[50%] xl:w-[38%] h-[600px] rounded-[16px] shadow-xl border flex flex-col overflow-hidden bg-white fixed bottom-[20px] right-[20px]  ">
+<div className="w-[90%] sm:w-[80%] md:w-[60%] lg:w-[40%] xl:w-[28%] h-[600px] rounded-[16px] shadow-2xl flex flex-col overflow-hidden bg-white fixed bottom-[20px] right-[20px]">
+
                 
-                <div className="p-4 border-b flex justify-between items-center">
-                    <span className="flex gap-[8px] font-sans font-semibold text-gray-700">
+                <div className="p-4  flex justify-between items-center">
+                    <span className="flex gap-[8px] font-sans font-semibold text-[black]">
                         <Icon icon="material-symbols:menu-rounded" width="20" height="24" style={{ color: "#71717A" }} />
                         Croose HQ
                     </span>
@@ -102,8 +103,8 @@ const Croosehq = (props:any) => {
                 </div>
 
                 
-                <div className='flex flex-col w-full rounded-b-[24px] h-auto p-3 gap-4 bg-white justify-end'>
-                    <div className='w-full h-auto border-2 rounded-[16px] border-[#E4E4E7] p-4 flex items-center justify-between'>
+                <div className='flex flex-col w-full  rounded-b-[24px] h-auto p-3 gap-4 bg-white justify-end'>
+                    <div className='w-full h-auto border-2 border-[#E4E4E7]  rounded-[16px]  p-4 flex items-center justify-between'>
                         <input
                             type="text"
                             placeholder="Ask a question, perform an action, or give instructions..."

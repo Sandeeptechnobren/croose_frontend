@@ -18,6 +18,7 @@ interface Order {
     payment_status: string;
     order_date: string;
     status: string;
+    currency:any
 }
 
 interface OrderStatistics {
@@ -973,8 +974,8 @@ const OrdersTable: React.FC = () => {
                                         <td className="px-4 py-2">{order.customer_name || 'N/A'}</td>
                                         <td className="px-4 py-2">{order.customer_number || 'N/A'}</td>
                                         <td className="px-4 py-2">{order.product_name || 'N/A'}</td>
-                                        <td className="px-4 py-2">
-                                            {order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
+                                        <td className="px-3 py-2">
+                                          {order.currency } {order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
                                         </td>
                                         <td className="px-4 py-2 capitalize">{order.payment_status || 'pending'}</td>
                                         <td className="px-4 py-2">

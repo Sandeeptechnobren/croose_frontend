@@ -116,7 +116,7 @@ const Spacebusiness = () => {
                             key={index}
                             onClick={() => handleSelectSpace(values)}
                             className={`
-                w-full rounded-[18px] p-[24px] h-[140px] relative flex flex-col justify-between cursor-pointer
+                w-full rounded-[18px] p-[24px]  hover:bg-[#9999] h-[140px] relative flex flex-col justify-between cursor-pointer
                 ${selectedBusiness === values.businessname
                                     ? 'bg-[#685BC71F] border-2 border-[#7F56D9]'
                                     : 'bg-[#F2F4F7] border border-transparent'}
