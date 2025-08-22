@@ -294,10 +294,10 @@ useEffect(() => {
               </div>
               
               {/* Form content - your existing form fields */}
-            <div className="p-5 space-y-5 overflow-y-auto flex-1">
+            <div className="p-5 space-y-5 overflow-y-auto flex-1 ">
            
               <div >
-                <label className="block text-sm font-medium mb-1">
+                <label className="block font-inter text-base tracking-normal  mb-1">
                   Space Name
                 </label>
                 <div className="relative">
@@ -326,7 +326,7 @@ useEffect(() => {
 <div className="grid grid-cols-2 gap-4">
   
   <div>
-    <label className="block text-sm font-medium mb-1">
+    <label className="block font-inter text-base tracking-normal mb-1">
       Subscription Name
     </label>
     <input
@@ -339,13 +339,13 @@ useEffect(() => {
         }))
       }
       placeholder="Enter name"
-    className="w-full p-2.5 rounded-lg border border-[#D0D5DD] text-black placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    className="w-full p-2.5 rounded-lg border border-[#D0D5DD]  text-black placeholder:text-[#98A2B3] placeholder:font-inter placeholder:text-base placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-indigo-500"
 />
   </div>
 
   {/* Subscription Type */}
   <div>
-    <label className="block text-sm font-medium mb-1">
+    <label className="block font-inter text-base tracking-normal mb-1">
       Subscription Type
     </label>
  
@@ -414,13 +414,13 @@ useEffect(() => {
 
         {formState.subscription_type === "Product" && (
                         <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                            <label className="block font-inter text-base tracking-normal text-gray-700 mb-1">Product</label>
                             <div className="relative">
                                 <select
                                   multiple
   value={formState.product_ids.map(String)}
   onChange={(e) =>{
-    console.log( Array.from(e.target.selectedOptions, opt => Number(opt.value)),'418');
+   
   setFormState(f => ({
       ...f,
       product_ids: Array.from(e.target.selectedOptions, opt => Number(opt.value)),
@@ -445,14 +445,14 @@ useEffect(() => {
 
 {formState.subscription_type === "Service" && (
   <div className="mt-4">
-    <label className="block text-sm font-medium mb-1">Select Service</label>
+    <label className="block font-inter text-base tracking-normal mb-1">Select Service</label>
     <div className="relative">
       <select
-      
+    multiple  
   value={formState.service_ids.map(String)}
 onChange={(e) => {
   const values = Array.from(e.target.selectedOptions, opt => Number(opt.value));
-  console.log("Converted service_ids:", values, values.map(v => typeof v));
+  
   setFormState(f => ({
     ...f,
     service_ids: values,
@@ -481,7 +481,7 @@ onChange={(e) => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium mb-1 ">
+                <label className="block font-inter text-base tracking-normal mb-1 ">
                   Description
                 </label>
                 <textarea
@@ -500,7 +500,7 @@ onChange={(e) => {
 
               {/* Variant */}
               <div>
-                <label className="block text-sm font-medium mb-1">Variant</label>
+                <label className="block font-inter text-base tracking-normal mb-1">Variant</label>
                 <div className="relative">
                 <select
                   value={formState.variant}
@@ -529,7 +529,7 @@ onChange={(e) => {
 <div className="grid grid-cols-2 gap-3">
   {/* Currency Dropdown */}
   <div>
-    <label className="block text-sm font-medium mb-1">Currency</label>
+    <label className="block font-inter text-base tracking-normal mb-1">Currency</label>
     <div className="relative">
       <select
         value={formState.currency}
@@ -551,7 +551,7 @@ onChange={(e) => {
 
   {/* Price Input with prefix & suffix */}
   <div>
-    <label className="block text-sm font-medium mb-1">
+    <label className="block font-inter text-base tracking-normal mb-1">
       Price per Month
     </label>
     <div className="relative">
@@ -582,7 +582,7 @@ onChange={(e) => {
           
             
 <div>
-  <label className="block text-sm font-medium mb-2">
+  <label className="block font-inter text-base tracking-normal mb-2">
     Access Settings
   </label>
   <div className="space-y-2">
@@ -634,8 +634,8 @@ onChange={(e) => {
     {/* Conditional discount_rate Input */}
     {formState.access_type === "discount_rate" && (
       <div className="mt-3">
-        <label className="block text-sm font-medium mb-1">
-          discount_rate Percentage
+        <label className="block font-inter text-base tracking-normal mb-1">
+        Discount Percentage
         </label>
         <input
           type="number"
@@ -675,7 +675,7 @@ onChange={(e) => {
               <button
                  type="submit"
                   disabled={loading}
-                className="w-full py-3 bg-[#685BC7] text-white rounded-lg hover:bg-[#5747b9] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                className="w-full py-3 bg-[#685BC7] font-inter text-base tracking-normal text-white rounded-lg hover:bg-[#5747b9] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
               >
               {loading ? "Creating..." : "Save & Publish"}
               </button>

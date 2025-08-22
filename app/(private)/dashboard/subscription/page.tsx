@@ -105,30 +105,8 @@ interface ApiResponse {
 
     loadStats();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchSubscriptions = async () => {
-  //     try {
-  //       const res = await axios.get<ApiResponse>(
-  //         `${BASE_URL}/api/subscription_list`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("token")}`, // if needed
-  //           },
-  //         }
-  //       );
-  //       setSubscriptions(res.data.subscriptions_list || []);
-  //     } catch (err) {
-  //       console.error("Error fetching subscriptions:", err);
-  //       setSubscriptions([]);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchSubscriptions();
-  // }, []);
-// Fetch subscribers
+ 
+ 
   useEffect(() => {
 
     const fetchSubscribers = async () => {
@@ -178,7 +156,7 @@ interface ApiResponse {
       
       <div className="p-6 space-y-6">
         {/* Top Section */}
-        <div className="flex justify-between items-start px-8">
+        <div className="flex justify-between items-start px-1 ">
           <div>
             <h2 className="text-xl font-semibold">Subscription</h2>
             <p className="text-sm text-gray-500">
@@ -283,7 +261,7 @@ interface ApiResponse {
                
                 <td className="px-4 py-3 ">{s.customer_name}</td>
                         <td className="px-4 py-3">
-  <StatusBadge status={s.status?.toLowerCase() || ""}  />
+                                  <StatusBadge status={s.status?.toLowerCase() || ""}  />
 </td>
 <td className="px-4 py-3 text-[#101828] font-inter font-semibold ">{s.subscription_amount}</td>
       
