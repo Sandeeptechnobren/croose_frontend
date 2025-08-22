@@ -26,14 +26,12 @@ const navItems = [
  
 ];
 
-
 export const Nav = ({ show, setShow }: any) => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [userdata, setUser] = useState<any>()
-  const { setOpenSetting1 } = useContext<any>(SettingContext);
+  const { setOpenSetting1, setOpenSetting2, setOpenSetting3 } = useContext<any>(SettingContext);
   const [showNAv, SetShowNav] = useState(false)
-
 
   const router = useRouter()
 
@@ -42,8 +40,6 @@ export const Nav = ({ show, setShow }: any) => {
     if (storedUser) {
       setUser(JSON.parse(storedUser))
     }
-
-
   }, [])
 
   const handlelogout = async () => {
@@ -53,7 +49,6 @@ export const Nav = ({ show, setShow }: any) => {
       setSnackbarMessage('Logout successful');
       setOpenSnackbar(true);
 
-
       setTimeout(() => {
         router.push("/login");
       }, 1000);
@@ -61,51 +56,47 @@ export const Nav = ({ show, setShow }: any) => {
       setSnackbarMessage(err.message || "Logout failed");
       setOpenSnackbar(true);
     }
+  };
 
+  // Function to close all settings popups
+  const closeAllSettings = () => {
+    setOpenSetting1(false);
+    setOpenSetting2(false);
+    setOpenSetting3(false);
   };
 
   const pathname = usePathname();
 
-
   return (
-
-
-      <div className={`fixed select-none top-0 left-0 z-40 w-[272px] h-full bg-[#13102E] transform transition-transform duration-300 ${show ? 'translate-x-0' : '-translate-x-full'}`}>
-
-
-      <div className="   bg-[#13102E] w-[272px] h-[100vh] max-w-[272px] fixed">
-         <div className="absolute top-4 right-4 z-50">
-          <button 
+    <div className={`fixed select-none top-0 left-0 z-40 w-[272px] h-full bg-[#13102E] transform transition-transform duration-300 ${show ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className="bg-[#13102E] w-[272px] h-[100vh] max-w-[272px] fixed">
+        <div className="absolute top-4 right-4 z-50">
+          <button
             onClick={() => setShow(false)}
             className="cursor-pointer hover:bg-gray-700 rounded-full p-2 transition-colors"
           >
-            <Icon 
-              icon="iconamoon:close-bold" 
-              width="20" 
-              height="20" 
-              style={{ color: 'white' }} 
+            <Icon
+              icon="iconamoon:close-bold"
+              width="20"
+              height="20"
+              style={{ color: 'white' }}
             />
           </button>
         </div>
-
-
 
         <div className="flex w-[272px] h-[76px] justify-left gap-[12px] pt-[24px] pr-[32px] pd-[12px] pl-[32px] items-center">
           <div>
             <img className="w-[82.95893096923828px] h-[19.239667892456055px]" src="../logo.png" alt='logo' />
           </div>
-
-
-
         </div>
 
         <div className="relative">
           <div className="flex justify-center flex-col items-center gap-[4px] mt-[20px] -ml-[10px]">
             <ul>
               {navItems.map((item, index) => (
-                <Link key={index} href={item.href}>
+                <Link key={index} href={item.href} onClick={closeAllSettings}>
                   <li className={`flex w-[232px] items-center gap-[8px] px-[12px] py-[8px] transition-all cursor-pointer
-  ${pathname === item.href ? 'bg-[#1a173b] border-l-4 border-[#7367CB]' : 'hover:bg-[#1a173b] hover:border-l-4 hover:border-[#7367CB]'}`}>
+                    ${pathname === item.href ? 'bg-[#1a173b] border-l-4 border-[#7367CB]' : 'hover:bg-[#1a173b] hover:border-l-4 hover:border-[#7367CB]'}`}>
                     <div>{item.icon}</div>
                     <div className='text-[14px] font-sans text-[#F2F4F7] font-normal'>{item.label}</div>
                   </li>
@@ -117,7 +108,7 @@ export const Nav = ({ show, setShow }: any) => {
           <section style={{ position: "fixed", bottom: "0" }}>
             <div className="flex justify-center items-center flex-col w-full gap-[4px] -ml-[12px]">
               <ul className="flex flex-col gap-[4px] w-[80%] h-auto">
-                <li className="flex w-[232px] h-auto gap-[8px] pt-[8px] pb-[8px] pl-[12px] pr-[12px] hover:bg-[#1a173b] hover:cursor-pointer hover:border-l-4 hover:border-[#7367CB]  transition-all" onClick={() => {
+                <li className="flex w-[232px] h-auto gap-[8px] pt-[8px] pb-[8px] pl-[12px] pr-[12px] hover:bg-[#1a173b] hover:cursor-pointer hover:border-l-4 hover:border-[#7367CB] transition-all" onClick={() => {
                   console.log('clicked setting');
                   setOpenSetting1(true);
                 }} >
@@ -125,39 +116,27 @@ export const Nav = ({ show, setShow }: any) => {
                     <Icon icon="mingcute:settings-4-line" width="24" height="24" color="white" />
                   </div>
                   <div>
-
                     <span className="text-[14px] font-sans text-[#F2F4F7] select-none font-normal">Settings</span>
                   </div>
                 </li>
-                <div >             <Link href='/dashboard/support' >
-                  <li className={`flex w-[232px] items-center gap-[8px] px-[12px] py-[8px] transition-all cursor-pointer
-  ${pathname === '/dashboard/support' ? 'bg-[#1a173b] border-l-4 border-[#7367CB]' : 'hover:bg-[#1a173b] hover:border-l-4 hover:border-[#7367CB]'}`} >
-                    <div  >
-                      <Icon icon="tabler:headphones" width="24" height="24" color='white' />
-                    </div>
-                    <div>
-                      <span className="text-[14px] font-sans text-[#F2F4F7] select-none font-normal">Support</span>
-                    </div>
-                  </li>
-                </Link>
+                
+                <div>
+                  <Link href='/dashboard/support' onClick={closeAllSettings}>
+                    <li className={`flex w-[232px] items-center gap-[8px] px-[12px] py-[8px] transition-all cursor-pointer
+                      ${pathname === '/dashboard/support' ? 'bg-[#1a173b] border-l-4 border-[#7367CB]' : 'hover:bg-[#1a173b] hover:border-l-4 hover:border-[#7367CB]'}`} >
+                      <div>
+                        <Icon icon="tabler:headphones" width="24" height="24" color='white' />
+                      </div>
+                      <div>
+                        <span className="text-[14px] font-sans text-[#F2F4F7] select-none font-normal">Support</span>
+                      </div>
+                    </li>
+                  </Link>
                 </div>
-
-
-
-                {/* 
-                <li onClick={handlelogout} className="flex w-[232px] h-auto gap-[8px] pt-[8px] pb-[8px] pl-[12px] pr-[12px] hover:bg-[#1a173b] hover:border-l-4 hover:border-[#7367CB]  transition-all">
-                  <div>
-                    <Icon icon="material-symbols:logout" width="24" height="24" color="white" />
-                  </div>
-                  <div>
-                    <span className="text-[14px] font-sans text-[#F2F4F7] font-normal">Logout</span>
-                  </div>
-                </li> */}
-
               </ul>
             </div>
 
-            <div className="flex flex-col w-[272px] select-none  h-auto p-[12px] gap-[10px]">
+            <div className="flex flex-col w-[272px] select-none h-auto p-[12px] gap-[10px]">
               <hr className="border-[#475467]" />
               <div className="bg-[#FFFFFF1F] flex w-[248px] h-auto p-[12px] gap-[12px] rounded-[10px]">
                 <div className='w-[40px] h-[40px] bg-[#EAECF0] rounded-full flex items-center justify-center text-[#475467] font-semibold text-[14px] uppercase'>
@@ -186,6 +165,13 @@ export const Nav = ({ show, setShow }: any) => {
           </section>
         </div>
       </div>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        message={snackbarMessage}
+      />
     </div>
   );
 };

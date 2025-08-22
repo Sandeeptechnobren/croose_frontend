@@ -1,8 +1,3 @@
-
-
-
-
-
 'use client';
 
 import React, { useState, useEffect, useContext } from 'react';
@@ -196,13 +191,15 @@ const [confirmPass, setConfirmPass] = useState('');
                 </div>
               </section>
 
+                   <section className="w-full relative flex justify-end  px-4 py-3 sm:px-[20px] sm:py-[12px]">
+
+              <button onClick={handleSubmit} className="rounded-lg bg-[#685BC7] absolute right-[0px]  text-white text-sm font-semibold px-7 py-2"> Update password </button>
+            </section>
+
               
 
             </section>
-            <section className="w-full flex justify-end  px-4 py-3 sm:px-[20px] sm:py-[12px]">
-
-              <button onClick={handleSubmit} className="rounded-lg bg-[#685BC7] text-white text-sm font-semibold px-7 py-2"> Update password </button>
-            </section>
+       
             
 
           </div>

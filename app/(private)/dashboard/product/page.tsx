@@ -479,7 +479,7 @@ const ProductServiceTabs = () => {
 
     return items?.map((item: any) => {
       return (
-        <tr key={item[id]} className="hover:bg-gray-50 border-b border-[#EAECF0]">
+        <tr key={item[id]} className="hover:bg-gray-50 text-[#475467] border-b border-[#EAECF0]">
           <td className="px-6 py-4 whitespace-nowrap">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
@@ -645,7 +645,7 @@ const ProductServiceTabs = () => {
         }
         }>Products/Services</h1>
       </div>
-      <div className="px-4 text-sm text-[#475467]">
+      <div className="px-8 text-sm text-[#475467]">
         <div className="flex justify-between items-center w-full">
           {/* Left Side: Products & Services Buttons */}
           <div className="flex gap-2">
@@ -711,10 +711,10 @@ const ProductServiceTabs = () => {
 
 
 
-      <div className='w-full p-6'>
+      <div className='w-full p-6 px-8'>
 
-        <table className="min-w-full text-sm text-left border text-gray-900 bg-white rounded-md overflow-hidden p-4">
-          <thead className="bg-[#F9FAFB] text-[#475467] text-xs font-medium">
+        <table className="min-w-full text-sm text-left  text-gray-900 rounded-md bg-white  border border-[#EAECF0]  overflow-hidden p-4">
+          <thead className="bg-[#F9FAFB] text-[#475467] border-t-2 max-w-full border-[#EAECF0] font-medium">
             <tr>
               <th className="px-4 py-2">Photos</th>
               <th className="px-4 py-2">Space Name</th>
@@ -743,7 +743,7 @@ const ProductServiceTabs = () => {
               )}
             </tr>
           </thead>
-          <tbody><RenderTableRows items={items} /></tbody>
+          <tbody className='border-r-2 border-l-2 border-[#EAECF0]  border '><RenderTableRows items={items} /></tbody>
         </table>
       </div>
       {showModal && (

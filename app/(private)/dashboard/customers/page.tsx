@@ -149,9 +149,9 @@ const Customers = () => {
                 <p className='font-semibold text-[#101828] text-[16px] mb-2'>Customer Insights</p>
                 <p className='text-[#475467] text-[14px] mb-4'>All the details about your customers</p>
 
-                <div className="overflow-x-auto rounded-[10px]">
-                    <table className="min-w-[700px] w-full border border-[#EAECF0] text-sm text-left bg-white">
-                        <thead className="text-xs text-[#475467] bg-[#F9FAFB] font-medium">
+                <div className="overflow-x-auto  rounded-[10px]">
+                    <table className="min-w-[700px] w-[100%] border border-[#EAECF0] text-sm text-left ">
+                        <thead className="bg-[#F9FAFB] text-[#475467]  max-w-full  font-medium">
                             <tr>
                                 <th className="px-6 py-3">Customer</th>
                                 <th className="px-6 py-3">Status</th>
@@ -163,13 +163,13 @@ const Customers = () => {
                         </thead>
                         <tbody>
                             {currentUsers.map((user) => (
-                                <tr key={user.id} className="border-b border-[#EAECF0]">
+                                <tr key={user.id} className="hover:bg-gray-50 text-[#475467] border-b border-[#EAECF0]">
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <input
+                                        <div className="hover:bg-gray-50 text-[#475467] ">
+                                            {/* <input
                                                 type="checkbox"
                                                 className="appearance-none w-4 h-4 border-2 border-[#D0D5DD] rounded-[4px] checked:bg-[#D0D5DD]"
-                                            />
+                                            /> */}
                                             <div className="text-[#101828] font-medium">{user.name}</div>
                                         </div>
                                     </td>

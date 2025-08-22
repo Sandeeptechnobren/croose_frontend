@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from "@iconify/react";
 import axios from 'axios';
 import Navbar from "../../components/Navbar";
+import StatusBadge from '../../components/StatusBadge';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -18,6 +19,7 @@ interface Order {
     payment_status: string;
     order_date: string;
     status: string;
+    currency:any
 }
 
 interface OrderStatistics {
@@ -652,7 +654,7 @@ const OrdersTable: React.FC = () => {
         <div className='select-none'>
             <Navbar heading="Orders" />
 
-            <div className="p-6 space-y-6">
+            <div className="pt-6 space-y-6">
                 <div className="flex justify-between items-start px-8">
                     <div>
                         <h2 className="text-xl font-semibold">Orders</h2>
@@ -949,8 +951,9 @@ const OrdersTable: React.FC = () => {
                 </div>
 
                 {/* Orders Table */}
-              <div className="overflow-x-auto rounded-lg border border-[#EAECF0]">
-  <table className="min-w-full text-sm text-left">
+                <section className='w-full flex justify-center'>
+              <div className="overflow-x-auto rounded-lg w-[94%] mr-3 border border-[#EAECF0]">
+  <table className="min-w-full text-sm   text-left">
     <thead className="bg-[#F9FAFB] text-[#475467] font-medium">  <tr>
                                 <th className="px-4 py-3">ID</th>
                                 <th className="px-4 py-3">Space</th>
@@ -973,26 +976,38 @@ const OrdersTable: React.FC = () => {
                                         <td className="px-4 py-2">{order.customer_name || 'N/A'}</td>
                                         <td className="px-4 py-2">{order.customer_number || 'N/A'}</td>
                                         <td className="px-4 py-2">{order.product_name || 'N/A'}</td>
-                                        <td className="px-4 py-2">
-                                            {order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
+                                        <td className="px-3 py-2">
+                                          {order.currency } {order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
                                         </td>
                                         <td className="px-4 py-2 capitalize">{order.payment_status || 'pending'}</td>
                                         <td className="px-4 py-2">
                                             {order.order_date ? new Date(order.order_date).toLocaleDateString() : 'N/A'}
                                         </td>
                                         <td className="px-4 py-2 capitalize">
-                                            <select
-                                                value={order.status || 'pending'}
-                                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                                                className="border rounded px-2 py-1 text-xs"
-                                            >
-                                                <option value="pending">Pending</option>
-                                                <option value="cancelled">Cancelled</option>
-                                                <option value="processing">Processing</option>
-                                                <option value="delivered">Delivered</option>
-                                                <option value="returned">Returned</option>
-                                                <option value="refunded">Refunded</option>
-                                            </select>
+                                            {/* <StatusBadge/> */}
+                                      <select
+  value={order.status || "pending"}
+  onChange={(e) => handleStatusChange(order.id, e.target.value)}
+  className={`border rounded px-2 py-1 text-xs capitalize
+    ${order.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
+    ${order.status === "cancelled" ? "bg-red-100 text-red-800" : ""}
+    ${order.status === "processing" ? "bg-blue-100 text-blue-800" : ""}
+    ${order.status === "delivered" ? "bg-green-100 text-green-800" : ""}
+    ${order.status === "returned" ? "bg-purple-100 text-purple-800" : ""}
+    ${order.status === "refunded" ? "bg-gray-200 text-gray-800" : ""}
+  `}
+
+
+>
+    
+  <option value="pending">Pending</option>
+  <option value="cancelled">Cancelled</option>
+  <option value="processing">Processing</option>
+  <option value="delivered">Delivered</option>
+  <option value="returned">Returned</option>
+  <option value="refunded">Refunded</option>
+</select>
+
                                         </td>
                                         <td className="px-4 py-2">
                                             <button
@@ -1019,6 +1034,10 @@ const OrdersTable: React.FC = () => {
                         </tbody>
                     </table>
                 </div>
+                </section>
+
+
+
             </div>
         </div>
     );

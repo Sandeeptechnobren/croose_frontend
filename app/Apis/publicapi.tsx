@@ -2046,22 +2046,42 @@ export const GetSpaceId = async () => {
 
 export const getProductsBySpace = async (spaceId: number) => {
   try {
+        const token = localStorage.getItem("token");
     const res = await axios.get(`${BASE_URL}/api/getProductBySpace`, {
       params: {
         space_id: spaceId
       },
       headers: {
-        'Content-Type': 'application/json',
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 
-    return res.data;
+    return res.data.data;
   } catch (error) {
     console.error('Error fetching products by space:', error);
     throw error;
   }
 };
+export const getServicesBySpace = async (spaceId: number) => {
+  try {
+        const token = localStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/api/getServicesBySpace`, {
+      params: {
+        space_id: spaceId
+      },
+        headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
+    return res.data.data;
+  } catch (error) {
+    console.error('Error fetching services by space:', error);
+    throw error;
+  }
+};
 export const ManualOrder = async (orderData: any) => {
   try {
     const res = await axios.post(`${BASE_URL}/api/createmanualorder`, orderData, {
