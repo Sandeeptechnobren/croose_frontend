@@ -27,14 +27,13 @@ export const DateSelectButton: React.FC<DateSelectButtonProps> = ({
     <div>
       <button
         type="button"
-        className="flex items-center gap-2 px-3 py-1.5 border rounded text-sm text-gray-700 hover:bg-gray-100"
+        className="flex items-center gap-2 px-3 py-1.5 border border-[#EAECF0] rounded text-sm text-gray-700 hover:bg-gray-100"
         onClick={handleButtonClick}
         aria-label="Select appointment date"
       >
         <Calendar className="w-4 h-4" />
         Select date
       </button>
-
       <input
         ref={inputRef}
         type="date" 
