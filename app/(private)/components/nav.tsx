@@ -150,7 +150,7 @@ export const Nav = ({ show, setShow }: any) => {
                 </div>
 
                 <div className="flex flex-col w-[136px] h-auto">
-                  <p className="font-medium text-[14px] text-[#F2F4F7] ">{userdata?.data?.name || "name"}</p>
+                 
                   <p className="font-normal text-[12px] text-[#F2F4F7] ">{userdata?.data?.email || "email"}</p>
                 </div>
                 <div className="flex items-center">
