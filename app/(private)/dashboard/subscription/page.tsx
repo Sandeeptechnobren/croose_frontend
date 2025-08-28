@@ -72,15 +72,7 @@ interface Subscriber {
   end_date: string;
   customer_name: string;
 }
-// interface Subscription {
- 
-//   space_name: string;
-//   name: string;
-//   subscription_type: string;
-//   variant: string;
-//   price: string;
-//   status: string;
-// }
+
 interface ApiResponse {
   status: number;
   message: string;

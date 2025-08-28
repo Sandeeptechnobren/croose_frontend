@@ -344,7 +344,7 @@ useEffect(() => {
   </div>
 
   {/* Subscription Type */}
-  <div>
+  <div className="mb-8">
     <label className="block font-inter text-base tracking-normal mb-1">
       Subscription Type
     </label>
@@ -375,7 +375,7 @@ useEffect(() => {
             leaveTo="opacity-0"
           >
             <Listbox.Options 
-         className="absolute mt-1 min-w-[380px] w-auto bg-white opacity-100 border border-gray-200 rounded-lg shadow-lg 
+         className="absolute mt-1 min-w-[380px] w-auto bg-white border border-gray-200 rounded-lg shadow-lg 
               -translate-x-1/2"
 >  {subscriptionOptions.map((opt: SubscriptionOption) => (
 
@@ -414,8 +414,8 @@ useEffect(() => {
 
         {formState.subscription_type === "Product" && (
                         <div className="mt-4">
-                            <label className="block font-inter text-base tracking-normal text-gray-700 mb-1">Product</label>
-                            <div className="relative">
+                            <label className="block font-inter  text-base tracking-normal text-gray-700 mb-1">Product</label>
+                            <div className="">
                                 <select
                                   multiple
   value={formState.product_ids.map(String)}
@@ -426,7 +426,7 @@ useEffect(() => {
       product_ids: Array.from(e.target.selectedOptions, opt => Number(opt.value)),
     }))}
   }
-     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+     className="w-full px-3 py-2 border border-gray-300  bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
                                     disabled={!formState.space_id || loadingProducts}
                                 >
                                     <option value="">
@@ -446,7 +446,7 @@ useEffect(() => {
 {formState.subscription_type === "Service" && (
   <div className="mt-4">
     <label className="block font-inter text-base tracking-normal mb-1">Select Service</label>
-    <div className="relative">
+    <div className="">
       <select
     multiple  
   value={formState.service_ids.map(String)}
@@ -460,8 +460,9 @@ onChange={(e) => {
 }}
 
 
-        className="w-full p-2.5 pr-10 rounded-lg border text-[#98A2B3] border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-      >
+     className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none  z-10">
+
         <option value="">Select a service</option>
         {services?.map((service: any) => (
           <option key={service.id} value={service.id}>

@@ -332,11 +332,13 @@ const ProductServiceTabs = () => {
         formData.append('price', formState.product_price);
 
         formData.append('stock', formState.product_stock);
-        formData.append('stock', formState.product_stock);
-        if (formState.image instanceof File) {
-          formData.append('image', formState.image);
-          toast.success("Image uploaded successfully");
-        }
+       
+    
+    images.forEach((imgFile) => {
+      formData.append('image', imgFile);
+   +` `
+    });
+
 
 
 
@@ -422,33 +424,7 @@ const ProductServiceTabs = () => {
   };
 
 
-  const handleEdit = (item: any) => {
-    const selectedSpace = spaces.find(s => String(s.id) === String(item.space_id));
-
-    setFormState({
-      ...item,
-      space_id: item.space_id,
-      space_name: selectedSpace?.name || '',
-      service_name: item.service_name,
-      service_category: item.service_category,
-
-      service_duration: item.service_duration,
-      service_price: item.service_price,
-      available_days: item.available_days || [],
-      unit: item.unit,
-      product_stock: item.product_stock,
-      product_name: item.product_name,
-      product_price: item.product_price,
-
-
-
-      status: item.status,
-
-      image: null,
-    });
-
-    setShowUpdateModal(true);
-  };
+  
 
 
   const productCategories = [
@@ -552,17 +528,6 @@ const ProductServiceTabs = () => {
 
 
 
-              {/* <td className="px-4 py-3">
-              <button
-                onClick={() => {
-                  setFormState(item);
-                  setShowUpdateModal(true);
-                }}
-                className="bg-[#685BC7] text-white px-4 py-2 rounded"
-              >
-                Update
-              </button>
-            </td> */}
             </>
           ) : (
             <>
@@ -855,6 +820,7 @@ const ProductServiceTabs = () => {
 
                       <div className='col-span-2'>
                         <span className="block text-sm font-medium mb-2">Add Images</span>
+                       
                         <div className="flex gap-3 flex-wrap">
                           {/* Add Image Button */}
                           <label className="flex flex-col justify-center items-center w-34 h-34 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">

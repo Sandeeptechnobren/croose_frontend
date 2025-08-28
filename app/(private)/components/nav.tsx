@@ -23,6 +23,8 @@ const navItems = [
   { label: 'Orders', href: '/dashboard/orders', icon: <Icon icon="lets-icons:order" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
   { label: 'Product/Services', href: '/dashboard/product', icon: <Icon icon="uil:box" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
   { label: 'Subscriptions', href: '/dashboard/subscription', icon: <Icon icon="uil:chart" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
+  { label: 'Messaging', href: '/dashboard/messaging', icon:<Icon icon="mdi:email-outline" className="w-5 h-5.5 text-gray-100" />
+ },
  
 ];
 
@@ -150,7 +152,7 @@ export const Nav = ({ show, setShow }: any) => {
                 </div>
 
                 <div className="flex flex-col w-[136px] h-auto">
-                  <p className="font-medium text-[14px] text-[#F2F4F7] ">{userdata?.data?.name || "name"}</p>
+                 
                   <p className="font-normal text-[12px] text-[#F2F4F7] ">{userdata?.data?.email || "email"}</p>
                 </div>
                 <div className="flex items-center">
