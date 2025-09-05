@@ -1185,7 +1185,7 @@ const ProductServiceTabs = () => {
       )}
 
       {showDeleteModal && (
-        <div className="fixed inset-0 flex bg-opacity-30 flex items-center justify-end z-50">
+        <div className="fixed inset-0 bg-opacity-30 flex items-center justify-end z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
             <h2 className="text-lg font-semibold mb-4">
               Confirm Delete
