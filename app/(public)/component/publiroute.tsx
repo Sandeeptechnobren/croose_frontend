@@ -11,8 +11,8 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await verifyToken();
-        if (!res?.err?.status) {
+        const token = localStorage.getItem('token')
+        if (token) {
          
           router.replace('/dashboard/space');
         } else {

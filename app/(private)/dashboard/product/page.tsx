@@ -1,5 +1,5 @@
 'use client';
-import {  X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { HiDotsVertical } from "react-icons/hi";
 import axios from "axios";
 import { Icon } from "@iconify/react";
@@ -101,7 +101,6 @@ const ProductServiceTabs = () => {
       });
 
       const data = await response.json();
-
       if (data.status) {
 
         setItems(data.data);
@@ -332,12 +331,12 @@ const ProductServiceTabs = () => {
         formData.append('price', formState.product_price);
 
         formData.append('stock', formState.product_stock);
-       
-    
-    images.forEach((imgFile) => {
-      formData.append('image', imgFile);
-   +` `
-    });
+
+
+        images.forEach((imgFile) => {
+          formData.append('image', imgFile);
+          +` `
+        });
 
 
 
@@ -424,7 +423,7 @@ const ProductServiceTabs = () => {
   };
 
 
-  
+
 
 
   const productCategories = [
@@ -452,6 +451,7 @@ const ProductServiceTabs = () => {
       return (words[0][0] + words[1][0]).toUpperCase();
     }
     const id = activeTab === 'products' ? 'product_id' : 'service_id';
+    const image = activeTab === 'products' ? 'product_image' : 'service_image'
 
     return items?.map((item: any) => {
       return (
@@ -459,8 +459,8 @@ const ProductServiceTabs = () => {
           <td className="px-6 py-4 whitespace-nowrap">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                {item.image ? (
-                  <img src={item.image} alt="" className="w-10 h-10 object-cover rounded-full" />
+                {item.product_image ? (
+                  <img src={`${activeTab === 'products' ? item.product_image : item.service_image}`} alt="" className="w-10 h-10 object-cover rounded-full" />
                 ) : (
                   <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
                     {getInitials(
@@ -543,7 +543,7 @@ const ProductServiceTabs = () => {
                   Active
                 </span>
               </td>
-            <td className="px-4 py-3 relative">
+              <td className="px-4 py-3 relative">
 
                 <button
                   onClick={() =>
@@ -820,7 +820,7 @@ const ProductServiceTabs = () => {
 
                       <div className='col-span-2'>
                         <span className="block text-sm font-medium mb-2">Add Images</span>
-                       
+
                         <div className="flex gap-3 flex-wrap">
                           {/* Add Image Button */}
                           <label className="flex flex-col justify-center items-center w-34 h-34 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50">
@@ -1185,7 +1185,7 @@ const ProductServiceTabs = () => {
       )}
 
       {showDeleteModal && (
-        <div className="fixed inset-0 flex bg-opacity-30 flex items-center justify-end z-50">
+        <div className="fixed inset-0 bg-opacity-30 flex items-center justify-end z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
             <h2 className="text-lg font-semibold mb-4">
               Confirm Delete

@@ -25,13 +25,13 @@ const Login = () => {
 
       setLoading(true)
 
-      let res: any = await verifyToken()
-      console.log(res, 28)
+      let token: any = localStorage.getItem('token')
+      // console.log(token, 28)
       // router.push("/dashboard/space")
       setLoading(false)
 
-      if (res?.err?.status) {
-        console.log("inif")
+      if (!token) {
+        // console.log("inif")
 
         return router.push("/login")
       }
