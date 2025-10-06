@@ -599,7 +599,7 @@ const ProductServiceTabs = () => {
           {/* Left Side: Products & Services Buttons */}
           <div className="flex gap-2">
             <button
-              className={`px-4 py-2 rounded font-medium ${activeTab === 'products'
+              className={`px-4 py-2 cursor-pointer rounded font-medium ${activeTab === 'products'
                 ? 'bg-[#685BC7] text-white'
                 : 'bg-gray-200 text-gray-700'
                 }`}
@@ -608,7 +608,7 @@ const ProductServiceTabs = () => {
               Products
             </button>
             <button
-              className={`px-4 py-2 rounded font-medium ${activeTab === 'services'
+              className={`px-4 py-2 cursor-pointer rounded font-medium ${activeTab === 'services'
                 ? 'bg-[#685BC7] text-white'
                 : 'bg-gray-200 text-gray-700'
                 }`}
@@ -696,22 +696,22 @@ const ProductServiceTabs = () => {
         </table>
       </div>
       {showModal && (
-        <div className="fixed inset-0 bg-[#9999] bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl h-[80vh] overflow-y-auto p-6 relative transition-all duration-300">
+        <div className="fixed inset-0 h-[100vh] bg-[#9999] bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl h-[90vh] overflow-y-auto p-5 relative transition-all duration-300">
 
             {/* Header with slider */}
-            <div className="flex justify-between items-center border-b border-[#F1F2F3] p-4 mb-4">
+            <div className="flex justify-between items-center border-b border-[#F1F2F3] p-2 mb-2">
               <div className="relative inline-flex items-center bg-gray-100 rounded-full p-1 transition-all duration-300">
                 <button
                   onClick={() => setShowBulkModal(false)}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${!showBulkModal ? 'bg-[#685BC7] text-white shadow' : 'text-gray-500'
+                  className={`px-4 cursor-pointer py-2 text-sm font-medium rounded-full transition-all duration-300 ${!showBulkModal ? 'bg-[#685BC7] text-white shadow' : 'text-gray-500'
                     }`}
                 >
                   Add {activeTab === 'products' ? 'Product' : 'Service'}
                 </button>
                 <button
                   onClick={() => setShowBulkModal(true)}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${showBulkModal ? 'bg-[#685BC7] text-white shadow' : 'text-gray-500'
+                  className={`px-4 cursor-pointer py-2 text-sm font-medium rounded-full transition-all duration-300 ${showBulkModal ? 'bg-[#685BC7] text-white shadow' : 'text-gray-500'
                     }`}
                 >
                   Bulk Upload
@@ -721,7 +721,7 @@ const ProductServiceTabs = () => {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex items-center justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
+                className="flex cursor-pointer items-center justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
               >
                 <X className="w-4 h-4 text-gray-600" />
               </button>
@@ -730,7 +730,7 @@ const ProductServiceTabs = () => {
             {/* Content Section (Sliding effect) */}
             <div className="transition-all duration-300 ease-in-out overflow-hidden">
               {!showBulkModal ? (
-                <form onSubmit={handleAddItem} className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleAddItem} className="grid grid-cols-2 gap-2">
                   <select
                     className="col-span-2 border border-[#D0D5DD]   rounded px-3 py-3"
                     value={formState.space_id}
@@ -917,10 +917,10 @@ const ProductServiceTabs = () => {
                   )}
 
                   <div className="col-span-2 flex justify-end gap-2 mt-4">
-                    <button type="button" onClick={() => setShowModal(false)} className="px-12 py-2 bg-gray-200 rounded-md">
+                    <button type="button" onClick={() => setShowModal(false)} className="px-12 cursor-pointer py-2 bg-gray-200 rounded-md">
                       Cancel
                     </button>
-                    <button type="submit" className="px-12 py-2 bg-[#685BC7] text-white rounded-md">
+                    <button type="submit" className="px-12 py-2 bg-[#685BC7] cursor-pointer text-white rounded-md">
                       Save
                     </button>
                   </div>
@@ -971,7 +971,7 @@ const ProductServiceTabs = () => {
                   {selectedFile && <p className="text-green-600 text-xs mb-2">Selected File: {selectedFile.name}</p>}
 
                   <div className="flex flex-row gap-2">
-                    <button onClick={() => setShowModal(false)} className="w-full py-3 bg-[#F1F5F9] rounded-lg hover:bg-gray-200">
+                    <button onClick={() => setShowModal(false)} className="w-full cursor-pointer py-3 bg-[#F1F5F9] rounded-lg hover:bg-gray-200">
                       Cancel
                     </button>
 
@@ -985,7 +985,7 @@ const ProductServiceTabs = () => {
                       />
                       <button
                         type="button"
-                        className={`w-full py-3 rounded text-white ${selectedFile ? 'bg-[#685BC7] hover:bg-purple-700' : 'bg-gray-500 cursor-pointer'
+                        className={`w-full py-3 rounded text-white ${selectedFile ? 'bg-[#685BC7] cursor-pointer hover:bg-purple-700' : 'bg-gray-500 cursor-pointer'
                           }`}
                         onClick={() => {
                           if (!selectedFile) {

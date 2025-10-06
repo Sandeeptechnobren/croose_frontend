@@ -236,7 +236,7 @@ const Signupform = () => {
 
                 </div>
                 {/* <Link href={"/emailverification"} > */}
-                <button type="submit" className="bg-[#685BC7] text-white font-semibold text-sm flex justify-center className='cursor-pointer'  items-center w-full h-[48px] rounded-[12px]">Sign up</button>
+                <button type="submit" className="bg-[#685BC7] cursor-pointer text-white font-semibold text-sm flex justify-center className='cursor-pointer'  items-center w-full h-[48px] rounded-[12px]">Sign up</button>
                 {/* </Link> */}
                 <div className="text-center  text-sm text-[#101828] mt-2">
                   Already have an account?{' '}
@@ -250,11 +250,11 @@ const Signupform = () => {
                 </div>
 
                 <div className='cursor-pointer' >
-                  <button type="button" className="flex items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
+                  <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
                     <img src="google.png" alt="Google" className="w-5 h-5" />
                     Continue with Google
                   </button>
-                  <button type="button" className="flex items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
+                  <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
                     <img src="apple.jpeg" alt="Apple" className="w-9 h-auto" />
                     Continue with Apple
                   </button>

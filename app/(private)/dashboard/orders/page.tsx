@@ -15,11 +15,11 @@ interface Order {
     customer_name: string;
     customer_number: string;
     product_name: string;
-    order_amount:  string;
+    order_amount: string;
     payment_status: string;
     order_date: string;
     status: string;
-    currency:any
+    currency: any
 }
 
 interface OrderStatistics {
@@ -129,7 +129,6 @@ const GetSpaceId = async (): Promise<Space[]> => {
     }
 };
 
-// FIXED: Updated function to handle the actual API response format with proper IDs
 const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
     try {
         console.log(`Fetching products for space ID: ${spaceId}`);
@@ -145,7 +144,6 @@ const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
 
         console.log('Raw API response:', res.data);
 
-        // Parse the response based on your actual API structure
         let productsData = [];
 
         if (res.data?.data && Array.isArray(res.data.data)) {
@@ -158,13 +156,10 @@ const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
 
         console.log('Raw products data:', productsData);
 
-        // Handle the actual API response structure with proper IDs and labels
         const formattedProducts = productsData.map((product: any) => {
-            // If product is already an object with id and label
             if (typeof product === 'object' && product.id && product.label) {
-                // Extract product name and price from label like "Bodywave 2 tone HD 6by 6 wig (4060.00 GHS)"
                 const match = product.label.match(/^(.+?)\s*\(([0-9.]+)\s*(GHS|₹)?\s*\)$/);
-                
+
                 let productName = product.label;
                 let price = 0;
 
@@ -174,17 +169,14 @@ const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
                 }
 
                 return {
-                    id: product.id, // Use the actual ID from API
+                    id: product.id,
                     name: productName,
                     product_name: productName,
                     price: price,
-                    original_string: product.label, // Keep original label for reference
-                    label: product.label // Keep the label field
+                    original_string: product.label,
+                    label: product.label
                 };
-            }
-            // If product is a string (fallback for old format)
-            else if (typeof product === 'string') {
-                // Extract product name and price from string like "Bodywave 2 tone HD 6by 6 wig(4060.00 )"
+            } else if (typeof product === 'string') {
                 const match = product.match(/^(.+?)\(([0-9.]+)\s*\)$/);
 
                 let productName = product;
@@ -196,15 +188,13 @@ const getProductsBySpace = async (spaceId: number): Promise<Product[]> => {
                 }
 
                 return {
-                    id: productsData.indexOf(product) + 1, // Generate sequential IDs for string format
+                    id: productsData.indexOf(product) + 1,
                     name: productName,
                     product_name: productName,
                     price: price,
-                    original_string: product // Keep original for reference
+                    original_string: product
                 };
-            }
-            // Handle any other format
-            else {
+            } else {
                 return {
                     id: product.id || productsData.indexOf(product) + 1,
                     name: product.name || product.product_name || 'Unknown Product',
@@ -239,7 +229,6 @@ const ManualOrder = async (orderData: any): Promise<ApiResponse<any>> => {
     }
 };
 
-// FIXED: Updated getCustomerByPhoneAPi with better validation
 const getCustomerByPhoneAPi = async (whatsappNumber: string): Promise<Customer | null> => {
     try {
         const res = await axios.get(`${BASE_URL}/api/getCustomerByPhone`, {
@@ -253,15 +242,14 @@ const getCustomerByPhoneAPi = async (whatsappNumber: string): Promise<Customer |
         console.log('Raw customer API response:', res.data);
 
         const customerData = res.data?.data || res.data?.customer || res.data;
-        
-        // Check if we actually have valid customer data
-        if (customerData && 
-            typeof customerData === 'object' && 
+
+        if (customerData &&
+            typeof customerData === 'object' &&
             (customerData.customer_name || customerData.name) &&
             (customerData.customer_name?.trim() !== '' || customerData.name?.trim() !== '')) {
             return customerData;
         }
-        
+
         return null;
     } catch (error) {
         console.error('Error fetching customer by phone:', error);
@@ -296,14 +284,12 @@ const OrdersTable: React.FC = () => {
     const [spaceError, setSpaceError] = useState<string>('');
     const [productError, setProductError] = useState<string>('');
 
-    // Dynamic data from APIs
     const [spaces, setSpaces] = useState<Space[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingSpaces, setLoadingSpaces] = useState<boolean>(false);
     const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
 
-    // FIXED: Add state to track pending status updates
-    const [pendingStatusUpdates, setPendingStatusUpdates] = useState<{[key: number]: string}>({});
+    const [pendingStatusUpdates, setPendingStatusUpdates] = useState<{ [key: number]: string }>({});
 
     useEffect(() => {
         const fetchOrderStatistics = async () => {
@@ -395,80 +381,69 @@ const OrdersTable: React.FC = () => {
         }
     };
 
-    // FIXED: Updated handleStatusChange to track pending changes
     const handleStatusChange = (orderId: number, newStatus: string) => {
-        // Update the local state immediately for better UX
         setOrders(prevOrders =>
             prevOrders.map(order =>
                 order.id === orderId ? { ...order, status: newStatus } : order
             )
         );
-        
-        // Track that this order has a pending status change
+
         setPendingStatusUpdates(prev => ({
             ...prev,
             [orderId]: newStatus
         }));
     };
 
-    // FIXED: Updated handleOrderStatusUpdate to use pending changes
     const handleOrderStatusUpdate = async (orderId: number) => {
         try {
-            // Get the pending status change for this order
             const newStatus = pendingStatusUpdates[orderId];
             if (!newStatus) {
                 console.log("No pending status change for order:", orderId);
                 return;
             }
-            
+
             console.log(`Updating order ${orderId} status to: ${newStatus}`);
-            
+
             const res = await OrdersStatus({ id: orderId, status: newStatus });
-            
+
             if (res?.success) {
                 console.log("Order status updated successfully in backend");
-                
-                // Remove from pending updates since it's now confirmed
+
                 setPendingStatusUpdates(prev => {
                     const updated = { ...prev };
                     delete updated[orderId];
                     return updated;
                 });
-                
-                // Ensure the status is set correctly in the orders state
+
                 setOrders(prevOrders =>
                     prevOrders.map(order =>
                         order.id === orderId ? { ...order, status: newStatus } : order
                     )
                 );
-                
+
                 console.log(`Order ${orderId} status confirmed as: ${newStatus}`);
-                
+
             } else {
                 console.error("Failed to update order status:", res);
-                // Remove from pending updates
                 setPendingStatusUpdates(prev => {
                     const updated = { ...prev };
                     delete updated[orderId];
                     return updated;
                 });
-                // Refresh orders to get the correct status from backend
                 getOrders();
                 alert('Failed to update order status. Please try again.');
             }
         } catch (err) {
             console.error("Order update error:", err);
-            
-            // Remove from pending updates and revert
+
             setPendingStatusUpdates(prev => {
                 const updated = { ...prev };
                 delete updated[orderId];
                 return updated;
             });
-            
-            // Refresh orders to get the correct status from backend
+
             getOrders();
-            
+
             alert('Error updating order status. Please try again.');
         }
     };
@@ -484,7 +459,6 @@ const OrdersTable: React.FC = () => {
             return updated;
         });
 
-        // Handle space selection
         if (name === 'spaceId' && value) {
             const spaceId = parseInt(value);
             if (!isNaN(spaceId)) {
@@ -494,11 +468,9 @@ const OrdersTable: React.FC = () => {
         }
     };
 
-    // FIXED: Updated searchCustomerByPhone with stricter validation
     const searchCustomerByPhone = async (phoneNumber: string) => {
         if (phoneNumber.length < 10) {
             setCustomerFound(false);
-            // Clear customer data when phone number is too short
             setNewOrder(prev => ({
                 ...prev,
                 customerName: '',
@@ -513,11 +485,10 @@ const OrdersTable: React.FC = () => {
             const customerData = await getCustomerByPhoneAPi(phoneNumber);
             console.log("Customer data:", customerData);
 
-            // More strict validation for customer existence
-            if (customerData && 
-                (customerData.customer_name || customerData.name) && 
+            if (customerData &&
+                (customerData.customer_name || customerData.name) &&
                 (customerData.customer_name?.trim() !== '' || customerData.name?.trim() !== '')) {
-                
+
                 const customerName = customerData.customer_name || customerData.name || '';
                 const address = customerData.customer_address || '';
                 const email = customerData.customer_email || '';
@@ -536,7 +507,6 @@ const OrdersTable: React.FC = () => {
                 });
                 setCustomerFound(true);
             } else {
-                // Customer not found or invalid data
                 console.log('Customer not found or invalid customer data');
                 setCustomerFound(false);
                 setNewOrder(prev => ({
@@ -564,14 +534,12 @@ const OrdersTable: React.FC = () => {
         const phoneNumber = e.target.value;
         setNewOrder(prev => ({ ...prev, whatsappNumber: phoneNumber }));
 
-        // Reset customer found status when phone number changes
         setCustomerFound(false);
 
         if (phoneNumber.length >= 10) {
             searchCustomerByPhone(phoneNumber);
         } else {
             setCustomerFound(false);
-            // Clear customer data when phone number is invalid
             setNewOrder(prev => ({
                 ...prev,
                 customerName: '',
@@ -592,7 +560,6 @@ const OrdersTable: React.FC = () => {
         });
     };
 
-    // Updated handleSubmitOrder function to use actual product ID
     const handleSubmitOrder = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -602,13 +569,12 @@ const OrdersTable: React.FC = () => {
         }
 
         try {
-            // FIXED: Send the actual product ID and name
             const selectedProduct = products.find(p => p.id.toString() === newOrder.productId);
-            
+
             const orderData = {
                 space_id: parseInt(newOrder.spaceId),
-                product_name: selectedProduct?.label || selectedProduct?.original_string || selectedProduct?.name || '', // Send the full product label/string
-                product_id: selectedProduct ? selectedProduct.id : parseInt(newOrder.productId), // Use actual product ID from API
+                product_name: selectedProduct?.label || selectedProduct?.original_string || selectedProduct?.name || '',
+                product_id: selectedProduct ? selectedProduct.id : parseInt(newOrder.productId),
                 order_quantity: parseInt(newOrder.orderQuantity.toString()),
                 whatsapp_number: newOrder.whatsappNumber,
                 customer_name: newOrder.customerName,
@@ -654,25 +620,17 @@ const OrdersTable: React.FC = () => {
         <div className='select-none'>
             <Navbar heading="Orders" />
 
-            <div className="pt-6 space-y-6">
-                <div className="flex justify-between items-start px-8">
+            <div className="pt-4 space-y-4">
+                <div className="flex justify-between items-start px-6">
                     <div>
-                        <h2 className="text-xl font-semibold">Orders</h2>
-                        <p className="text-sm text-gray-500">
+                        <h2 className="text-lg font-semibold">Orders</h2>
+                        <p className="text-xs text-gray-500">
                             Dive deep into your orders and manage them efficiently.
                         </p>
                     </div>
                     <button
                         onClick={() => setShowModel(true)}
-                        className="bg-[#F9F5FF] text-[#685BC7] hover:bg-violet-200 px-4 py-2 rounded-md whitespace-nowrap hover:cursor-pointer"
-                        style={{
-                            display: 'flex',
-                            fontWeight: '600',
-                            fontSize: '14px',
-                            lineHeight: '20px',
-                            letterSpacing: '0%',
-                            color: '#685BC7'
-                        }}
+                        className="bg-[#F9F5FF] text-[#685BC7] hover:bg-violet-200 px-3 py-1.5 rounded-md whitespace-nowrap hover:cursor-pointer text-sm font-semibold"
                     >
                         Add Orders
                     </button>
@@ -680,20 +638,19 @@ const OrdersTable: React.FC = () => {
 
                 {/* Add Order Popup Modal */}
                 {showmodel && (
-                    <div className="fixed inset-0 bg-[#9999] h-[700px] bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                    <div className="fixed inset-0 bg-[#9999] h-[100vh] bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[100vh] overflow-y-auto">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-900">Add New Order</h3>
                                 <button
                                     onClick={closeModal}
-                                    className="text-gray-400 hover:text-gray-600"
+                                    className="text-gray-400 cursor-pointer hover:text-gray-600"
                                 >
                                     <Icon icon="mdi:close" className="w-6 h-6" />
                                 </button>
                             </div>
 
                             <form onSubmit={handleSubmitOrder} className="space-y-4">
-                                {/* WhatsApp Number */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         WhatsApp Number *
@@ -728,7 +685,6 @@ const OrdersTable: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Customer Name */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Customer Name *
@@ -744,7 +700,6 @@ const OrdersTable: React.FC = () => {
                                     />
                                 </div>
 
-                                {/* Space Dropdown */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Space *
@@ -781,7 +736,6 @@ const OrdersTable: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Product Dropdown - FIXED: Now shows actual product names with proper IDs */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Product *
@@ -808,7 +762,7 @@ const OrdersTable: React.FC = () => {
                                             </option>
                                             {products.map((product) => (
                                                 <option key={product.id} value={product.id} title={`ID: ${product.id} - Price: ${product.price}`}>
-                                                    {product.name} {product.price ? `(${product.price} GHS)` : ''} 
+                                                    {product.name} {product.price ? `(${product.price} GHS)` : ''}
                                                 </option>
                                             ))}
                                         </select>
@@ -821,7 +775,6 @@ const OrdersTable: React.FC = () => {
                                     {productError && (
                                         <p className="text-sm text-red-600 mt-1">{productError}</p>
                                     )}
-                                    {/* Show selected product details */}
                                     {newOrder.productId && products.length > 0 && (
                                         <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
                                             {(() => {
@@ -838,7 +791,6 @@ const OrdersTable: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Order Quantity */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Quantity *
@@ -855,7 +807,6 @@ const OrdersTable: React.FC = () => {
                                     />
                                 </div>
 
-                                {/* Address */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Address
@@ -871,7 +822,6 @@ const OrdersTable: React.FC = () => {
                                     />
                                 </div>
 
-                                {/* Email */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Email
@@ -887,18 +837,17 @@ const OrdersTable: React.FC = () => {
                                     />
                                 </div>
 
-                                {/* Action Buttons */}
                                 <div className="flex justify-end space-x-3 pt-4">
                                     <button
                                         type="button"
                                         onClick={closeModal}
-                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#685BC7]"
+                                        className="px-4 py-2 cursor-pointer text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#685BC7]"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 text-sm font-medium text-white bg-[#685BC7] border border-transparent rounded-md hover:bg-[#5748B8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#685BC7]"
+                                        className="px-4 py-2 cursor-pointer text-sm font-medium text-white bg-[#685BC7] border border-transparent rounded-md hover:bg-[#5748B8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#685BC7]"
                                     >
                                         Create Order
                                     </button>
@@ -909,41 +858,41 @@ const OrdersTable: React.FC = () => {
                 )}
 
                 {/* Statistics Cards */}
-                <div className="w-full flex flex-wrap gap-6 px-8">
-                    <div className="w-full lg:w-[31%] border rounded-[12px] border-[#EAECF0] p-[24px]">
-                        <p className="text-[#475467] text-[14px] font-medium">New Orders</p>
-                        <div className="flex items-center justify-between">
-                            <p className="font-semibold text-[#101828] text-[30px]">
+                <div className="w-full flex flex-wrap gap-4 px-6">
+                    <div className="flex-1 min-w-[280px] border rounded-lg border-[#EAECF0] p-4">
+                        <p className="text-[#475467] text-xs font-medium">New Orders</p>
+                        <div className="flex items-center justify-between mt-1">
+                            <p className="font-semibold text-[#101828] text-2xl">
                                 {OrdersStatistics?.total_new_orders || 0}
                             </p>
-                            <div className="flex items-center text-[#067647] bg-[#ECFDF3] border border-[#ABEFC6] px-2 py-1 rounded-full text-sm">
-                                <Icon icon="jam:arrow-up" className="mr-1" />
+                            <div className="flex items-center text-[#067647] bg-[#ECFDF3] border border-[#ABEFC6] px-2 py-0.5 rounded-full text-xs">
+                                <Icon icon="jam:arrow-up" className="mr-1 w-3 h-3" />
                                 {OrdersStatistics?.total_new_orders_growth || 0}%
                             </div>
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-[32%] border rounded-[12px] border-[#EAECF0] p-[24px]">
-                        <p className="text-[#475467] text-[14px] font-medium">Total Orders</p>
-                        <div className="flex items-center justify-between">
-                            <p className="font-semibold text-[#101828] text-[30px]">
+                    <div className="flex-1 min-w-[280px] border rounded-lg border-[#EAECF0] p-4">
+                        <p className="text-[#475467] text-xs font-medium">Total Orders</p>
+                        <div className="flex items-center justify-between mt-1">
+                            <p className="font-semibold text-[#101828] text-2xl">
                                 {OrdersStatistics?.total_orders || 0}
                             </p>
-                            <div className="flex items-center text-[#B42318] bg-[#FEF3F2] border border-[#FECDCA] px-2 py-1 rounded-full text-sm">
-                                <Icon icon="charm:arrow-down" className="mr-1" />
+                            <div className="flex items-center text-[#B42318] bg-[#FEF3F2] border border-[#FECDCA] px-2 py-0.5 rounded-full text-xs">
+                                <Icon icon="charm:arrow-down" className="mr-1 w-3 h-3" />
                                 {OrdersStatistics?.total_orders_growth || 0}%
                             </div>
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-[32%] border rounded-[12px] border-[#EAECF0] p-[24px]">
-                        <p className="text-[#475467] text-[14px] font-medium">Cancelled Orders</p>
-                        <div className="flex items-center justify-between">
-                            <p className="font-semibold text-[#101828] text-[30px]">
+                    <div className="flex-1 min-w-[280px] border rounded-lg border-[#EAECF0] p-4">
+                        <p className="text-[#475467] text-xs font-medium">Cancelled Orders</p>
+                        <div className="flex items-center justify-between mt-1">
+                            <p className="font-semibold text-[#101828] text-2xl">
                                 {OrdersStatistics?.cancelled_orders || 0}
                             </p>
-                            <div className="flex items-center text-[#B42318] bg-[#FEF3F2] border border-[#FECDCA] px-2 py-1 rounded-full text-sm">
-                                <Icon icon="charm:arrow-down" className="mr-1" />
+                            <div className="flex items-center text-[#B42318] bg-[#FEF3F2] border border-[#FECDCA] px-2 py-0.5 rounded-full text-xs">
+                                <Icon icon="charm:arrow-down" className="mr-1 w-3 h-3" />
                                 {OrdersStatistics?.cancelled_orders_growth || 0}%
                             </div>
                         </div>
@@ -951,93 +900,85 @@ const OrdersTable: React.FC = () => {
                 </div>
 
                 {/* Orders Table */}
-                <section className='w-full flex justify-center'>
-              <div className="overflow-x-auto rounded-lg w-[94%] mr-3 border border-[#EAECF0]">
-  <table className="min-w-full text-sm   text-left">
-    <thead className="bg-[#F9FAFB] text-[#475467] font-medium">  <tr>
-                                <th className="px-4 py-3">ID</th>
-                                <th className="px-4 py-3">Space</th>
-                                <th className="px-4 py-3">Customer</th>
-                                <th className="px-4 py-3">Phone</th>
-                                <th className="px-4 py-3">Product</th>
-                                <th className="px-4 py-3">Amount</th>
-                                <th className="px-4 py-3">Payment</th>
-                                <th className="px-4 py-3">Date</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {orders && orders.length > 0 ? (
-                                orders.map((order: Order) => (
-                                    <tr key={order.id} className="hover:bg-gray-50 text-[#475467] border-b border-[#EAECF0]">
-                                        <td className="px-4 py-2">{order.id || 'N/A'}</td>
-                                        <td className="px-4 py-2">{order.space_name || 'N/A'}</td>
-                                        <td className="px-4 py-2">{order.customer_name || 'N/A'}</td>
-                                        <td className="px-4 py-2">{order.customer_number || 'N/A'}</td>
-                                        <td className="px-4 py-2">{order.product_name || 'N/A'}</td>
-                                        <td className="px-3 py-2">
-                                          {order.currency } {order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
-                                        </td>
-                                        <td className="px-4 py-2 capitalize">{order.payment_status || 'pending'}</td>
-                                        <td className="px-4 py-2">
-                                            {order.order_date ? new Date(order.order_date).toLocaleDateString() : 'N/A'}
-                                        </td>
-                                        <td className="px-4 py-2 capitalize">
-                                            {/* <StatusBadge/> */}
-                                      <select
-  value={order.status || "pending"}
-  onChange={(e) => handleStatusChange(order.id, e.target.value)}
-  className={`border rounded px-2 py-1 text-xs capitalize
-    ${order.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
-    ${order.status === "cancelled" ? "bg-red-100 text-red-800" : ""}
-    ${order.status === "processing" ? "bg-blue-100 text-blue-800" : ""}
-    ${order.status === "delivered" ? "bg-green-100 text-green-800" : ""}
-    ${order.status === "returned" ? "bg-purple-100 text-purple-800" : ""}
-    ${order.status === "refunded" ? "bg-gray-200 text-gray-800" : ""}
-  `}
-
-
->
-    
-  <option value="pending">Pending</option>
-  <option value="cancelled">Cancelled</option>
-  <option value="processing">Processing</option>
-  <option value="delivered">Delivered</option>
-  <option value="returned">Returned</option>
-  <option value="refunded">Refunded</option>
-</select>
-
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <button
-                                                onClick={() => handleOrderStatusUpdate(order.id)}
-                                                disabled={!pendingStatusUpdates[order.id]}
-                                                className={`px-3 py-1 rounded text-xs hover:cursor-pointer transition-colors ${
-                                                    pendingStatusUpdates[order.id] 
-                                                        ? 'bg-[#685BC7] text-white hover:bg-[#5748B8]' 
-                                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                }`}
-                                            >
-                                                {pendingStatusUpdates[order.id] ? 'Update Status' : 'No Changes'}
-                                            </button>
+                <section className='w-full flex justify-center px-2'>
+                    <div className="overflow-x-auto rounded-lg w-full border border-[#EAECF0]">
+                        <table className="min-w-full text-xs text-left">
+                            <thead className="bg-[#F9FAFB] text-[#475467] font-medium">
+                                <tr>
+                                    <th className="px-2 py-2">ID</th>
+                                    <th className="px-2 py-2">Space</th>
+                                    <th className="px-2 py-2">Customer</th>
+                                    <th className="px-2 py-2">Phone</th>
+                                    <th className="px-2 py-2">Product</th>
+                                    <th className="px-2 py-2">Amount</th>
+                                    <th className="px-2 py-2">Payment</th>
+                                    <th className="px-2 py-2">Date</th>
+                                    <th className="px-2 py-2">Status</th>
+                                    <th className="px-2 py-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orders && orders.length > 0 ? (
+                                    orders.map((order: Order) => (
+                                        <tr key={order.id} className="hover:bg-gray-50 text-[#475467] border-b border-[#EAECF0]">
+                                            <td className="px-2 py-2">{order.id || 'N/A'}</td>
+                                            <td className="px-2 py-2">{order.space_name || 'N/A'}</td>
+                                            <td className="px-2 py-2">{order.customer_name || 'N/A'}</td>
+                                            <td className="px-2 py-2">{order.customer_number || 'N/A'}</td>
+                                            <td className="px-2 py-2 max-w-[150px] truncate" title={order.product_name}>{order.product_name || 'N/A'}</td>
+                                            <td className="px-2 py-2 whitespace-nowrap">
+                                                {order.currency} {order.order_amount ? Number(order.order_amount).toLocaleString() : '0'}
+                                            </td>
+                                            <td className="px-2 py-2 capitalize">{order.payment_status || 'pending'}</td>
+                                            <td className="px-2 py-2 whitespace-nowrap">
+                                                {order.order_date ? new Date(order.order_date).toLocaleDateString() : 'N/A'}
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                <select
+                                                    value={order.status || "pending"}
+                                                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                                    className={`border rounded px-1.5 py-1 text-xs capitalize w-full
+                                                        ${order.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
+                                                        ${order.status === "cancelled" ? "bg-red-100 text-red-800" : ""}
+                                                        ${order.status === "processing" ? "bg-blue-100 text-blue-800" : ""}
+                                                        ${order.status === "delivered" ? "bg-green-100 text-green-800" : ""}
+                                                        ${order.status === "returned" ? "bg-purple-100 text-purple-800" : ""}
+                                                        ${order.status === "refunded" ? "bg-gray-200 text-gray-800" : ""}
+                                                    `}
+                                                >
+                                                    <option value="pending">Pending</option>
+                                                    <option value="cancelled">Cancelled</option>
+                                                    <option value="processing">Processing</option>
+                                                    <option value="delivered">Delivered</option>
+                                                    <option value="returned">Returned</option>
+                                                    <option value="refunded">Refunded</option>
+                                                </select>
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                <button
+                                                    onClick={() => handleOrderStatusUpdate(order.id)}
+                                                    disabled={!pendingStatusUpdates[order.id]}
+                                                    className={`px-2 py-1 rounded text-xs hover:cursor-pointer transition-colors whitespace-nowrap ${pendingStatusUpdates[order.id]
+                                                            ? 'bg-[#685BC7] text-white hover:bg-[#5748B8]'
+                                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                        }`}
+                                                >
+                                                    {pendingStatusUpdates[order.id] ? 'Update' : 'No Changes'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td className="px-4 py-6 text-center text-gray-400" colSpan={10}>
+                                            No orders available.
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td className="px-4 py-6 text-center text-gray-400" colSpan={10}>
-                                        No orders available.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
-
-
-
             </div>
         </div>
     );

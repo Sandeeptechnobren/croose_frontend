@@ -70,7 +70,7 @@ const Setting1 = () => {
               <span className="w-auto font-inter font-semibold text-[18px] sm:text-[20px] leading-[150%] tracking-[-0.04em] text-[#1D2939]">
                 Settings
               </span>
-              <span className="w-9 h-9 rounded-full border p-2 flex items-center justify-center border-[#F1F2F3] bg-[#F6F8FA]" onClick={() => setOpenSetting1(false)}>
+              <span className="w-9 h-9 rounded-full border p-2 flex items-center cursor-pointer justify-center border-[#F1F2F3] bg-[#F6F8FA]" onClick={() => setOpenSetting1(false)}>
                 <Icon icon="iconamoon:close-bold" width="24" height="24" style={{ color: '#000' }} />
               </span>
             </section>
@@ -146,7 +146,7 @@ const Setting1 = () => {
             <section className="w-full flex justify-end border-t border-[#F6F6F6] px-4 py-3 sm:px-[20px] sm:py-[12px]">
               <button
                 onClick={() => { formik.handleSubmit() }}
-                className="rounded-lg bg-[#685BC7] text-white text-sm font-semibold px-7 py-2"
+                className="rounded-lg cursor-pointer bg-[#685BC7] text-white text-sm font-semibold px-7 py-2"
               >
                 Save changes
               </button>

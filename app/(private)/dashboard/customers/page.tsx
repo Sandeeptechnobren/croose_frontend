@@ -65,7 +65,7 @@ const Customers = () => {
                 let res = await fetchCustomerStatistics()
                 console.log("Customer Statistics:", res)
                 setCustomerStatistic(res)
-                
+
 
 
             } catch (err) {
@@ -73,12 +73,12 @@ const Customers = () => {
             }
         }
         fetchCustomers()
-    },[])
+    }, [])
 
     return (
         <div className='select-none' >
             {/* Header */}
-           <Navbar heading="Customers" />
+            <Navbar heading="Customers" />
 
             <div>
                 <div className='w-full h-auto' >
@@ -97,7 +97,7 @@ const Customers = () => {
                                     <p className='text-[#475467] text-[14px] font-medium font-Inter' >New Customers</p>
                                     <div className='flex items-center gap-[16px] justify-between  '>
                                         <p className='font-semibold text-[#101828] text-[30px] ' >{customerStatistic.new_customers
-}</p>
+                                        }</p>
                                         <img className='w-[71px] ' src={"/100.png"} alt='badge' />
                                     </div>
                                 </li>
@@ -135,7 +135,7 @@ const Customers = () => {
                                     <p className='text-[#475467] text-[14px] font-medium font-Inter' >Average Customer Value</p>
                                     <div className='flex items-center gap-[16px] justify-between  '>
                                         <p className='font-semibold text-[#101828] text-[30px] ' >{customerStatistic.average_customer_value
-}</p>
+                                        }</p>
                                         <img className='w-[71px] ' src={"/100.png"} alt='badge' />
                                     </div>
                                 </li>
@@ -191,7 +191,7 @@ const Customers = () => {
                     <button
                         onClick={handlePrevPage}
                         disabled={currentPage === 1}
-                        className="px-4 py-2 bg-[#685BC7] text-white rounded disabled:opacity-50"
+                        className="px-4 py-2 cursor-pointer disabled:cursor-not-allowed bg-[#685BC7] text-white rounded disabled:opacity-50"
                     >
                         Previous
                     </button>
@@ -201,7 +201,7 @@ const Customers = () => {
                     <button
                         onClick={handleNextPage}
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 bg-[#685BC7] text-white rounded disabled:opacity-50"
+                        className="px-4 py-2 cursor-pointer disabled:cursor-not-allowed bg-[#685BC7] text-white rounded disabled:opacity-50"
                     >
                         Next
                     </button>
