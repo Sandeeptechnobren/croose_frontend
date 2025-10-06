@@ -14,6 +14,7 @@ import { BASE_URL } from '../../../Apis/publicapi';
 
 import Pagination from '../../components/pagination';
 import { Noto_Sans_Bhaiksuki } from 'next/font/google';
+import Navbar from '../../components/Navbar';
 //import MultiSelectDays from './components/MultiSelectDays';
 const initialData = {
   products: [],
@@ -591,25 +592,8 @@ const ProductServiceTabs = () => {
 
 
   return (
-    <div className="p-2 space-y-6">
-      <div
-        className="flex  w-full items-center justify-between border-b  border-[#EAECF0]"
-        style={{
-          height: '60px',
-          padding: '14px 32px',
-          opacity: 1,
-          top: 0,
-        }}
-      >
-        <h1 className="text-lg text-gray-900" style={{
-          fontWeight: "700",
-          fontSize: "20px",
-          lineHeight: "30px",
-          letterSpacing: "0%",
-          verticalAlign: "middle",
-        }
-        }>Products/Services</h1>
-      </div>
+    <div className="space-y-6">
+      <Navbar heading="Products and services" />
       <div className="px-8 text-sm text-[#475467]">
         <div className="flex justify-between items-center w-full">
           {/* Left Side: Products & Services Buttons */}

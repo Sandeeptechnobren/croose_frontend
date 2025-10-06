@@ -13,19 +13,79 @@ import Settingprovider, { SettingContext } from '@/app/context/SettingContext';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
-  { label: 'Overview', href: '/dashboard/maindashboard', icon: <Squares2X2Icon className="w-5.6 h-5.5 select-none text-gray-100" /> },
-  // { label: 'Modules', href: '/dashboard/createnewspace', icon: <MagnifyingGlassIcon className="w-5.6 h-5.5 text-gray-100" /> },
-  { label: 'Your Space', href: '/dashboard/createnewspace', icon: <Icon icon="hugeicons:sparkles" className="w-5 h-5.5 text-gray-100" /> },
-  { label: 'Payments', href: '/dashboard/payments', icon: <Icon icon="solar:banknote-outline" className="w-5 h-5.5 text-gray-100" /> },
-  { label: 'Customers', href: '/dashboard/customers', icon: <Icon icon="lucide:book-user" className="w-5 h-5.5 text-gray-100" /> },
-  // { label: 'Analytics', href: '#', icon: <Icon icon="solar:chart-outline" className="w-5 h-5.5 text-gray-100" /> },
-  { label: 'Appointments', href: '/dashboard/appointment', icon: <Icon icon="uil:calender" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
-  { label: 'Orders', href: '/dashboard/orders', icon: <Icon icon="lets-icons:order" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
-  { label: 'Product/Services', href: '/dashboard/product', icon: <Icon icon="uil:box" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
-  { label: 'Subscriptions', href: '/dashboard/subscription', icon: <Icon icon="uil:chart" width="24" height="24" style={{ color: "#e5e7e9" }} /> },
-  { label: 'Messaging', href: '/dashboard/messaging', icon:<Icon icon="mdi:email-outline" className="w-5 h-5.5 text-gray-100" />
- },
- 
+  {
+    label: 'Overview',
+    href: '/dashboard/overview',
+    icon: <Squares2X2Icon className="w-5.5 h-5.5 select-none text-gray-100" />,
+  },
+  {
+    label: 'Your Space',
+    href: '/dashboard/yourspace',
+    icon: <Icon icon="hugeicons:sparkles" className="w-5 h-5.5 text-gray-100" />,
+  },
+  {
+    label: 'Payments',
+    href: '/dashboard/payments',
+    icon: <Icon icon="solar:banknote-outline" className="w-5 h-5.5 text-gray-100" />,
+  },
+  {
+    label: 'Customers',
+    href: '/dashboard/customers',
+    icon: <Icon icon="lucide:book-user" className="w-5 h-5.5 text-gray-100" />,
+  },
+  {
+    label: 'Appointments',
+    href: '/dashboard/appointment',
+    icon: (
+      <Icon
+        icon="uil:calender"
+        width="24"
+        height="24"
+        style={{ color: '#e5e7e9' }}
+      />
+    ),
+  },
+  {
+    label: 'Orders',
+    href: '/dashboard/orders',
+    icon: (
+      <Icon
+        icon="lets-icons:order"
+        width="24"
+        height="24"
+        style={{ color: '#e5e7e9' }}
+      />
+    ),
+  },
+  {
+    label: 'Product/Services',
+    href: '/dashboard/product',
+    icon: (
+      <Icon
+        icon="uil:box"
+        width="24"
+        height="24"
+        style={{ color: '#e5e7e9' }}
+      />
+    ),
+  },
+  {
+    label: 'Subscriptions',
+    href: '/dashboard/subscription',
+    icon: (
+      <Icon
+        icon="uil:chart"
+        width="24"
+        height="24"
+        style={{ color: '#e5e7e9' }}
+      />
+    ),
+  },
+  {
+    label: 'Messaging',
+    href: '/dashboard/messaging',
+    icon: <Icon icon="mdi:email-outline" className="w-5 h-5.5 text-gray-100" />,
+  },
 ];
 
 export const Nav = ({ show, setShow }: any) => {
@@ -121,7 +181,7 @@ export const Nav = ({ show, setShow }: any) => {
                     <span className="text-[14px] font-sans text-[#F2F4F7] select-none font-normal">Settings</span>
                   </div>
                 </li>
-                
+
                 <div>
                   <Link href='/dashboard/support' onClick={closeAllSettings}>
                     <li className={`flex w-[232px] items-center gap-[8px] px-[12px] py-[8px] transition-all cursor-pointer
@@ -152,7 +212,7 @@ export const Nav = ({ show, setShow }: any) => {
                 </div>
 
                 <div className="flex flex-col w-[136px] h-auto">
-                 
+
                   <p className="font-normal text-[12px] text-[#F2F4F7] ">{userdata?.data?.email || "email"}</p>
                 </div>
                 <div className="flex items-center">

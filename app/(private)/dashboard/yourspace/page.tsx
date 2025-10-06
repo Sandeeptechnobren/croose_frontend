@@ -6,6 +6,7 @@ import { getSpaceList } from '@/app/Apis/publicapi';
 import Link from 'next/link';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { useState, useEffect } from 'react';
+import Navbar from '../../components/Navbar';
 
 interface Space {
   id: number;
@@ -15,7 +16,7 @@ interface Space {
   updated_at?: string;
   created_at?: string;
   category?: string;
-  is_active?: number; 
+  is_active?: number;
 }
 
 const Newspace = () => {
@@ -56,9 +57,7 @@ const Newspace = () => {
 
   return (
     <div style={{ overflowX: "hidden" }} className='min-h-screen flex flex-col select-none ' >
-      <div>
-        <Spacenav />
-      </div>
+      <Navbar heading="Your space" />
 
       <section className='flex  flex-wrap justify-center'>
         <div className='w-[95%] min-h-[100vh]  flex flex-col gap-[40px] mt-[30px]'>
@@ -70,26 +69,24 @@ const Newspace = () => {
               </h1>
               <ul className='flex gap-[10px] mr-[110px] gap-[20px] items-center'>
                 <div className='flex items-center gap-[10px] ' >
-                  <li 
+                  <li
                     onClick={() => handleFilterChange('all')}
-                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${
-                      activeFilter === 'all'
-                        ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
-                        : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
-                    }`}
+                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${activeFilter === 'all'
+                      ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
+                      : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
+                      }`}
                   >
                     <span>All ({spaceData.length})</span>
                     {activeFilter === 'all' && (
                       <Icon icon="charm:tick" width="16" height="16" style={{ color: "black" }} />
                     )}
                   </li>
-                  <li 
+                  <li
                     onClick={() => handleFilterChange('active')}
-                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${
-                      activeFilter === 'active'
-                        ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
-                        : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
-                    }`}
+                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${activeFilter === 'active'
+                      ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
+                      : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
+                      }`}
                   >
                     <span>Active ({spaceData.filter(space => space.is_active === 1).length})</span>
                     {activeFilter === 'active' && (
@@ -162,7 +159,7 @@ const Newspace = () => {
                               />
                             </li>
                           </ul>
-                          
+
                           {/* Status Badge */}
                           {/* <div className="absolute top-4 right-4">
                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -178,11 +175,11 @@ const Newspace = () => {
                                   marginRight: "4px"
                                 }} 
                               /> */}
-                              {/* {space.is_active === 1 ? 'Active' : 'Inactive'} */}
-                            {/* </span>
-                          </div> */} 
+                          {/* {space.is_active === 1 ? 'Active' : 'Inactive'} */}
+                          {/* </span>
+                          </div> */}
                         </div>
-                        
+
                         <section>
                           <div className='w-[352px] h-auto p-[16px] flex flex-col gap-[16px]'>
                             <div>
@@ -225,7 +222,7 @@ const Newspace = () => {
                   </Link>
                 ))
               )}
-              
+
               {/* Create New Space Card - Only show when not loading and there are spaces */}
               {!loading && (
                 <Link href="/spacebusiness">

@@ -2,15 +2,14 @@
 import React, { useState } from "react";
 import Spacenav from "../../components/spacenav";
 import Messging5 from "../../components/messging5";
+import Navbar from "../../components/Navbar";
 
 const Page = () => {
   const [showMessaging, setShowMessaging] = useState(false);
 
   return (
     <div className="flex flex-col ">
-      <div>
-        <Spacenav />
-      </div>
+      <Navbar heading="Messaging" />
 
       <section className="w-full h-[100vh] flex justify-center items-center">
         {!showMessaging ? (
