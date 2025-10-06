@@ -213,14 +213,8 @@ export const Nav = ({ show, setShow }: any) => {
 
                 <div className="flex flex-col w-[136px] h-auto">
 
+                  <p className="font-normal text-[12px] font-semibold text-[#F2F4F7] ">{userdata?.data?.name || "name"}</p>
                   <p className="font-normal text-[12px] text-[#F2F4F7] ">{userdata?.data?.email || "email"}</p>
-                </div>
-                <div className="flex items-center">
-                  <button>
-                    <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M0.833344 10.5002L5.00001 14.6668L9.16668 10.5002M0.833344 5.50016L5.00001 1.3335L9.16668 5.50016" stroke="#EAECF0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
                 </div>
               </div>
             </div>
