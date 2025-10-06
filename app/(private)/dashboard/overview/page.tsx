@@ -13,7 +13,7 @@ const slideData = [
     name: "Create a space",
     description: "Create a space that fits your business perfectly. Hair Salon or Groomer? We’ve got you, E-Commerce startup? Yes! Let’s go!",
     bg: "#FAEEDC",
-    link: "/dashboard/home"
+    link: "/spacebusiness"
   },
   {
     image: "/brain.png",
@@ -340,7 +340,7 @@ const Overview = () => {
                 </div>
                 <div className='p-[20px]'>
                   <Link href={values.link}>
-                    <button className='py-[8px] px-[16px] bg-[#F2F4F7] rounded-[8px]'>Proceed</button>
+                    <button className='py-[8px] cursor-pointer px-[16px] bg-[#F2F4F7] rounded-[8px]'>Proceed</button>
                   </Link>
                 </div>
               </li>

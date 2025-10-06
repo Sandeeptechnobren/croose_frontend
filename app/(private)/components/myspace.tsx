@@ -163,7 +163,7 @@ const Myspace = () => {
       <div className="h-auto w-full bg-[#FFFFFF] relative mt-[15px] flex flex-col gap-5  items-center">
         <div className="w-[100%]  items-center mt-[-17px]   flex flex-row h-[64px] " style={{ borderBottom: "1px solid #EAECF0" }}>
           <div className='hover: bg-grey'>
-      <Link href={'/dashboard/createnewspace'} >
+      <Link href={'/dashboard/overview'} >
           <img
             src="/arrow.png"
             alt="arrow"
