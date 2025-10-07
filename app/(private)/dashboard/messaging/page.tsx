@@ -31,7 +31,7 @@ const Page = () => {
               </div>
               <button
                 onClick={() => setShowMessaging(true)}
-                className="w-[162px] bg-[#685BC7] h-[36px] rotate-0 opacity-100 gap-[10px] rounded-lg pt-2 pr-4 pb-2 pl-4 flex items-center"
+                className="w-[162px] cursor-pointer bg-[#685BC7] h-[36px] rotate-0 opacity-100 gap-[10px] rounded-lg pt-2 pr-4 pb-2 pl-4 flex items-center"
               >
                 <span className="w-[130px] h-[20px] font-sans font-semibold text-sm leading-5 tracking-normal text-center text-[#FFFFFF]">
                   Create a Broadcast
