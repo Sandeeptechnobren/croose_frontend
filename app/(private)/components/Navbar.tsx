@@ -20,11 +20,12 @@ const Navbar: React.FC<NavbarProps> = ({ heading }) => {
 
         <div className="mr-[20px]">
           <li className="flex w-[98px] gap-[23px] justify-center items-center">
-            <div className="w-[46px] flex gap-[10px] border-r-[2px] border-[#F2F4F7]">
-              <Icon icon="mynaui:search" width="24" height="24" style={{ color: "#000" }} />
-            </div>
+            {/* <div className="w-[46px] flex gap-[10px] border-r-[2px] border-[#F2F4F7]">
+              <Icon icon="mynaui:search" width="24" className='cursor-pointer' height="24" style={{ color: "#000" }} />
+            </div> */}
             <div className="w-[16px] flex gap-[10px]">
               <svg
+                className='cursor-pointer'
                 width="24"
                 height="20"
                 viewBox="0 0 16 19"

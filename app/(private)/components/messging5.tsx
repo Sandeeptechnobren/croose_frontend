@@ -96,7 +96,7 @@ const Page = () => {
                 New Broadcast
               </span>
             </div>
-            <div className="w-full sm:w-[135px] h-[36px] flex items-center justify-center bg-[#F1F0FA] gap-[10px] px-[16px] py-[8px] rounded-lg">
+            <div className="w-full cursor-pointer sm:w-[135px] h-[36px] flex items-center justify-center bg-[#F1F0FA] gap-[10px] px-[16px] py-[8px] rounded-lg">
               <span className="font-Inter font-semibold text-sm leading-5 text-[#685BC7] text-center">
                 Send Message
               </span>
@@ -183,7 +183,7 @@ const Page = () => {
           <div className="px-3 sm:px-6 py-4 border-t border-[#EAECF0] bg-white">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-3 w-full">
               {/* Left Button */}
-              <button className="px-4 py-2 bg-[#F2F4F7] text-sm text-[#344054] rounded-md hover:bg-[#E4E7EC] flex gap-2">
+              <button className="px-4 cursor-pointer py-2 bg-[#F2F4F7] text-sm text-[#344054] rounded-md hover:bg-[#E4E7EC] flex gap-2">
                 <Icon
                   icon="meteor-icons:arrow-left"
                   width="20"
@@ -208,7 +208,7 @@ const Page = () => {
               </span>
 
               {/* Right Button */}
-              <button className="px-4 py-2 bg-[#F2F4F7] text-sm text-[#344054] rounded-md hover:bg-[#E4E7EC] flex gap-2">
+              <button className="px-4 py-2 cursor-pointer bg-[#F2F4F7] text-sm text-[#344054] rounded-md hover:bg-[#E4E7EC] flex gap-2">
                 Next
                 <Icon
                   icon="meteor-icons:arrow-right"

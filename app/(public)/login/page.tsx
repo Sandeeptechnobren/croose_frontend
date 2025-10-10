@@ -188,7 +188,7 @@ const Login = () => {
 
                       <button
                         type="submit"
-                        className="bg-[#685BC7] text-white w-full h-[48px] rounded-[12px] font-semibold text-sm"
+                        className="bg-[#685BC7] cursor-pointer text-white w-full h-[48px] rounded-[12px] font-semibold text-sm"
                       >
                         Sign in
                       </button>
@@ -204,11 +204,11 @@ const Login = () => {
                         <hr className="flex-grow border-t border-gray-300" />
                       </div>
 
-                      <button type="button" className="flex items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm text-[#344054] border-[#EAECF0]">
+                      <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm text-[#344054] border-[#EAECF0]">
                         <img src="google.png" alt="Google" className="w-5 h-5" />
                         Continue with Google
                       </button>
-                      <button type="button" className="flex items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm text-[#344054] border-[#EAECF0]">
+                      <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm text-[#344054] border-[#EAECF0]">
                         <img src="apple.jpeg" alt="Apple" className="w-9 h-auto" />
                         Continue with Apple
                       </button>

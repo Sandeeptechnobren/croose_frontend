@@ -2,15 +2,14 @@
 import React, { useState } from "react";
 import Spacenav from "../../components/spacenav";
 import Messging5 from "../../components/messging5";
+import Navbar from "../../components/Navbar";
 
 const Page = () => {
   const [showMessaging, setShowMessaging] = useState(false);
 
   return (
     <div className="flex flex-col ">
-      <div>
-        <Spacenav />
-      </div>
+      <Navbar heading="Messaging" />
 
       <section className="w-full h-[100vh] flex justify-center items-center">
         {!showMessaging ? (
@@ -32,7 +31,7 @@ const Page = () => {
               </div>
               <button
                 onClick={() => setShowMessaging(true)}
-                className="w-[162px] bg-[#685BC7] h-[36px] rotate-0 opacity-100 gap-[10px] rounded-lg pt-2 pr-4 pb-2 pl-4 flex items-center"
+                className="w-[162px] cursor-pointer bg-[#685BC7] h-[36px] rotate-0 opacity-100 gap-[10px] rounded-lg pt-2 pr-4 pb-2 pl-4 flex items-center"
               >
                 <span className="w-[130px] h-[20px] font-sans font-semibold text-sm leading-5 tracking-normal text-center text-[#FFFFFF]">
                   Create a Broadcast

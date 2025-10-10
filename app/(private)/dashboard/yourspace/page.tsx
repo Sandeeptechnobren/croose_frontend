@@ -1,11 +1,12 @@
 'use client'
 import React from 'react'
-
+import Image from 'next/image'
 import Spacenav from '../../components/spacenav';
 import { getSpaceList } from '@/app/Apis/publicapi';
 import Link from 'next/link';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { useState, useEffect } from 'react';
+import Navbar from '../../components/Navbar';
 
 interface Space {
   id: number;
@@ -15,16 +16,16 @@ interface Space {
   updated_at?: string;
   created_at?: string;
   category?: string;
-  is_active?: number; 
+  is_active?: number;
 }
 
 const Newspace = () => {
   const [spaceData, setSpaceData] = useState<Space[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' or 'active'
+  const [activeFilter, setActiveFilter] = useState('all');
   const [filteredSpaceData, setFilteredSpaceData] = useState<Space[]>([]);
+  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
 
-  // Filter spaces based on active filter
   useEffect(() => {
     if (activeFilter === 'active') {
       setFilteredSpaceData(spaceData.filter(space => space.is_active === 1));
@@ -33,9 +34,12 @@ const Newspace = () => {
     }
   }, [activeFilter, spaceData]);
 
-  // Handle filter changes
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
+  };
+
+  const handleImageError = (spaceId: number) => {
+    setImageErrors(prev => ({ ...prev, [spaceId]: true }));
   };
 
   useEffect(() => {
@@ -56,9 +60,7 @@ const Newspace = () => {
 
   return (
     <div style={{ overflowX: "hidden" }} className='min-h-screen flex flex-col select-none ' >
-      <div>
-        <Spacenav />
-      </div>
+      <Navbar heading="Your space" />
 
       <section className='flex  flex-wrap justify-center'>
         <div className='w-[95%] min-h-[100vh]  flex flex-col gap-[40px] mt-[30px]'>
@@ -70,26 +72,24 @@ const Newspace = () => {
               </h1>
               <ul className='flex gap-[10px] mr-[110px] gap-[20px] items-center'>
                 <div className='flex items-center gap-[10px] ' >
-                  <li 
+                  <li
                     onClick={() => handleFilterChange('all')}
-                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${
-                      activeFilter === 'all'
-                        ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
-                        : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
-                    }`}
+                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${activeFilter === 'all'
+                      ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
+                      : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
+                      }`}
                   >
                     <span>All ({spaceData.length})</span>
                     {activeFilter === 'all' && (
                       <Icon icon="charm:tick" width="16" height="16" style={{ color: "black" }} />
                     )}
                   </li>
-                  <li 
+                  <li
                     onClick={() => handleFilterChange('active')}
-                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${
-                      activeFilter === 'active'
-                        ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
-                        : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
-                    }`}
+                    className={`flex items-center justify-center gap-[10px] px-[16px] py-[8px] rounded-full font-sans font-[600] text-[14px] cursor-pointer transition-colors ${activeFilter === 'active'
+                      ? 'bg-[#F4F4F5] border border-[#E4E4E7] text-[#18181B]'
+                      : 'bg-white border border-transparent text-[#71717A] hover:bg-[#F4F4F5]'
+                      }`}
                   >
                     <span>Active ({spaceData.filter(space => space.is_active === 1).length})</span>
                     {activeFilter === 'active' && (
@@ -151,38 +151,31 @@ const Newspace = () => {
                       <div >
                         <div className='flex w-[352px] flex-col relative justify-end p-[20px] w-[289px] rounded-t-[16px] h-[127px] bg-[#9E77ED]'>
                           <ul className='flex -space-x-4 rtl:space-x-reverse'>
-                            <li>
-                              <img
-                                src={space.image}
-                                alt={space.name}
-                                className='w-[59px] h-[59px] absolute top-[75%] rounded-full border-2 border-white'
-                                onError={(e) => {
-                                  e.currentTarget.src = '/default-space.png'; // Add a default image fallback
-                                }}
-                              />
+                            <li className='relative w-[59px] h-[59px]'>
+                              {imageErrors[space.id] || !space.image ? (
+                                <div className='w-[59px] h-[59px] absolute top-[75%] rounded-full border-2 border-white bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-xl font-bold'>
+                                  {space.name.charAt(0).toUpperCase()}
+                                </div>
+                              ) : (
+                                <div className='w-[59px] h-[59px] absolute top-[75%] rounded-full border-2 border-white overflow-hidden bg-white'>
+                                  <Image
+                                    src={space.image}
+                                    alt={`${space.name} avatar`}
+                                    width={59}
+                                    height={59}
+                                    className='w-full h-full object-cover'
+                                    onError={() => handleImageError(space.id)}
+                                    loading="lazy"
+                                    quality={85}
+                                    placeholder="blur"
+                                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTkiIGhlaWdodD0iNTkiIHZpZXdCb3g9IjAgMCA1OSA1OSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjU5IiBoZWlnaHQ9IjU5IiBmaWxsPSIjOUU3N0VEIi8+Cjwvc3ZnPgo="
+                                  />
+                                </div>
+                              )}
                             </li>
                           </ul>
-                          
-                          {/* Status Badge */}
-                          {/* <div className="absolute top-4 right-4">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                              space.is_active === 1 
-                                ? 'bg-green-100 text-green-800 border border-green-200' 
-                                : 'bg-red-100 text-red-800 border border-red-200'
-                            }`}>
-                              {/* <Icon 
-                                icon="icon-park-outline:dot" 
-                                width="12" 
-                                style={{ 
-                                  color: space.is_active === 1 ? "#10B981" : "#EF4444",
-                                  marginRight: "4px"
-                                }} 
-                              /> */}
-                              {/* {space.is_active === 1 ? 'Active' : 'Inactive'} */}
-                            {/* </span>
-                          </div> */} 
                         </div>
-                        
+
                         <section>
                           <div className='w-[352px] h-auto p-[16px] flex flex-col gap-[16px]'>
                             <div>
@@ -225,8 +218,7 @@ const Newspace = () => {
                   </Link>
                 ))
               )}
-              
-              {/* Create New Space Card - Only show when not loading and there are spaces */}
+
               {!loading && (
                 <Link href="/spacebusiness">
                   <div className="bg-[#F4F4F5] border-[1px] border-[#EAECF0] flex justify-center items-center rounded-[16px] w-[352px] h-[270px] hover:cursor-pointer hover:bg-[#E4E4E7] transition-colors duration-200">

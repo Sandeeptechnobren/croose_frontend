@@ -8,48 +8,7 @@ const Spacebusiness = () => {
     const [selectedBusiness, setSelectedBusiness] = useState('');
     const [boxes, setBoxes] = useState<
         { id: number; businessname: string; description: string }[]
-    >([]);// top of the component
-
-    // const boxes = [
-    //     {
-    //         businessname: "Hair Salon",
-    //         description: "Accept recurring payments via mobile money. Setup instantly."
-    //     },
-    //     {
-    //         businessname: "Barbershop",
-    //         description: "Increase sales with a seamless payment experience."
-    //     },
-    //     {
-    //         businessname: "E-Commerce platform",
-    //         description: "Introduce your customers to modern loans on-demand."
-    //     },
-    //     {
-    //         businessname: "Logistics",
-    //         description: "Create unique links your customers can pay with via social media or messaging platforms"
-    //     },
-    //     {
-    //         businessname: "Health & Wellness",
-    //         description: "Create automated deductions from hundreds of thousands of Government workers in Ghana."
-    //     },
-    //     {
-    //         businessname: "Online Educator",
-    //         description: "Link your platform to mobile money wallets and bank accounts seamlessly via a self service portal."
-    //     },
-    //     {
-    //         businessname: "Event Planning & Decorating",
-    //         description: "Integrate brand new services for your customers directly onto your mobile app"
-    //     },
-    //     {
-    //         businessname: "Real Estate Agent",
-    //         description: "Integrate brand new services for your customers directly onto your mobile app"
-    //     },
-    //     {
-    //         businessname: "Therapist & Counsellor",
-    //         description: "Integrate brand new services for your customers directly onto your mobile app"
-    //     },
-    // ];
-
-
+    >([]);
     useEffect(() => {
         const getCategories = async () => {
             try {
@@ -81,10 +40,10 @@ const Spacebusiness = () => {
         }));
         // localStorage.setItem('category', space.businessname);
         localStorage.setItem('categoryID', String(space.id));
-          localStorage.setItem('categoryName', space.businessname);
+        localStorage.setItem('categoryName', space.businessname);
 
         console.log("saved category:", space.businessname)
-        console.log("spaceid:",space.id)
+        console.log("spaceid:", space.id)
         setSelectedBusiness(space.businessname);
     };
 
@@ -144,10 +103,10 @@ const Spacebusiness = () => {
             </div>
 
             <div className='w-full flex justify-end gap-[20px] mt-[60px]'>
-                <Link href={'/dashboard/createnewspace'} >
-                <button className='w-[100px] py-[10px] px-[14px] border-2 border-[#D0D5DD] rounded-[8px] font-semibold font-inter text-[14px] bg-[#FFFFFF] text-[#344054 hover:cursor-pointer ]'>
-                    Previous
-                </button>
+                <Link href={'/dashboard/overview'} >
+                    <button className='w-[100px] py-[10px] px-[14px] border-2 border-[#D0D5DD] rounded-[8px] font-semibold font-inter text-[14px] bg-[#FFFFFF] text-[#344054 hover:cursor-pointer ]'>
+                        Previous
+                    </button>
                 </Link>
                 <Link
                     href={"/customisespace"} >

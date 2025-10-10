@@ -2,7 +2,7 @@
 //import { formatDbDate } from '@/app/(private)/utils/date';
 import React, { useEffect, useState, useRef } from 'react';
 import { appointmentList, fetchAppointmentStatistics, getCancelledAppointments, getNewAppointments, getTotalAppointments, updateAppointmentStatus } from '@/app/Apis/publicapi';
-import { X} from "lucide-react";
+import { X } from "lucide-react";
 import appointmentImg from "@/assets/appointment.png";
 import { Icon } from "@iconify/react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
@@ -30,12 +30,12 @@ const AppointmentTable = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
-// Function to open modal with selected appointment
-const handleRowClick = (appt: any) => {
-  setSelectedAppointment(appt);
-};
+  // Function to open modal with selected appointment
+  const handleRowClick = (appt: any) => {
+    setSelectedAppointment(appt);
+  };
 
   const defaultTypography: React.CSSProperties = {
     fontFamily: "Inter, sans-serif",
@@ -96,22 +96,22 @@ const handleRowClick = (appt: any) => {
       console.error("Failed to update appointment status", err);
     }
   };
-const subheading = {
-  fontFamily: 'Inter',
-  fontWeight: 500,
-  fontSize: '14px',
-  lineHeight: '20px',
-  letterSpacing: '0%',
-  color: '#1D2939',
-};
+  const subheading = {
+    fontFamily: 'Inter',
+    fontWeight: 500,
+    fontSize: '14px',
+    lineHeight: '20px',
+    letterSpacing: '0%',
+    color: '#1D2939',
+  };
   const datainside = {
-  fontFamily: 'Inter',
-  fontWeight: 400,
-  fontSize: '14px',
-  lineHeight: '20px',
-  letterSpacing: '0%',
+    fontFamily: 'Inter',
+    fontWeight: 400,
+    fontSize: '14px',
+    lineHeight: '20px',
+    letterSpacing: '0%',
 
-};
+  };
 
   useEffect(() => {
     fetchAppointments();
@@ -238,7 +238,7 @@ const subheading = {
                 Dive deep into who your customers are
               </p>
             </div>
-           
+
 
 
           </div>
@@ -401,79 +401,79 @@ const subheading = {
 
       </div> */}
 
-<section className='w-full flex justify-center'>
-        <div className="mt-6 overflow-x-auto  w-[95%] border border-[#EAECF0] rounded-lg">
-          <table className="min-w-full text-sm  text-left text-gray-700">
-            
+        <section className='w-full flex justify-center'>
+          <div className="mt-6 overflow-x-auto  w-[95%] border border-[#EAECF0] rounded-lg">
+            <table className="min-w-full text-sm  text-left text-gray-700">
 
-                <thead className="bg-[#F9FAFB] text-[#475467] max-w-full font-medium">  <tr>
-                                <th className="px-4 py-3"> Space Name</th>
-                                <th className="px-4 py-3">Customer Name</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3"> Phone Number</th>
-                                <th className="px-4 py-3">Service Name</th>
-                                <th className="px-4 py-3">Appointment Time</th>
-                                
-                            </tr>
-                        </thead>
 
-            
-            <tbody>
-              {currentAppointments.map((appt: any) => (
-                <tr key={appt.id}
-                 onClick={() => handleRowClick(appt)}
-                  className="hover:bg-gray-50 border-b border-[#EAECF0] cursor-pointer transition-colors duration-200">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      {/* <input
+              <thead className="bg-[#F9FAFB] text-[#475467] max-w-full font-medium">  <tr>
+                <th className="px-4 py-3"> Space Name</th>
+                <th className="px-4 py-3">Customer Name</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3"> Phone Number</th>
+                <th className="px-4 py-3">Service Name</th>
+                <th className="px-4 py-3">Appointment Time</th>
+
+              </tr>
+              </thead>
+
+
+              <tbody>
+                {currentAppointments.map((appt: any) => (
+                  <tr key={appt.id}
+                    onClick={() => handleRowClick(appt)}
+                    className="hover:bg-gray-50 border-b border-[#EAECF0] cursor-pointer transition-colors duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        {/* <input
                         type="checkbox"
                         className="appearance-none w-4 h-4 border-2 border-[#D0D5DD] rounded-[4px] checked:bg-[#D0D5DD] checked:border-[#D0D5DD]"
                       /> */}
-                      <span style={defaultTypography}>
-                        {appt.space_name || "_"}
-                      </span>
-                    </div>
-                  </td>
+                        <span style={defaultTypography}>
+                          {appt.space_name || "_"}
+                        </span>
+                      </div>
+                    </td>
 
 
-                  <td className="px-4 py-3" style={defaultTypography}>{appt.customer_name}</td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={appt.status}
-                      onChange={(e) => handleStatusUpdate(appt.id, e.target.value)}
-                      className="border p-1 rounded-md text-sm"
-                    >
-                      {statusOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
+                    <td className="px-4 py-3" style={defaultTypography}>{appt.customer_name}</td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={appt.status}
+                        onChange={(e) => handleStatusUpdate(appt.id, e.target.value)}
+                        className="border p-1 rounded-md text-sm"
+                      >
+                        {statusOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
 
-                  </td>
-                  <td className="px-4 py-3 text-[#101828] " style={{
-                    font: "Inter",
-                    fontWeight: "500",
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    letterSpacing: "0%"
-                  }} >{appt.customer_number}</td>
-                  <td className="px-4 py-3" style={defaultTypography}>{appt.service_name || '-'}</td>
-                  <td className="px-4 py-3" style={defaultTypography}>{appt.date}</td>
+                    </td>
+                    <td className="px-4 py-3 text-[#101828] " style={{
+                      font: "Inter",
+                      fontWeight: "500",
+                      fontSize: "14px",
+                      lineHeight: "20px",
+                      letterSpacing: "0%"
+                    }} >{appt.customer_number}</td>
+                    <td className="px-4 py-3" style={defaultTypography}>{appt.service_name || '-'}</td>
+                    <td className="px-4 py-3" style={defaultTypography}>{appt.date}</td>
 
 
-                </tr>
-              ))}
-              {currentAppointments.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-400">No appointments found</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </tr>
+                ))}
+                {currentAppointments.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="text-center py-6 text-gray-400">No appointments found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
 
-        </div>
-</section>
+          </div>
+        </section>
 
 
 
@@ -485,7 +485,7 @@ const subheading = {
         <button
           onClick={handlePrevPage}
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-[#685BC7] text-white rounded disabled:opacity-50"
+          className="px-4 py-2 cursor-pointer disabled:cursor-not-allowed bg-[#685BC7] text-white rounded disabled:opacity-50"
         >
           Previous
         </button>
@@ -495,130 +495,130 @@ const subheading = {
         <button
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-[#685BC7] text-white rounded disabled:opacity-50"
+          className="px-4 py-2 cursor-pointer disabled:cursor-not-allowed bg-[#685BC7] text-white rounded disabled:opacity-50"
         >
           Next
         </button>
       </div>
-{selectedAppointment && (
-  <div className=" fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
-    <div className="h-[650px] bg-white rounded-2xl shadow-xl w-full max-w-3xl pb-6 relative animate-fadeIn">
-    
-      <div className="relative  rounded-lg overflow-hidden" style={{ width: '773px', height: '146px' }}>
-     
-        <img 
-          src="/assets/appointment.png" 
-          alt="Appointment background"
-          className="w-full h-full object-cover"
-     
-        />
-        
-      
-        <div 
-          className="absolute inset-0"
-           style={{
-      background: 'linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 84%)'
-    }}
-        ></div>
-        
+      {selectedAppointment && (
+        <div className=" fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
+          <div className="h-[650px] bg-white rounded-2xl shadow-xl w-full max-w-3xl pb-6 relative animate-fadeIn">
 
-    
-      </div>
+            <div className="relative  rounded-lg overflow-hidden" style={{ width: '773px', height: '146px' }}>
 
-       <button
+              <img
+                src="/assets/appointment.png"
+                alt="Appointment background"
+                className="w-full h-full object-cover"
+
+              />
+
+
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 84%)'
+                }}
+              ></div>
+
+
+
+            </div>
+
+            <button
               type="button"
-             
+
               onClick={() => setSelectedAppointment(null)}
-              
-    
+
+
               className=" absolute p-2 top-1 right-1 bg-[#FFFFFF] text-[#0E120F] bg-opacity-50  rounded-md p-1 hover:bg-opacity-70 mt-2 mr-2 transition-colors duration-200 shadow-md hover:shadow-lg hover:text-gray-700 cursor-pointer"
             >
-              <X size={18}  />
+              <X size={18} />
             </button>
 
-  <div className="w-12 h-12 border-[rgba(0, 0, 0, 0.08)] rounded-full bg-[#F2F4F7] flex items-center justify-center text-lg font-semibold font-Inter text-gray-700 mx-8 mb-2">
-          {selectedAppointment.customer_name.charAt(0)}
-        </div>
-      <div className="flex items-center gap-4 mb-4 mx-10">
-       
-        <div>
-          <h3 className="text-[#101828]   font-Inter "
-          style={{
-            
-            fontWeight: 500,
-            fontSize: '14px',
-            lineHeight: '20px',
-            letterSpacing: '0%'
-          }}>{selectedAppointment.customer_name}</h3>
-          <p className=" text-[#475467]  font-Inter "
-             style={{
-           
-            fontWeight: 400,
-            fontSize: '14px',
-            lineHeight: '20px',
-            letterSpacing: '0%'
-          }}>
-            {selectedAppointment.customer_email || ''} • {selectedAppointment.customer_number}  • {selectedAppointment.customer_address || ''}
-          </p>
-        </div>
-        <span className={`ml-auto px-3 py-1 rounded-full text-sm capitalize 
-          ${selectedAppointment.status === "pending" ? "bg-yellow-100 text-yellow-700" : 
-          selectedAppointment.status === "confirmed" ? "bg-green-100 text-green-700" : 
-          selectedAppointment.status === "cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
-          {selectedAppointment.status}
-        </span>
-      </div>
+            <div className="w-12 h-12 border-[rgba(0, 0, 0, 0.08)] rounded-full bg-[#F2F4F7] flex items-center justify-center text-lg font-semibold font-Inter text-gray-700 mx-8 mb-2">
+              {selectedAppointment.customer_name.charAt(0)}
+            </div>
+            <div className="flex items-center gap-4 mb-4 mx-10">
 
-      {/* Details Section */}
-      <div className="w-[690px] h-[108px] grid grid-cols-3 gap-4 mb-6 bg-[#F2F4F7]  font-Inter rounded-lg p-4 mx-10">
-        <div className='gap-2 flex-col  flex'>
-          <p className=' font-Inter'
-       >Appointment Day</p>
-          <p className="text-[#475467]  font-Inter  "
-         >{selectedAppointment.date}</p>
-        </div>
-        <div className='gap-2  font-Inter flex-col flex'>
-          <p   >Date created</p>
-          <p className=' text-[#475467]' >{selectedAppointment.date_created}</p>
-        </div>
-        <div className='gap-2 flex-col flex font-Inter '>
-          <p >Service type</p>
-          <p className=' text-[#475467]' >{selectedAppointment.service_name}</p>
-        </div>
-      </div>
+              <div>
+                <h3 className="text-[#101828]   font-Inter "
+                  style={{
 
-      {/* Notes */}
-      <div className="mb-4 mx-10">
-        <p className="mb-1"
-        >Notes</p>
-        <p className=" text-[#344054]">{selectedAppointment.notes ||
-       "No notes available"}</p>
-      </div>
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    lineHeight: '20px',
+                    letterSpacing: '0%'
+                  }}>{selectedAppointment.customer_name}</h3>
+                <p className=" text-[#475467]  font-Inter "
+                  style={{
 
-      {/* Images Section */}
-      <div className="mx-10 mb-8">
-  <p className="mb-3 text-sm font-medium text-gray-500">Images shared</p>
-  
-  {selectedAppointment.images?.length > 0 ? (
-    <div className="flex flex-wrap gap-3">
-      {selectedAppointment.images.map((image:any, index:any) => (
-        <div key={index} className="relative">
-          <img
-            src={image}
-            alt={`Appointment reference ${index + 1}`}
-            className="w-32 h-28 rounded-lg object-cover border border-gray-200"
-            onError={(e) => (e.currentTarget.src = "/assets/placeholder.png")}
-          />
-        </div>
-      ))}
-    </div>
-  ) : (
-    <div className="w-full h-28 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-      No images shared
-    </div>
-  )}
-</div>
-      {/* {selectedAppointment.images && selectedAppointment.images.length > 0 ? (
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    lineHeight: '20px',
+                    letterSpacing: '0%'
+                  }}>
+                  {selectedAppointment.customer_email || ''} • {selectedAppointment.customer_number}  • {selectedAppointment.customer_address || ''}
+                </p>
+              </div>
+              <span className={`ml-auto px-3 py-1 rounded-full text-sm capitalize 
+          ${selectedAppointment.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                  selectedAppointment.status === "confirmed" ? "bg-green-100 text-green-700" :
+                    selectedAppointment.status === "cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
+                {selectedAppointment.status}
+              </span>
+            </div>
+
+            {/* Details Section */}
+            <div className="w-[690px] h-[108px] grid grid-cols-3 gap-4 mb-6 bg-[#F2F4F7]  font-Inter rounded-lg p-4 mx-10">
+              <div className='gap-2 flex-col  flex'>
+                <p className=' font-Inter'
+                >Appointment Day</p>
+                <p className="text-[#475467]  font-Inter  "
+                >{selectedAppointment.date}</p>
+              </div>
+              <div className='gap-2  font-Inter flex-col flex'>
+                <p   >Date created</p>
+                <p className=' text-[#475467]' >{selectedAppointment.date_created}</p>
+              </div>
+              <div className='gap-2 flex-col flex font-Inter '>
+                <p >Service type</p>
+                <p className=' text-[#475467]' >{selectedAppointment.service_name}</p>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="mb-4 mx-10">
+              <p className="mb-1"
+              >Notes</p>
+              <p className=" text-[#344054]">{selectedAppointment.notes ||
+                "No notes available"}</p>
+            </div>
+
+            {/* Images Section */}
+            <div className="mx-10 mb-8">
+              <p className="mb-3 text-sm font-medium text-gray-500">Images shared</p>
+
+              {selectedAppointment.images?.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                  {selectedAppointment.images.map((image: any, index: any) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={image}
+                        alt={`Appointment reference ${index + 1}`}
+                        className="w-32 h-28 rounded-lg object-cover border border-gray-200"
+                        onError={(e) => (e.currentTarget.src = "/assets/placeholder.png")}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full h-28 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400">
+                  No images shared
+                </div>
+              )}
+            </div>
+            {/* {selectedAppointment.images && selectedAppointment.images.length > 0 ? (
         <div className='mx-10 '>
           <p className=" mb-2" style={subheading}>Images shared</p>
           <div className="flex flex-wrap gap-2 ">
@@ -641,10 +641,10 @@ const subheading = {
           </div>
         </div>
       )} */}
-      </div>
-    
-  </div>
-)}
+          </div>
+
+        </div>
+      )}
 
 
     </div>
