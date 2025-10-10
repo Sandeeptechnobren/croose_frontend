@@ -1635,8 +1635,10 @@ export const loginApi = async (data: any) => {
     });
     localStorage.setItem("token", res.token);
     return res;
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    // Surface the API error back to the caller so the UI can show the real message
+    // e.g., {"status": false, "message": "Invalid credentials"}
+    throw new Error(err?.message || 'Login failed');
   }
 };
 
