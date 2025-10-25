@@ -2,6 +2,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react/dist/iconify.js';
+import SendMessageModal from './SendMessageModal';
 
 
 const users = [
@@ -72,6 +73,7 @@ const count = [
 
 const Page = () => {
   const [messaging, setMessaging] = useState(false);
+  const [sendOpen, setSendOpen] = useState(false);
 
   return (
     <div className="flex flex-col w-full mt-[-100px] bg-white">
@@ -96,7 +98,7 @@ const Page = () => {
                 New Broadcast
               </span>
             </div>
-            <div className="w-full cursor-pointer sm:w-[135px] h-[36px] flex items-center justify-center bg-[#F1F0FA] gap-[10px] px-[16px] py-[8px] rounded-lg">
+            <div onClick={() => setSendOpen(true)} className="w-full cursor-pointer sm:w-[135px] h-[36px] flex items-center justify-center bg-[#F1F0FA] gap-[10px] px-[16px] py-[8px] rounded-lg">
               <span className="font-Inter font-semibold text-sm leading-5 text-[#685BC7] text-center">
                 Send Message
               </span>
@@ -335,6 +337,11 @@ const Page = () => {
 
         </div>
       )}
+      {/* Send Message Modal */}
+      <SendMessageModal
+        isOpen={sendOpen}
+        onClose={() => setSendOpen(false)}
+      />
     </div>
   );
 };
