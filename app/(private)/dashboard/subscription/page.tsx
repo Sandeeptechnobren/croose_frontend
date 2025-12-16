@@ -123,7 +123,61 @@ const Subscription = () => {
 
     fetchSubscribers();
   }, []);
-  if (loading) return <p>Loading...</p>;
+  if (loading) return (
+    <div className='select-none relative'>
+      <Navbar heading="Subscription" />
+      <div className="p-6 space-y-6 animate-pulse">
+        <div className="flex justify-between items-start px-1 ">
+          <div className="space-y-2">
+            <div className="h-6 w-40 bg-gray-200 rounded" />
+            <div className="h-4 w-64 bg-gray-200 rounded" />
+          </div>
+          <div className="flex space-x-3">
+            <div className="h-10 w-40 bg-gray-200 rounded-lg" />
+            <div className="h-10 w-48 bg-gray-200 rounded-lg" />
+          </div>
+        </div>
+
+        <div className='w-full'>
+          <ul className='w-full flex flex-col lg:flex-row gap-4'>
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <li key={idx} className='w-full lg:w-1/3 border-2 rounded-xl border-[#EAECF0] p-6'>
+                <div className='h-4 w-40 bg-gray-200 rounded' />
+                <div className='flex items-center justify-between mt-4'>
+                  <div className='h-8 w-20 bg-gray-200 rounded' />
+                  <div className='w-[71px] h-8 bg-gray-200 rounded-full' />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="overflow-x-auto rounded-lg border border-[#EAECF0] mt-10">
+          <div className="min-w-full">
+            <div className="bg-[#F9FAFB]">
+              <div className="grid grid-cols-6 gap-4 px-4 py-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-4 bg-gray-200 rounded w-24" />
+                ))}
+              </div>
+            </div>
+            <div className="divide-y divide-[#EAECF0]">
+              {Array.from({ length: 5 }).map((_, r) => (
+                <div key={r} className="grid grid-cols-6 gap-4 px-4 py-4">
+                  <div className="h-4 bg-gray-200 rounded w-40" />
+                  <div className="h-6 bg-gray-200 rounded w-24" />
+                  <div className="h-4 bg-gray-200 rounded w-28" />
+                  <div className="h-4 bg-gray-200 rounded w-24" />
+                  <div className="h-4 bg-gray-200 rounded w-32" />
+                  <div className="h-6 bg-gray-200 rounded w-10 justify-self-end" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   // handle adding subscription
   const handleSaveSubscription = (newSub: any) => {
     setSubscribers((prev) => [...prev, newSub]);
