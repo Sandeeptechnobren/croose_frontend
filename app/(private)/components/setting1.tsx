@@ -9,17 +9,17 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { useContext } from 'react'
-import { logoutapi, registerApi } from '@/app/Apis/publicapi'
+import { logoutapi, registerApi, updatePassword } from '@/app/Apis/publicapi'
 
 const Setting1 = () => {
 
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const router = useRouter()
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'security'
 
-  const { setOpenSetting2 } = useContext<any>(SettingContext)
   const { setOpenSetting1 } = useContext<any>(SettingContext)
-  const { setOpenSetting3 } = useContext<any>(SettingContext)
+
   const formik = useFormik({
     initialValues: {
       fullName: '',
@@ -59,12 +59,40 @@ const Setting1 = () => {
     }
   }, [])
 
+  // Security tab states
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [oldPass, setOldPass] = useState('');
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [msg, setMsg] = useState('');
+
+  const handlePasswordUpdate = async () => {
+    if (newPass !== confirmPass) {
+      setMsg("New password and confirm password do not match.");
+      return;
+    }
+
+    try {
+      await updatePassword(oldPass, newPass);
+      setMsg("Password updated successfully!");
+      setOldPass('');
+      setNewPass('');
+      setConfirmPass('');
+      setSnackbarMessage('Password updated successfully!');
+      setOpenSnackbar(true);
+    } catch (err) {
+      setMsg("Failed to update password. Check your current password.");
+    }
+  };
+
   return (
     <div>
       <div className="fixed inset-0 flex items-center justify-center bg-[#9999] p-4 sm:p-6 select-none">
 
         <div className="relative z-10 flex justify-center items-center w-full">
-          <div className="w-full max-w-[800px] h-auto opacity-100 border-[#E2E4E84D] bg-[#ffffff] rounded-[16px] border border-solid">
+          <div className="w-full max-w-[800px] min-h-[700px] opacity-100 border-[#E2E4E84D] bg-[#ffffff] rounded-[16px] border border-solid overflow-y-auto">
 
             <section className="w-full h-auto flex justify-between items-center border-b border-[#F6F6F6] rounded-t-[16px] px-4 py-3 sm:px-[20px] sm:py-[12px]">
               <span className="w-auto font-inter font-semibold text-[18px] sm:text-[20px] leading-[150%] tracking-[-0.04em] text-[#1D2939]">
@@ -79,81 +107,167 @@ const Setting1 = () => {
               <div className="w-full flex flex-col gap-4">
                 <div className="w-full flex flex-wrap items-center gap-2 sm:gap-5">
                   <div className="flex flex-wrap gap-2 w-full">
-                    <button className="rounded-sm text-sm px-3 py-2 bg-[#F9F5FF] hover:cursor-pointer">
-                      <span className="font-semibold text-[14px] text-[#685BC7]">Profile</span>
+                    <button
+                      className={`rounded-sm text-sm px-3 py-2 ${activeTab === 'profile' ? 'bg-[#F9F5FF]' : ''}`}
+                      onClick={() => setActiveTab('profile')}
+                    >
+                      <span className={`font-semibold text-[14px] ${activeTab === 'profile' ? 'text-[#685BC7]' : 'text-[#667085] hover:text-[#685BC7]'}`}>
+                        Profile
+                      </span>
                     </button>
-                    <button className="rounded-sm text-sm px-3 py-2" onClick={() => {
-                      setOpenSetting2(true)
-                      setOpenSetting1(false)
-                      setOpenSetting3(false)
-                    }}>
-                      <span className="font-semibold text-[14px] text-[#667085] hover:text-[#685BC7] bg-[#F9F5FF] rounded-sm text-sm px-3 py-2 hover:cursor-pointer">Security</span>
-                    </button>
-                    <button className="rounded-sm text-sm" onClick={() => {
-                      setOpenSetting3(true)
-                      setOpenSetting1(false)
-                      setOpenSetting2(false)
-                    }}>
-                      {/* <span className="font-semibold text-[14px] text-[#667085] hover:text-[#685BC7] bg-[#F9F5FF] rounded-sm text-sm px-3 py-2 hover:cursor-pointer">Billing</span> */}
+                    <button
+                      className={`rounded-sm text-sm px-3 py-2 ${activeTab === 'security' ? 'bg-[#F9F5FF]' : ''}`}
+                      onClick={() => setActiveTab('security')}
+                    >
+                      <span className={`font-semibold text-[14px] ${activeTab === 'security' ? 'text-[#685BC7]' : 'text-[#667085] hover:text-[#685BC7]'}`}>
+                        Security
+                      </span>
                     </button>
                     <button className="rounded-sm text-sm px-3 py-2" onClick={handlelogout}>
                       <span className="font-semibold text-[14px] text-[#667085] hover:text-[red] bg-[white] rounded-sm text-sm px-3 py-2 hover:cursor-pointer">Log Out</span>
                     </button>
                   </div>
                 </div>
-                <div className="text-[18px] font-semibold text-[#101828]">Account Profile</div>
+                <div className="text-[18px] font-semibold text-[#101828]">
+                  {activeTab === 'profile' ? 'Account Profile' : 'Security'}
+                </div>
               </div>
 
-              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                <div className="flex flex-col items-start gap-4">
-                  <div className="flex items-center gap-4">
-                    <img src="/userse.png" className="w-[80px] h-[80px] bg-[#F2F4F7] rounded-full" />
-                    <div className="rounded-[64px] bg-[#F2F4F7] px-5 py-2 text-center">
-                      <span className="text-[12px] font-semibold text-[#475467]">Upload Photo</span>
+              {/* Profile Tab Content */}
+              {activeTab === 'profile' && (
+                <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                  <div className="flex flex-col items-start gap-4">
+                    <div className="flex items-center gap-4">
+                      <img src="/userse.png" className="w-[80px] h-[80px] bg-[#F2F4F7] rounded-full" />
+                      <div className="rounded-[64px] bg-[#F2F4F7] px-5 py-2 text-center">
+                        <span className="text-[12px] font-semibold text-[#475467]">Upload Photo</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-1 gap-3 lg:col-span-2">
+                    <div>
+                      <label className="block text-sm font-medium text-[#344054] mb-1">Full Name</label>
+                      <div className="w-full h-[44px] text-[#98A2B3] flex items-center text-sm rounded-[12px] border border-[#D0D5DD] px-4">
+                        {registerData?.data?.name}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#344054] mb-1">Business Name</label>
+                      <div className="w-full h-[44px] text-[#98A2B3] flex items-center text-sm rounded-[12px] border border-[#D0D5DD] px-4">
+                        {registerData?.data?.business_name}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#344054] mb-1">Business location</label>
+                      <div className="w-full h-[44px] text-[#98A2B3] flex items-center text-sm rounded-[12px] border border-[#D0D5DD] px-4">
+                        {registerData?.data?.business_location}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#344054] mb-1">Email</label>
+                      <div className="w-full h-[44px] text-[#98A2B3] text-sm rounded-[12px] flex items-center border border-[#D0D5DD] px-4">
+                        {registerData?.data?.email}
+                      </div>
                     </div>
                   </div>
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-1 gap-3 lg:col-span-2">
-                  <div>
-                    <label className="block text-sm font-medium text-[#344054] mb-1">Full Name</label>
-                    <div className="w-full h-[44px] text-[#98A2B3] flex items-center text-sm rounded-[12px] border border-[#D0D5DD] px-4">
-                      {registerData?.data?.name}
+              {/* Security Tab Content */}
+              {activeTab === 'security' && (
+                <div className="w-full flex flex-col gap-4 mt-4">
+                  <div className="w-full flex flex-col">
+                    <label className="block font-medium text-sm leading-5 font-inter text-[#344054] mb-1">Current Password</label>
+                    <div className="relative w-full">
+                      <input
+                        type={showOldPassword ? "text" : "password"}
+                        onChange={(e) => setOldPass(e.target.value)}
+                        value={oldPass}
+                        className="w-full h-[44px] border-[1px] border-[#D0D5DD] rounded-[12px] px-3"
+                        placeholder="Enter your current password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      >
+                        <Icon icon={showOldPassword ? "tabler:eye-off-filled" : "tabler:eye-filled"} width="20" height="20" />
+                      </button>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#344054] mb-1">Business Name</label>
-                    <div className="w-full h-[44px] text-[#98A2B3] flex items-center text-sm rounded-[12px] border border-[#D0D5DD] px-4">
-                      {registerData?.data?.business_name}
+
+                  <div className="w-full flex flex-col">
+                    <label className="block font-medium text-sm leading-5 font-inter text-[#344054] mb-1">New Password</label>
+                    <div className="relative w-full">
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        onChange={(e) => setNewPass(e.target.value)}
+                        value={newPass}
+                        className="w-full h-[44px] border-[1px] border-[#D0D5DD] rounded-[12px] px-3"
+                        placeholder="Enter new password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      >
+                        <Icon icon={showNewPassword ? "tabler:eye-off-filled" : "tabler:eye-filled"} width="20" height="20" />
+                      </button>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#344054] mb-1">Business location</label>
-                    <div className="w-full h-[44px] text-[#98A2B3] flex items-center text-sm rounded-[12px] border border-[#D0D5DD] px-4">
-                      {registerData?.data?.business_location}
+
+                  <div className="w-full flex flex-col">
+                    <label className="block font-medium text-sm leading-5 font-inter text-[#344054] mb-1">Confirm Password</label>
+                    <div className="relative w-full">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        onChange={(e) => setConfirmPass(e.target.value)}
+                        value={confirmPass}
+                        className="w-full h-[44px] border-[1px] border-[#D0D5DD] rounded-[12px] px-3"
+                        placeholder="Confirm new password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      >
+                        <Icon icon={showConfirmPassword ? "tabler:eye-off-filled" : "tabler:eye-filled"} width="20" height="20" />
+                      </button>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#344054] mb-1">Email</label>
-                    <div className="w-full h-[44px] text-[#98A2B3] text-sm rounded-[12px] flex items-center border border-[#D0D5DD] px-4">
-                      {registerData?.data?.email}
-                    </div>
+                    {msg && <p className="text-sm mt-2 text-[red]">{msg}</p>}
                   </div>
                 </div>
-              </div>
+              )}
             </section>
 
             <section className="w-full flex justify-end border-t border-[#F6F6F6] px-4 py-3 sm:px-[20px] sm:py-[12px]">
-              <button
-                onClick={() => { formik.handleSubmit() }}
-                className="rounded-lg cursor-pointer bg-[#685BC7] text-white text-sm font-semibold px-7 py-2"
-              >
-                Save changes
-              </button>
+              {activeTab === 'profile' ? (
+                <button
+                  onClick={() => { formik.handleSubmit() }}
+                  className="rounded-lg cursor-pointer bg-[#685BC7] text-white text-sm font-semibold px-7 py-2"
+                >
+                  Save changes
+                </button>
+              ) : (
+                <button
+                  onClick={handlePasswordUpdate}
+                  className="rounded-lg cursor-pointer bg-[#685BC7] text-white text-sm font-semibold px-7 py-2"
+                >
+                  Update password
+                </button>
+              )}
             </section>
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        message={snackbarMessage}
+      />
     </div>
   )
 }
