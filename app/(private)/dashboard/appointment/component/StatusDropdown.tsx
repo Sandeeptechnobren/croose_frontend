@@ -69,7 +69,7 @@ const StatusDropdown: React.FC<Props> = ({ value, onChange }) => {
             clipRule="evenodd"
           />
         </svg>
-      </div>
+      </div> 
 
       {/* Dropdown Menu */}
       {open && (
