@@ -1699,7 +1699,7 @@ export const searchServices = async (query: string) => {
 
 
 
-export const countryApi = async () => {
+export const countryApi = async () => { 
   try {
     const res = await axiosRequest({
       method: "get",

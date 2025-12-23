@@ -322,7 +322,7 @@ const AppointmentTable = () => {
 
 
                 {/* DateTime input */}
-                <select className="w-full border p-2  font-Inter rounded-md"
+                <select className="w-full border p-2  font-Inter rounded-md fd"
                   value={formData.service} onChange={(e) => setFormData({ ...formData, service: e.target.value })}>
                   <option>Dental Cleaning</option>
                   <option>Eye Checkup</option>
