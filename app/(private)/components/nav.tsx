@@ -81,11 +81,11 @@ const navItems = [
   //     />
   //   ),
   // },
-  // {
-  //   label: 'Messaging',
-  //   href: '/dashboard/messaging',
-  //   icon: <Icon icon="mdi:email-outline" className="w-5 h-5.5 text-gray-100" />,
-  // },
+  {
+    label: 'Messaging',
+    href: '/dashboard/messaging',
+    icon: <Icon icon="mdi:email-outline" className="w-5 h-5.5 text-gray-100" />,
+  },
 ];
 
 export const Nav = ({ show, setShow }: any) => {
