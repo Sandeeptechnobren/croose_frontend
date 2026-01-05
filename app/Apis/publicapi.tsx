@@ -1699,7 +1699,7 @@ export const searchServices = async (query: string) => {
 
 
 
-export const countryApi = async () => { 
+export const countryApi = async () => {
   try {
     const res = await axiosRequest({
       method: "get",
@@ -2048,7 +2048,7 @@ export const GetSpaceId = async () => {
 
 export const getProductsBySpace = async (spaceId: number) => {
   try {
-        const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     const res = await axios.get(`${BASE_URL}/api/getProductBySpace`, {
       params: {
         space_id: spaceId
@@ -2067,12 +2067,12 @@ export const getProductsBySpace = async (spaceId: number) => {
 };
 export const getServicesBySpace = async (spaceId: number) => {
   try {
-        const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     const res = await axios.get(`${BASE_URL}/api/getServicesBySpace`, {
       params: {
         space_id: spaceId
       },
-        headers: {
+      headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
@@ -2131,9 +2131,72 @@ export const resetPassword = async (email: string, securityQuestion: string, sec
         password_confirmation: newPassword
       }
     });
-  
+
   } catch (err) {
     console.log('Reset password error:', err);
     throw err;
+  }
+};
+
+export const getBroadcastList = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `${BASE_URL}/api/broadcast/list`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching broadcast list:', error);
+    throw error;
+  }
+};
+export const getTargetList = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `${BASE_URL}/api/target/list`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching broadcast list:', error);
+    throw error;
+  }
+};
+
+export const addBroadcast = async (data: any) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `${BASE_URL}/api/broadcast/add`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    console.error('Error adding broadcast:', error);
+    throw error;
   }
 };
