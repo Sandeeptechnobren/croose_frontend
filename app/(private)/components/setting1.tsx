@@ -89,9 +89,9 @@ const Setting1 = () => {
 
   return (
     <div>
-      <div className="fixed inset-0 flex items-center justify-center bg-[#9999] p-4 sm:p-6 select-none">
+      <div className="fixed inset-0 flex items-center justify-center bg-[#9999] p-4 sm:p-6 select-none z-[10001]">
 
-        <div className="relative z-10 flex justify-center items-center w-full">
+        <div className="relative z-[10002] flex justify-center items-center w-full">
           <div className="w-full max-w-[800px] min-h-[700px] opacity-100 border-[#E2E4E84D] bg-[#ffffff] rounded-[16px] border border-solid overflow-y-auto">
 
             <section className="w-full h-auto flex justify-between items-center border-b border-[#F6F6F6] rounded-t-[16px] px-4 py-3 sm:px-[20px] sm:py-[12px]">

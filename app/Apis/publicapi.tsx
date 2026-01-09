@@ -2200,3 +2200,24 @@ export const addBroadcast = async (data: any) => {
     throw error;
   }
 };
+export const addNewMessage = async (data: any) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `${BASE_URL}/api/sendBroadcastMessage`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    console.error('Error adding New Message :', error);
+    throw error;
+  }
+};

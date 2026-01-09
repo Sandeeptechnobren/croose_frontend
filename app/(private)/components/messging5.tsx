@@ -2,6 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react/dist/iconify.js';
+import toast, { Toaster } from 'react-hot-toast';
 import SendMessageModal from './SendMessageModal';
 import { getBroadcastList, getTargetList, addBroadcast } from '@/app/Apis/publicapi';
 
@@ -103,12 +104,13 @@ const Page = () => {
   // Handle schedule broadcast
   const handleSchedule = async () => {
     if (!selectedTarget || !frequency || !date || !content) {
-      alert("Please fill in all fields");
+      toast.error("Please fill in all fields");
       return;
     }
 
     try {
       setSubmitting(true);
+
       await addBroadcast({
         target_id: selectedTarget,
         frequency: frequency,
@@ -120,9 +122,9 @@ const Page = () => {
       setMessaging(false);
       resetForm();
       fetchBroadcastList(1); // Refresh list to first page
+      toast.success("New Broadcast create successfull");
     } catch (error) {
-      console.error('Error scheduling broadcast:', error);
-      alert("Failed to schedule broadcast. Please try again.");
+      toast.error("Failed to schedule broadcast. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -224,6 +226,7 @@ const Page = () => {
 
   return (
     <div className=" flex-col w-full mt-0 bg-white">
+      <Toaster />
       <section className="flex flex-col items-center gap-2 mt-0">
         {/* Header Section */}
         <section className="w-[95%] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -403,11 +406,11 @@ const Page = () => {
 
       {/* Modal for New Broadcast */}
       {messaging && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-[#18181B1F]">
+        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-[#18181B1F]">
           {/* Backdrop - intentionally no onClick handler to prevent closing */}
-          <div className="absolute inset-0 z-50"></div>
+          <div className="absolute inset-0 z-[9998]"></div>
 
-          <section className="relative z-[60] w-full h-full flex justify-center items-center py-4 px-2 sm:py-8 pointer-events-none">
+          <section className="relative z-[10000] w-full h-full flex justify-center items-center py-4 px-2 sm:py-8 pointer-events-none">
             <div className="relative w-full max-w-[717px] mx-4 rotate-0 opacity-100 rounded-[16px] border border-solid bg-[#ffffff] border-[#E2E4E84D] overflow-y-auto max-h-[90vh] pointer-events-auto shadow-xl">
               {/* Header */}
               <section className="w-full h-[60px] flex justify-between items-center rounded-t-[16px] border-b border-[#F6F6F6] px-[16px] sm:px-[20px] py-[12px] bg-[#fff]">

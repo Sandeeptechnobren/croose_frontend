@@ -38,15 +38,16 @@ const Setting3 = () => {
   };
   return (
     <div>
-      <div className="fixed inset-0 flex  items-center justify-center bg-[#9999] p-4 sm:p-6">
+      <div className="fixed inset-0 flex  items-center justify-center bg-[#9999] p-4 sm:p-6 z-[10001]">
 
-        <div className="absolute w-full max-w-[717px] h-[650px] bg-[#ffffff] z-10 rounded-[16px] border-[#E2E4E84D] overflow-y-auto border-1 ">
+        <div className="absolute w-full max-w-[717px] h-[650px] bg-[#ffffff] z-[10002] rounded-[16px] border-[#E2E4E84D] overflow-y-auto border-1 ">
 
           <section className="w-full h-auto flex justify-between items-center border-b border-[#F6F6F6] rounded-t-[16px] px-4 py-3 sm:px-[20px] sm:py-[12px]">
             <span className="w-auto font-inter font-semibold text-[18px] sm:text-[20px] leading-[150%] tracking-[-0.04em] text-[#1D2939]  ">
               Settings
             </span>
-            <span className="w-9 h-9 rounded-full border p-2 flex items-center justify-center border-[#F1F2F3] bg-[#F6F8FA] hover:cursor-pointer " onClick={() => {setOpenSetting1(false)
+            <span className="w-9 h-9 rounded-full border p-2 flex items-center justify-center border-[#F1F2F3] bg-[#F6F8FA] hover:cursor-pointer " onClick={() => {
+              setOpenSetting1(false)
               setOpenSetting2(false)
               setOpenSetting3(false)
             }} >
