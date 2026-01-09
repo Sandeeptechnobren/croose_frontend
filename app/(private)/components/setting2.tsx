@@ -49,16 +49,16 @@ const SettingTwo = () => {
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-const [confirmPass, setConfirmPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
 
   const [oldPass, setOldPass] = useState('');
   const [newPass, setNewPass] = useState('');
-  
+
   const [msg, setMsg] = useState('');
 
   const handleSubmit = async () => {
     if (newPass !== confirmPass) {
-    
+
       setMsg("New password and confirm password do not match.");
       return;
     }
@@ -79,14 +79,15 @@ const [confirmPass, setConfirmPass] = useState('');
 
   return (
     <div>
-      <div className="fixed inset-0 flex items-center justify-center bg-[#9999] p-4 sm:p-6">
-        <div className="relative z-10 flex justify-center items-center w-full">
+      <div className="fixed inset-0 flex items-center justify-center bg-[#9999] p-4 sm:p-6 z-[10001]">
+        <div className="relative z-[10002] flex justify-center items-center w-full">
           <div className="w-full max-w-[717px] h-[650px] opacity-100 border-[#E2E4E84D] bg-[#ffffff] rounded-[16px] border border-solid overflow-y-auto ">
             <section className="w-full h-auto flex justify-between items-center border-b border-[#F6F6F6] rounded-t-[16px] px-4 py-3 sm:px-[20px] sm:py-[12px]">
               <span className="w-auto font-inter font-semibold text-[18px] sm:text-[20px] leading-[150%] tracking-[-0.04em] text-[#1D2939]">
                 Settings
               </span>
-              <span className="w-9 h-9 rounded-full border p-2 flex items-center justify-center border-[#F1F2F3] bg-[#F6F8FA] hover:cursor-pointer " onClick={() => {setOpenSetting1(false)
+              <span className="w-9 h-9 rounded-full border p-2 flex items-center justify-center border-[#F1F2F3] bg-[#F6F8FA] hover:cursor-pointer " onClick={() => {
+                setOpenSetting1(false)
                 setOpenSetting2(false)
               }} >
                 <Icon icon="iconamoon:close-bold" width="24" height="24" style={{ color: '#000' }} />
@@ -191,16 +192,16 @@ const [confirmPass, setConfirmPass] = useState('');
                 </div>
               </section>
 
-                   <section className="w-full relative flex justify-end  px-4 py-3 sm:px-[20px] sm:py-[12px]">
+              <section className="w-full relative flex justify-end  px-4 py-3 sm:px-[20px] sm:py-[12px]">
 
-              <button onClick={handleSubmit} className="rounded-lg bg-[#685BC7] absolute right-[0px]  text-white text-sm font-semibold px-7 py-2"> Update password </button>
+                <button onClick={handleSubmit} className="rounded-lg bg-[#685BC7] absolute right-[0px]  text-white text-sm font-semibold px-7 py-2"> Update password </button>
+              </section>
+
+
+
             </section>
 
-              
 
-            </section>
-       
-            
 
           </div>
         </div>

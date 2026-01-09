@@ -9,6 +9,7 @@ import Alert from '@mui/material/Alert';
 // import { useRouter } from 'next/router';
 import { useRouter } from 'next/navigation';
 import Loader from '@/app/(private)/components/loading';
+import { Icon } from '@iconify/react/dist/iconify.js';
 
 const Login = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -188,9 +189,17 @@ const Login = () => {
 
                       <button
                         type="submit"
-                        className="bg-[#685BC7] cursor-pointer text-white w-full h-[48px] rounded-[12px] font-semibold text-sm"
+                        disabled={formik.isSubmitting}
+                        className="bg-[#685BC7] cursor-pointer text-white w-full h-[48px] rounded-[12px] font-semibold text-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
-                        Sign in
+                        {formik.isSubmitting ? (
+                          <>
+                            <Icon icon="eos-icons:loading" width="20" height="20" className="animate-spin" />
+                            Signing in...
+                          </>
+                        ) : (
+                          'Sign in'
+                        )}
                       </button>
 
                       <div className="text-center text-sm text-[#101828] mt-2">
