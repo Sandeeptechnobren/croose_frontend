@@ -11,7 +11,10 @@ const Page = () => {
     <div className="flex flex-col ">
       <Navbar heading="Messaging" />
 
-      <section className="w-full h-[100vh] flex justify-center items-center">
+      <section
+        className={`w-full h-[100vh] flex ${!showMessaging ? "justify-center items-center" : "justify-start items-start pt-4"
+          }`}
+      >
         {!showMessaging ? (
           <div className="w-[368px] h-[380px] rotate-0 opacity-100 gap-0 rounded-2xl border border-[#EAECF0] p-0 relative">
             <div className="w-full h-[220px] bg-[#F9FAFB] rounded-t-2xl flex justify-center items-center">
