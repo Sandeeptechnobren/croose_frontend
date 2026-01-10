@@ -162,7 +162,7 @@ const Page = () => {
                     <Icon icon="lucide:message-circle-more" width="24" height="24" />
                   </span>
                   <span className="w-auto h-[20px] mt-3 font-semibold text-sm leading-5 align-bottom text-[#18181B]">
-                    Live Chats{' '}
+                    Live Chats{' '} 3
                   </span>
                 </div>
               </div>

@@ -74,7 +74,7 @@ const Page = () => {
               <img src="/message.png" />
               <div className="w-[212px] h-[20px] font-sans font-medium text-xs leading-5 tracking-normal text-[#475467] ">
                 {' '}
-                Live Chats
+                Live Chats 1
               </div>
             </div>
             <div className=" text-center text-[#101828] flex items-center justify-center w-[100%] h-[70%]  font-sans font-semibold text-4xl leading-[100%] tracking-[-0.025em]">
