@@ -6,7 +6,7 @@ import Spaceiqcolor from './spaceiqcolor'
 import Upgradetopro from './upgradetopro'
 import Scanqrpage from './scanqr'
 import Spacenav from './spacenav'
-import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, addNewMessage } from "@/app/Apis/publicapi";
+import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage } from "@/app/Apis/publicapi";
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
@@ -45,36 +45,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
   }));
 
 
-  // Call NewMessage API when WhatsApp opens
-  useEffect(() => {
-    const callNewMessageApi = async () => {
-      if (!spaceId) {
-        // console.log("Cannot call NewMessage API: spaceId is missing");
-        return;
-      }
 
-      try {
-        // console.log("Calling NewMessage API with spaceId:", spaceId);
-        // Updated payload to try to satisfy potential required fields
-        const payload = {
-          space_id: spaceId,
-          message: "Init", // Dummy message
-          phone: "0000000000", // Dummy phone
-          // Add other potential fields
-          status: "init"
-        };
-        const res = await addNewMessage(payload);
-        // console.log("NewMessage API response:", res);
-      } catch (err: any) {
-        // console.error("Error calling NewMessage API:", err);
-        if (err.response && err.response.status === 422) {
-          // console.warn("⚠️ NewMessage API returned 422. This usually means missing fields in the payload. Please check API documentation for required fields.");
-        }
-      }
-    };
-
-    callNewMessageApi();
-  }, [spaceId]);
 
   useEffect(() => {
     const fetchMessages = async () => {
