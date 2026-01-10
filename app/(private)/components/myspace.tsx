@@ -6,7 +6,7 @@ import Spaceiqcolor from './spaceiqcolor'
 import Upgradetopro from './upgradetopro'
 import Scanqrpage from './scanqr'
 import Spacenav from './spacenav'
-import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage } from "@/app/Apis/publicapi";
+import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp } from "@/app/Apis/publicapi";
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
@@ -91,11 +91,28 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
     }
   }, [selectedChat, spaceId]);
 
-  const handleSendMessage = () => {
-    if (messageInput.trim()) {
-      // Handle sending message - you can add your API call here
-      console.log('Sending message:', messageInput);
-      setMessageInput('');
+  const handleSendMessage = async () => {
+    if (messageInput.trim() && selectedChat?.phone) {
+      try {
+        console.log('Sending message to:', selectedChat.phone);
+        const payload = {
+          message: messageInput,
+          phone: selectedChat.phone
+        };
+        await sendWhatsapp(payload, spaceId);
+
+        // Optimistically update UI
+        const newMessage = {
+          from_me: true,
+          body: messageInput,
+          timestamp: Date.now() / 1000
+        };
+        setMessages(prev => [...prev, newMessage]);
+
+        setMessageInput('');
+      } catch (error) {
+        console.error('Failed to send message:', error);
+      }
     }
   };
 
