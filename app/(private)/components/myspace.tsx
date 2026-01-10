@@ -6,7 +6,7 @@ import Spaceiqcolor from './spaceiqcolor'
 import Upgradetopro from './upgradetopro'
 import Scanqrpage from './scanqr'
 import Spacenav from './spacenav'
-import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus } from "@/app/Apis/publicapi";
+import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage } from "@/app/Apis/publicapi";
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
@@ -14,71 +14,82 @@ import Link from 'next/link'
 import { MessageCircle, Search, MoreVertical, Send, Paperclip, Smile } from 'lucide-react';
 
 
-const WhatsAppChat = ({ spaceLiveChatsData }: { spaceLiveChatsData: any }) => {
+const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any, spaceId: any }) => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [messageInput, setMessageInput] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
 
-  // Sample chat data - replace with your spaceLiveChatsData
-  const chats = spaceLiveChatsData || [
-    {
-      id: 1,
-      name: '918849451406',
-      message: 'chai ja mattel ho jayega',
-      time: '03:11 AM',
-      category: 'General',
-      unread: 0,
-      online: true
-    },
-    {
-      id: 2,
-      name: 'falak khan',
-      phone: '916393797065',
-      message: 'Good morning',
-      time: '02:21 AM',
-      category: 'General',
-      unread: 0,
-      online: true
-    },
-    {
-      id: 3,
-      name: 'Sandeep',
-      phone: '918808050301',
-      message: 'Hi',
-      time: '03:38 PM',
-      category: 'General',
-      unread: 0,
-      online: true
-    },
-    {
-      id: 4,
-      name: 'Sandeep',
-      phone: '919695114516',
-      message: 'how can I register for the summer training',
-      time: '03:25 PM',
-      category: 'General',
-      unread: 0,
-      online: true
-    },
-    {
-      id: 5,
-      name: '915393588327',
-      message: 'hii',
-      time: '10:36 AM',
-      category: 'General',
-      unread: 0,
-      online: true
-    },
-    {
-      id: 6,
-      name: 'Ujjwal',
-      phone: '918433392678',
-      message: 'hi',
-      time: '07:29 AM',
-      category: 'General',
-      unread: 0,
-      online: true
+  // Log the actual API data to see its structure
+  useEffect(() => {
+    // console.log("🔍 spaceLiveChatsData received:", spaceLiveChatsData);
+    // console.log("🔍 Type:", typeof spaceLiveChatsData);
+    // console.log("🔍 Is Array:", Array.isArray(spaceLiveChatsData));
+    if (spaceLiveChatsData) {
+      // console.log("🔍 Length:", spaceLiveChatsData.length);
+      // console.log("🔍 First item:", spaceLiveChatsData[0]);
     }
-  ];
+  }, [spaceLiveChatsData]);
+
+  // Use actual API data with mapping
+  const chats = (spaceLiveChatsData || []).map((chat: any) => ({
+    id: chat.whatsapp_number || Math.random().toString(), // Use whatsapp_number as ID if available
+    name: chat.customer_name || chat.whatsapp_number || 'Unknown',
+    message: chat.user_message || '',
+    time: chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+    unread: 0, // Default to 0 as API doesn't seem to return this
+    online: false, // Default to false
+    category: 'WhatsApp',
+    phone: chat.whatsapp_number,
+    chat_id: chat.whatsapp_number, // Ensure we have a chat identifier
+    ...chat // Keep original fields
+  }));
+
+
+
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      // Use phone as the primary identifier for the chat API
+      const chatId = selectedChat?.phone || selectedChat?.name;
+
+      if (!spaceId) {
+        console.error("Cannot fetch messages: spaceId is null or undefined");
+        setMessages([]);
+        return;
+      }
+
+      console.log("Fetching messages for:", chatId, "SpaceID:", spaceId);
+
+      if (chatId && spaceId) {
+        try {
+          const res = await getMessage(chatId, spaceId);
+          console.log("getMessage response:", res);
+
+          // Check if the response contains messages in the expected format
+          if (res?.messages && Array.isArray(res.messages)) {
+            // If messages are directly in res.messages
+            setMessages(res.messages);
+          } else if (res?.data?.messages && Array.isArray(res.data.messages)) {
+            // If messages are in res.data.messages
+            setMessages(res.data.messages);
+          } else if (Array.isArray(res)) {
+            // Fallback if the response itself is an array
+            setMessages(res);
+          } else {
+            setMessages([]);
+            console.log("No messages found in response", res);
+          }
+        } catch (err) {
+          console.error("Error fetching messages:", err);
+          setMessages([]);
+        }
+      }
+    };
+
+    if (selectedChat) {
+      fetchMessages();
+    }
+  }, [selectedChat, spaceId]);
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
@@ -87,6 +98,22 @@ const WhatsAppChat = ({ spaceLiveChatsData }: { spaceLiveChatsData: any }) => {
       setMessageInput('');
     }
   };
+
+  const formatTime = (timestamp: number) => {
+    if (!timestamp) return '';
+    // Handle both seconds (Unix timestamp) and milliseconds
+    const date = new Date(timestamp > 10000000000 ? timestamp : timestamp * 1000);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter chats based on search query
+  const filteredChats = chats.filter((chat: any) =>
+    chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.phone?.includes(searchQuery) ||
+    chat.message?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="w-full h-[600px] bg-white rounded-lg border border-gray-200 overflow-hidden flex">
@@ -109,13 +136,15 @@ const WhatsAppChat = ({ spaceLiveChatsData }: { spaceLiveChatsData: any }) => {
               type="text"
               placeholder="Search or start new chat"
               className="flex-1 outline-none text-sm text-[#111B21]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
 
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto bg-white">
-          {chats.map((chat: any) => (
+          {filteredChats.map((chat: any) => (
             <div
               key={chat.id}
               onClick={() => setSelectedChat(chat)}
@@ -126,7 +155,7 @@ const WhatsAppChat = ({ spaceLiveChatsData }: { spaceLiveChatsData: any }) => {
               <div className="relative flex-shrink-0">
                 <div className="w-12 h-12 rounded-full bg-[#DFE5E7] flex items-center justify-center">
                   <span className="text-[#54656F] font-semibold text-lg">
-                    {chat.name.charAt(0).toUpperCase()}
+                    {chat.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 {chat.online && (
@@ -152,10 +181,15 @@ const WhatsAppChat = ({ spaceLiveChatsData }: { spaceLiveChatsData: any }) => {
                     </span>
                   )}
                 </div>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-col gap-1">
                   <span className="text-xs text-[#667781] bg-[#F0F2F5] px-2 py-0.5 rounded">
                     {chat.category}
                   </span>
+                  {chat.chat_id && (
+                    <span className="text-[10px] text-[#8696A0] font-mono">
+                      ID: {chat.chat_id}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -173,7 +207,7 @@ const WhatsAppChat = ({ spaceLiveChatsData }: { spaceLiveChatsData: any }) => {
                 <div className="relative">
                   <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center">
                     <span className="text-[#54656F] font-semibold">
-                      {selectedChat.name.charAt(0).toUpperCase()}
+                      {selectedChat.name?.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   {selectedChat.online && (
@@ -203,16 +237,33 @@ const WhatsAppChat = ({ spaceLiveChatsData }: { spaceLiveChatsData: any }) => {
                 backgroundRepeat: 'repeat'
               }}
             >
-              {/* Sample Messages */}
+              {/* Messages */}
               <div className="space-y-3">
-                <div className="flex justify-start">
-                  <div className="bg-white rounded-lg px-3 py-2 max-w-[65%] shadow-sm">
-                    <p className="text-sm text-[#111B21]">{selectedChat.message}</p>
-                    <span className="text-[10px] text-[#667781] float-right ml-2 mt-1">
-                      {selectedChat.time}
-                    </span>
+                {messages && messages.length > 0 ? (
+                  messages.map((msg: any, index: number) => (
+                    <div key={msg.id || index} className={`flex ${msg.from_me ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`rounded-lg px-3 py-2 max-w-[65%] shadow-sm ${msg.from_me ? 'bg-[#D9FDD3]' : 'bg-white'
+                          }`}
+                      >
+                        <p className="text-sm text-[#111B21] whitespace-pre-wrap">{msg.text?.body || msg.body}</p>
+                        <span className={`text-[10px] text-[#667781] float-right ml-2 mt-1`}>
+                          {formatTime(msg.timestamp)}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  // Fallback to sample message if no fetched messages (optional, or just empty)
+                  <div className="flex justify-start">
+                    <div className="bg-white rounded-lg px-3 py-2 max-w-[65%] shadow-sm">
+                      <p className="text-sm text-[#111B21]">{selectedChat.message}</p>
+                      <span className="text-[10px] text-[#667781] float-right ml-2 mt-1">
+                        {selectedChat.time}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -275,8 +326,18 @@ const Myspace = () => {
   const [showLiveAgent, setShowLiveAgent] = useState(false);
   const [instanceData, setInstanceData] = useState<any>()
   const searchParams: any = useSearchParams();
-  const id = searchParams.get('id');
+  // Support both 'id' and 'space_id' from URL
+  const paramId = searchParams.get('id');
+  const paramSpaceId = searchParams.get('space_id');
+  // TEMPORARY: Hardcoded fallback ID for testing (REMOVE THIS IN PRODUCTION)
+  const id = paramId || paramSpaceId || "189";
+
   const uuid = searchParams.get('uuid');
+
+  console.log("Myspace - Raw URL params:", Object.fromEntries(searchParams.entries()));
+  console.log("Myspace - Derived ID:", id, "(from id:", paramId, "space_id:", paramSpaceId, ")");
+  console.log("Myspace - UUID:", uuid);
+
   const handleCheck = async () => {
     setLoading(true)
     try {
@@ -316,10 +377,14 @@ const Myspace = () => {
   useEffect(() => {
     const fetchLiveChats = async () => {
       try {
+        console.log("📡 Fetching live chats for space ID:", id);
         const res = await spaceLiveChats(Number(id));
+        console.log("📡 Live Chats API Response:", res);
+        console.log("📡 Type of response:", typeof res);
+        console.log("📡 Is Array:", Array.isArray(res));
         setSpaceLiveChatsData(res);
       } catch (err) {
-        console.log(err);
+        console.error("❌ Error fetching live chats:", err);
       }
     };
     if (id) fetchLiveChats();
@@ -502,7 +567,7 @@ const Myspace = () => {
 
         <section className="flex justify-center w-[95%] mt-4">
           {showLiveAgent ? (
-            <WhatsAppChat spaceLiveChatsData={spaceLiveChatsData} />
+            <WhatsAppChat spaceLiveChatsData={spaceLiveChatsData} spaceId={id} />
           ) : (
             <div className="w-[89%] h-[486px] bottom-0 rounded-lg border border-[#EAECF0]">
               <div
