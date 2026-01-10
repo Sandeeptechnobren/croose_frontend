@@ -1896,7 +1896,18 @@ export const spaceLiveChats = async (spaceId: number) => {
     console.log(' Response Data:', res.data);
     console.log('🌐 Response Data.data:', res.data.data);
     console.log('🌐 Type of res.data.data:', typeof res.data.data);
-    return res.data.data
+
+    // Robust check for data location
+    if (Array.isArray(res.data?.data)) {
+      return res.data.data;
+    } else if (Array.isArray(res.data)) {
+      return res.data;
+    } else if (res.data && typeof res.data === 'object') {
+      // Sometimes data might be wrapped differently or be a single object
+      return [res.data];
+    }
+
+    return []; // Return empty array instead of undefined to prevent crashes
   } catch (err: any) {
     console.error('API Error:', err);
     if (err.response) {
@@ -2219,5 +2230,25 @@ export const addNewMessage = async (data: any) => {
   } catch (error: any) {
     console.error('Error adding New Message :', error);
     throw error;
+  }
+};
+
+export const getMessage = async (id: string, space_id: string) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios({
+      method: "get",
+      url: `${BASE_URL}/api/Message/${id}`,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      params: {
+        space_id: space_id
+      }
+    });
+    return res.data;
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
 };
