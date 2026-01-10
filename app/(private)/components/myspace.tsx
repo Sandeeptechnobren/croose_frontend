@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Spaceiq from './spaceiq'
 import Documentpopup from './documentpopup'
 import Spaceiqcolor from './spaceiqcolor'
@@ -17,7 +17,20 @@ import { MessageCircle, Search, MoreVertical, Send, Paperclip, Smile } from 'luc
 const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any, spaceId: any }) => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [messageInput, setMessageInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  
   const [messages, setMessages] = useState<any[]>([]);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const getInitials = (name: string = '') =>
+  name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 
   // Log the actual API data to see its structure
   useEffect(() => {
@@ -151,13 +164,24 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
               className={`px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-[#F5F6F6] ${selectedChat?.id === chat.id ? 'bg-[#F0F2F5]' : ''
                 }`}
             >
-              {/* Avatar */}
               <div className="relative flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-[#DFE5E7] flex items-center justify-center">
+                {/* <div className="w-12 h-12 rounded-full bg-[#DFE5E7] flex items-center justify-center">
                   <span className="text-[#54656F] font-semibold text-lg">
                     {chat.name?.charAt(0).toUpperCase()}
                   </span>
-                </div>
+                </div> */}
+                {chat.profilePic ? (
+                    <img
+                      src={chat.profilePic}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-[#DFE5E7] flex items-center justify-center">
+                      <span className="text-[#54656F] font-semibold text-sm">
+                        {getInitials(chat.name)}
+                      </span>
+                    </div>
+                  )}
                 {chat.online && (
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#25D366] rounded-full border-2 border-white"></div>
                 )}
@@ -182,14 +206,14 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                   )}
                 </div>
                 <div className="mt-1 flex flex-col gap-1">
-                  <span className="text-xs text-[#667781] bg-[#F0F2F5] px-2 py-0.5 rounded">
+                  {/* <span className="text-xs text-[#667781] bg-[#F0F2F5] px-2 py-0.5 rounded">
                     {chat.category}
-                  </span>
-                  {chat.chat_id && (
+                  </span> */}
+                  {/* {chat.chat_id && (
                     <span className="text-[10px] text-[#8696A0] font-mono">
                       ID: {chat.chat_id}
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>
@@ -205,11 +229,23 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             <div className="h-[60px] bg-[#F0F2F5] px-4 flex items-center justify-between border-b border-gray-200">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center">
+                  {/* <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center">
                     <span className="text-[#54656F] font-semibold">
                       {selectedChat.name?.charAt(0).toUpperCase()}
                     </span>
-                  </div>
+                  </div> */}
+                  {selectedChat.profilePic ? (
+                      <img
+                        src={selectedChat.profilePic}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center">
+                        <span className="text-[#54656F] font-semibold text-sm">
+                          {getInitials(selectedChat.name)}
+                        </span>
+                      </div>
+                    )}
                   {selectedChat.online && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#25D366] rounded-full border-2 border-white"></div>
                   )}
@@ -229,7 +265,6 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
               </div>
             </div>
 
-            {/* Messages Area */}
             <div
               className="flex-1 overflow-y-auto p-4 bg-[#EFEAE2]"
               style={{
@@ -237,10 +272,10 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                 backgroundRepeat: 'repeat'
               }}
             >
-              {/* Messages */}
               <div className="space-y-3">
                 {messages && messages.length > 0 ? (
-                  messages.map((msg: any, index: number) => (
+                  // messages.map((msg: any, index: number) => (
+                  [...messages].reverse().map((msg: any, index: number) => (
                     <div key={msg.id || index} className={`flex ${msg.from_me ? 'justify-end' : 'justify-start'}`}>
                       <div
                         className={`rounded-lg px-3 py-2 max-w-[65%] shadow-sm ${msg.from_me ? 'bg-[#D9FDD3]' : 'bg-white'
@@ -252,9 +287,9 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                         </span>
                       </div>
                     </div>
+                    
                   ))
                 ) : (
-                  // Fallback to sample message if no fetched messages (optional, or just empty)
                   <div className="flex justify-start">
                     <div className="bg-white rounded-lg px-3 py-2 max-w-[65%] shadow-sm">
                       <p className="text-sm text-[#111B21]">{selectedChat.message}</p>
@@ -264,10 +299,9 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                     </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
             </div>
-
-            {/* Message Input */}
             <div className="bg-[#F0F2F5] px-4 py-2 flex items-center gap-2">
               <button className="p-2 hover:bg-[#E0E0E0] rounded-full transition-colors">
                 <Smile className="w-6 h-6 text-[#54656F]" />
@@ -292,7 +326,6 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             </div>
           </>
         ) : (
-          /* Empty State */
           <div className="flex-1 flex flex-col items-center justify-center">
             <div className="w-16 h-16 bg-[#F0F2F5] rounded-full flex items-center justify-center mb-4">
               <MessageCircle className="w-8 h-8 text-[#54656F]" />
