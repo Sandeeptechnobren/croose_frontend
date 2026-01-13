@@ -2252,3 +2252,26 @@ export const getMessage = async (id: string, space_id: string) => {
     throw err;
   }
 };
+
+export const sendWhatsapp = async (data: any, spaceId: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      `${BASE_URL}/api/sendWhatsapp`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        params: {
+          space_id: spaceId
+        }
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error sending WhatsApp message:', error);
+    throw error;
+  }
+};
