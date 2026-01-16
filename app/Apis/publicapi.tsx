@@ -2232,6 +2232,48 @@ export const addNewMessage = async (data: any) => {
     throw error;
   }
 };
+export const addProfileUpdate = async (data: any) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `${BASE_URL}/api/account/profile/update`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Let axios set Content-Type (multipart/form-data for FormData, application/json for objects)
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+export const addForgetPassword = async (data: any) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `${BASE_URL}/api/reset-password`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // Let axios set Content-Type (multipart/form-data for FormData, application/json for objects)
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    console.error('Error updating Password:', error);
+    throw error;
+  }
+};
 
 export const getMessage = async (id: string, space_id: string) => {
   try {
