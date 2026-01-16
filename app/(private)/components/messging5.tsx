@@ -102,29 +102,52 @@ const Page = () => {
   };
 
   // Handle schedule broadcast
+  // Handle schedule broadcast
   const handleSchedule = async () => {
     if (!selectedTarget || !frequency || !date || !content) {
-      toast.error("Please fill in all fields");
+      toast.error("Please fill in all fields", {
+        position: 'top-center',
+        style: {
+          background: 'red',
+          color: 'white',
+        }
+      });
       return;
     }
 
     try {
       setSubmitting(true);
 
-      await addBroadcast({
+      const payload = {
         target_id: selectedTarget,
         frequency: frequency,
         content: content,
         scheduled_at: date
-      });
+      }
+
+      console.log("Sending payload:", payload)
+
+      await addBroadcast(payload);
 
       // Success
       setMessaging(false);
       resetForm();
       fetchBroadcastList(1); // Refresh list to first page
-      toast.success("New Broadcast create successfull");
+      toast.success("New Broadcast create successfull", {
+        position: 'top-center',
+        style: {
+          background: 'green',
+          color: 'white',
+        }
+      });
     } catch (error) {
-      toast.error("Failed to schedule broadcast. Please try again.");
+      toast.error("Failed to schedule broadcast. Please try again.", {
+        position: 'top-center',
+        style: {
+          background: 'red',
+          color: 'white',
+        }
+      });
     } finally {
       setSubmitting(false);
     }
