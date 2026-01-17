@@ -2256,15 +2256,16 @@ export const addProfileUpdate = async (data: any) => {
 export const addForgetPassword = async (data: any) => {
   try {
     const token = localStorage.getItem("token");
+    const headers: any = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
 
     const res = await axios.post(
       `${BASE_URL}/api/reset-password`,
       data,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          // Let axios set Content-Type (multipart/form-data for FormData, application/json for objects)
-        },
+        headers: headers
       }
     );
 
