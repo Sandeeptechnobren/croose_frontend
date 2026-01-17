@@ -1,8 +1,9 @@
 'use client'
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { findAccountByEmail, addForgetPassword } from '@/app/Apis/publicapi'
+import { addForgetPassword } from '@/app/Apis/publicapi'
 import toast, { Toaster } from 'react-hot-toast'
+import { Eye, EyeOff } from 'lucide-react'
 
 const Forgotcard = (props: any) => {
   const [email, setEmail] = useState('');
@@ -11,6 +12,8 @@ const Forgotcard = (props: any) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: Password
   const [isLoading, setIsLoading] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleVerifyEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,20 +30,25 @@ const Forgotcard = (props: any) => {
 
     setIsLoading(true);
     try {
-      const res = await findAccountByEmail(email);
-      console.log('Email verification response:', res);
+      const payload = {
+        email: email
+      };
 
-      if (res?.status === 200 && res?.account_existing_status === 1) {
-        toast.success(`Account found! OTP has been sent to ${email}`);
+      console.log('Sending OTP request:', payload);
+      const res = await addForgetPassword(payload);
+      console.log('OTP sending response:', res);
+
+      const isSuccess = res?.status === 200 || res?.status === "200" || res?.status === true || res?.success || res?.message?.toLowerCase().includes('sent');
+
+      if (isSuccess) {
+        toast.success(res?.message || `OTP has been sent to ${email}`);
         setStep(2);
-      } else if (res?.account_existing_status === 0) {
-        toast.error('No account found with this email address.');
       } else {
-        toast.error(res?.message || 'Email not found. Please check and try again.');
+        toast.error(res?.message || 'Failed to send OTP. Please check your email.');
       }
     } catch (err: any) {
-      console.error('Email verification error:', err);
-      toast.error(err?.response?.data?.message || 'Unable to verify email. Please try again later.');
+      console.error('OTP sending error:', err);
+      toast.error(err?.response?.data?.message || 'Unable to send OTP. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -62,9 +70,12 @@ const Forgotcard = (props: any) => {
 
       console.log('Verifying OTP payload:', payload);
       const res = await addForgetPassword(payload);
+      console.log('OTP verification response:', res);
 
-      if (res?.status === 200) {
-        toast.success('OTP verified successfully!');
+      const isSuccess = res?.status === 200 || res?.status === "200" || res?.status === true || res?.success || res?.message?.toLowerCase().includes('verified') || res?.message?.toLowerCase().includes('success');
+
+      if (isSuccess) {
+        toast.success(res?.message || 'OTP verified successfully!');
         setStep(3);
       } else {
         toast.error(res?.message || 'Invalid OTP. Please try again.');
@@ -107,9 +118,12 @@ const Forgotcard = (props: any) => {
 
       console.log('Resetting password payload:', payload);
       const res = await addForgetPassword(payload);
+      console.log('Reset password response:', res);
 
-      if (res?.status === 200) {
-        toast.success('Password reset successfully!');
+      const isSuccess = res?.status === 200 || res?.status === "200" || res?.status === true || res?.success || res?.message?.toLowerCase().includes('success');
+
+      if (isSuccess) {
+        toast.success(res?.message || 'Password reset successfully!');
 
         setTimeout(() => {
           window.location.href = '/login';
@@ -203,15 +217,24 @@ const Forgotcard = (props: any) => {
                   <label htmlFor="password" className="text-[#344054] text-sm font-medium mb-1">
                     New Password
                   </label>
-                  <input
-                    type="password"
-                    id="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    className="h-11 px-4 text-sm text-[#667085] border border-gray-300 rounded-xl outline-none focus:border-[#685BC7] focus:ring-1 focus:ring-[#685BC7]"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      id="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                      className="w-full h-11 px-4 pr-10 text-sm text-[#667085] border border-gray-300 rounded-xl outline-none focus:border-[#685BC7] focus:ring-1 focus:ring-[#685BC7]"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   <small className="text-xs text-[#667085] mt-1">
                     At least 8 chars, uppercase, lowercase, number & special char
                   </small>
@@ -221,15 +244,24 @@ const Forgotcard = (props: any) => {
                   <label htmlFor="confirm-password" className="text-[#344054] text-sm font-medium mb-1">
                     Confirm New Password
                   </label>
-                  <input
-                    type="password"
-                    id="confirm-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm password"
-                    className="h-11 px-4 text-sm text-[#667085] border border-gray-300 rounded-xl outline-none focus:border-[#685BC7] focus:ring-1 focus:ring-[#685BC7]"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="confirm-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm password"
+                      className="w-full h-11 px-4 pr-10 text-sm text-[#667085] border border-gray-300 rounded-xl outline-none focus:border-[#685BC7] focus:ring-1 focus:ring-[#685BC7]"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
               </>
             )}
