@@ -1670,11 +1670,44 @@ export const registerApi = async (data: any) => {
 
     return res;
 
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    throw err;
   }
 
 };
+
+export const verifySignupOtpApi = async (data: { email: string; otp: number }) => {
+  try {
+    const res = await axiosRequest({
+      method: "post",
+      url: `${BASE_URL}/api/register`,
+      headers: {},
+      body: data,
+    });
+
+    return res;
+
+  } catch (err: any) {
+    throw err;
+  }
+};
+
+export const completeRegistrationApi = async (data: any) => {
+  try {
+    const res = await axiosRequest({
+      method: "post",
+      url: `${BASE_URL}/api/register`,
+      headers: {},
+      body: data,
+    });
+
+    return res;
+
+  } catch (err: any) {
+    throw err;
+  }
+};
+
 
 export const searchProducts = async (query: string) => {
   const token = localStorage.getItem("token");

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import Link from 'next/link';
 import Selectbox from '../component/selectbox';
-import { registerApi } from '@/app/Apis/publicapi';
+import { registerApi, verifySignupOtpApi, completeRegistrationApi } from '@/app/Apis/publicapi';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertColor } from '@mui/material/Alert';
 import PublicRoute from '../component/publiroute';
@@ -17,14 +17,14 @@ type SignupFormValues = {
   phone_number: string;
   email: string;
   password: string;
-  security_question: any;
-  security_answer: any;
-
+  otp: string;
 };
 
 
 const Signupform = () => {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [registeredEmail, setRegisteredEmail] = useState<string>('');
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -52,87 +52,128 @@ const Signupform = () => {
       phone_number: '',
       email: '',
       password: '',
-      security_question: "",
-      security_answer: "",
-
-
+      otp: '',
     },
     validate: (values) => {
       const errors: Partial<SignupFormValues> = {};
-      if (!values.name) errors.name = 'Name is required';
-      if (!values.email) errors.email = 'Email is required';
-      else if (
-        !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-      ) {
-        errors.email = 'Invalid email address';
+
+      if (currentStep === 1) {
+        if (!values.name) errors.name = 'Name is required';
+        if (!values.email) errors.email = 'Email is required';
+        else if (
+          !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
+        ) {
+          errors.email = 'Invalid email address';
+        }
       }
 
-      if (!values.password || values.password.length < 8) {
-        errors.password = 'Password must be at least 8 characters';
+      if (currentStep === 2) {
+        if (!values.otp) errors.otp = 'OTP is required';
+        else if (values.otp.length !== 6) {
+          errors.otp = 'OTP must be 6 digits';
+        }
       }
+
+      if (currentStep === 3) {
+        if (!values.password || values.password.length < 8) {
+          errors.password = 'Password must be at least 8 characters';
+        }
+      }
+
       return errors;
     },
     onSubmit: async (values) => {
       try {
-        const res = await registerApi({
-          ...values,
-          business_location: values.business_location?.name,
-        });
-
-        if (res?.status) {
-          setSnackbar({
-            open: true,
-            message: res.message || 'Registered Successfully!',
-            severity: 'success',
+        if (currentStep === 1) {
+          // Step 1: Initial registration (send OTP)
+          const res = await registerApi({
+            name: values.name,
+            business_name: values.business_name,
+            business_location: values.business_location,
+            phone_number: values.phone_number,
+            email: values.email,
           });
 
-          console.log(res)
-
-
-          if (res.token) {
-            localStorage.setItem('token', res.token);
+          if (res?.status) {
+            setSnackbar({
+              open: true,
+              message: res.message || 'OTP sent to your email!',
+              severity: 'success',
+            });
+            setRegisteredEmail(values.email);
+            setCurrentStep(2);
+          } else {
+            let errorMsg = res.message || 'Registration failed';
+            if (res.errors?.email?.length > 0) {
+              errorMsg = res.errors.email[0];
+            }
+            setSnackbar({
+              open: true,
+              message: errorMsg,
+              severity: 'error',
+            });
           }
-          // if(res.data){
-          //   localStorage.setItem("user",JSON.stringify(res.data))
-          // }
-          localStorage.setItem('registeredEmail', values.email)
-          console.log("email:", values.email)
-
-          // router.push(`/emailverification?email=${encodeURIComponent(values.email)}`);
-          router.push("/login")
-        } else {
-          let errorMsg = res.message;
-
-          if (res.errors?.email?.length > 0) {
-            errorMsg = res.errors.email[0];
-          }
-          setSnackbar({
-            open: true,
-            message: errorMsg,
-            severity: 'error',
+        } else if (currentStep === 2) {
+          // Step 2: Verify OTP
+          const res = await verifySignupOtpApi({
+            email: registeredEmail,
+            otp: parseInt(values.otp),
           });
+
+          if (res?.status) {
+            setSnackbar({
+              open: true,
+              message: res.message || 'OTP verified successfully!',
+              severity: 'success',
+            });
+            setCurrentStep(3);
+          } else {
+            setSnackbar({
+              open: true,
+              message: res.message || 'Invalid OTP',
+              severity: 'error',
+            });
+          }
+        } else if (currentStep === 3) {
+          // Step 3: Complete registration with password
+          const res = await completeRegistrationApi({
+            name: values.name,
+            business_name: values.business_name,
+            business_location: values.business_location,
+            phone_number: values.phone_number,
+            email: registeredEmail,
+            password: values.password,
+          });
+
+          if (res?.status) {
+            setSnackbar({
+              open: true,
+              message: res.message || 'Registration completed successfully!',
+              severity: 'success',
+            });
+
+            if (res.token) {
+              localStorage.setItem('token', res.token);
+            }
+
+            setTimeout(() => {
+              router.push('/login');
+            }, 1500);
+          } else {
+            setSnackbar({
+              open: true,
+              message: res.message || 'Registration failed',
+              severity: 'error',
+            });
+          }
         }
       } catch (err: any) {
-        if (err.response?.data?.errors?.email) {
-          setSnackbar({
-            open: true,
-            message: err.response.data.errors.email[0],
-            severity: 'error',
-          });
-        } else if (err.response?.data?.message) {
-          setSnackbar({
-            open: true,
-            message: err.response.data.message,
-            severity: 'error',
-          });
-        } else {
-          setSnackbar({
-            open: true,
-            message: 'Email already exists',
-            severity: 'error',
-          });
-        }
         console.error('Registration Error:', err);
+        setSnackbar({
+          open: true,
+          message: err?.message || 'An error occurred. Please try again.',
+          severity: 'error',
+        });
       }
     },
   });
@@ -163,102 +204,106 @@ const Signupform = () => {
               <h1 className="font-bold text-[32px] select-none  text-[#1D2939]">Create an account</h1>
 
               <form onSubmit={formik.handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block mb-2 text-sm font-medium select-none text-[#344054]">Full Name</label>
-                  <input  type="text" name="name" id="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Name" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
-                  {formik.touched.name && formik.errors.name && <p className="text-red-500  text-sm mt-1">{formik.errors.name}</p>}
-                </div>
+                {/* Step 1: User Details */}
+                {currentStep === 1 && (
+                  <>
+                    <div>
+                      <label htmlFor="name" className="block mb-2 text-sm font-medium select-none text-[#344054]">Full Name</label>
+                      <input type="text" name="name" id="name" value={formik.values.name} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Name" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
+                      {formik.touched.name && formik.errors.name && <p className="text-red-500  text-sm mt-1">{formik.errors.name}</p>}
+                    </div>
 
-                <div>
-                  <label htmlFor="business_name" className="block mb-2 text-sm font-medium select-none text-[#344054]">Business Name</label>
-                  <input type="text" name="business_name" id="business_name" value={formik.values.business_name} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Business Name" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
-                </div>
+                    <div>
+                      <label htmlFor="business_name" className="block mb-2 text-sm font-medium select-none text-[#344054]">Business Name</label>
+                      <input type="text" name="business_name" id="business_name" value={formik.values.business_name} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Business Name" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
+                    </div>
 
-                <div>
-                  <Selectbox formik={formik} />
-                </div>
+                    <div>
+                      <Selectbox formik={formik} />
+                    </div>
 
-                <div>
-                  <label htmlFor="email" className="block mb-2 text-sm font-medium select-none  text-[#344054]">Email</label>
-                  <input type="email" name="email" id="email" value={formik.values.email} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Email" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
-                  {formik.touched.email && formik.errors.email && <p className="text-red-500 text-sm mt-1">{formik.errors.email}</p>}
-                </div>
+                    <div>
+                      <label htmlFor="email" className="block mb-2 text-sm font-medium select-none  text-[#344054]">Email</label>
+                      <input type="email" name="email" id="email" value={formik.values.email} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Email" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
+                      {formik.touched.email && formik.errors.email && <p className="text-red-500 text-sm mt-1">{formik.errors.email}</p>}
+                    </div>
 
-                <div>
-                  <label htmlFor="phone_number" className="block mb-2 text-sm font-medium select-none text-[#344054]">Mobile Number</label>
-                  <input type="text" name="phone_number" id="phone_number" value={formik.values.phone_number} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Mobile Number" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
-                </div>
+                    <div>
+                      <label htmlFor="phone_number" className="block mb-2 text-sm font-medium select-none text-[#344054]">Mobile Number</label>
+                      <input type="text" name="phone_number" id="phone_number" value={formik.values.phone_number} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Mobile Number" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
+                    </div>
+                  </>
+                )}
 
-                <div>
-                  <label htmlFor="password" className="block mb-2 text-sm font-medium select-none select-none text-[#344054]">Password (Min of 8 characters)</label>
-                  <input type="password" name="password" id="password" value={formik.values.password} onChange={formik.handleChange} onBlur={formik.handleBlur} placeholder="Enter Password" className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none" />
-                  {formik.touched.password && formik.errors.password && <p className="text-red-500 text-sm mt-1">{formik.errors.password}</p>}
-                </div>
+                {/* Step 2: OTP Verification */}
+                {currentStep === 2 && (
+                  <div>
+                    <label htmlFor="otp" className="block mb-2 text-sm font-medium select-none text-[#344054]">Enter OTP</label>
+                    <p className="text-sm text-gray-600 mb-2">We've sent a 6-digit OTP to {registeredEmail}</p>
+                    <input
+                      type="text"
+                      name="otp"
+                      id="otp"
+                      value={formik.values.otp}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="Enter 6-digit OTP"
+                      maxLength={6}
+                      className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none"
+                    />
+                    {formik.touched.otp && formik.errors.otp && <p className="text-red-500 text-sm mt-1">{formik.errors.otp}</p>}
+                  </div>
+                )}
 
-                <div className=''  >
+                {/* Step 3: Password Setup */}
+                {currentStep === 3 && (
+                  <div>
+                    <label htmlFor="password" className="block mb-2 text-sm font-medium select-none text-[#344054]">Set Password (Min of 8 characters)</label>
+                    <input
+                      type="password"
+                      name="password"
+                      id="password"
+                      value={formik.values.password}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="Enter Password"
+                      className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none"
+                    />
+                    {formik.touched.password && formik.errors.password && <p className="text-red-500 text-sm mt-1">{formik.errors.password}</p>}
+                  </div>
+                )}
 
+                <button type="submit" className="bg-[#685BC7] cursor-pointer text-white font-semibold text-sm flex justify-center items-center w-full h-[48px] rounded-[12px]">
+                  {currentStep === 1 && 'Send OTP'}
+                  {currentStep === 2 && 'Verify OTP'}
+                  {currentStep === 3 && 'Complete Registration'}
+                </button>
 
-
-
-
-                  <label className="block mb-2 text-sm font-medium text-[#344054]" >Select question</label>
-                  <select
-                    name="security_question"
-                    value={formik.values.security_question || ''}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className='text-[#344054] rounded-[10px] border-[#344054] border-1 text-[11px] font-medium w-full p-[13px]'
-                  >
-
-                    <option value='What service did you book first using Croose?'>What service did you book first using Croose?</option>
-                    <option value='What was the location of your first appointment with Croose?'>What was the location of your first appointment with Croose?</option>
-                    <option value='What was your most recent service on Croose?'>What was your most recent service on Croose?</option>
-                    <option value='Which salon or service provider do you visit most often via Croose?'>Which salon or service provider do you visit most often via Croose?</option>
-                    <option value='Who referred you to Croose or introduced you to our platform?'>Who referred you to Croose or introduced you to our platform?</option>
-                  </select>
-
-
-
-                </div>
-                <div>
-                  <label htmlFor="password" className="block mb-2 text-sm font-medium text-[#344054]">Security answer</label>
-                  <input
-                    type="text"
-                    name="security_answer"
-                    id="security_answer"
-                    value={formik.values.security_answer || ''}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder="Enter Answer"
-                    className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none"
-                  />
-
-
-                </div>
-                {/* <Link href={"/emailverification"} > */}
-                <button type="submit" className="bg-[#685BC7] cursor-pointer text-white font-semibold text-sm flex justify-center className='cursor-pointer'  items-center w-full h-[48px] rounded-[12px]">Sign up</button>
-                {/* </Link> */}
                 <div className="text-center  text-sm text-[#101828] mt-2">
                   Already have an account?{' '}
                   <Link href="/login" className="text-[#685BC7] font-medium hover:underline">Log In</Link>
                 </div>
 
-                <div className="flex items-center justify-center w-full gap-4 my-4">
-                  <hr className="flex-grow border-t border-gray-300" />
-                  <span className="text-gray-500 text-sm font-medium">OR</span>
-                  <hr className="flex-grow border-t border-gray-300" />
-                </div>
+                {currentStep === 1 && (
+                  <>
+                    <div className="flex items-center justify-center w-full gap-4 my-4">
+                      <hr className="flex-grow border-t border-gray-300" />
+                      <span className="text-gray-500 text-sm font-medium">OR</span>
+                      <hr className="flex-grow border-t border-gray-300" />
+                    </div>
 
-                <div className='cursor-pointer' >
-                  <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
-                    <img src="google.png" alt="Google" className="w-5 h-5" />
-                    Continue with Google
-                  </button>
-                  <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
-                    <img src="apple.jpeg" alt="Apple" className="w-9 h-auto" />
-                    Continue with Apple
-                  </button>
-                </div>
+                    <div className='cursor-pointer' >
+                      <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
+                        <img src="google.png" alt="Google" className="w-5 h-5" />
+                        Continue with Google
+                      </button>
+                      <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
+                        <img src="apple.jpeg" alt="Apple" className="w-9 h-auto" />
+                        Continue with Apple
+                      </button>
+                    </div>
+                  </>
+                )}
               </form>
 
               <Snackbar
