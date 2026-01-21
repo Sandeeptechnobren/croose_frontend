@@ -18,6 +18,7 @@ const Login = () => {
 
   const [loginData, setLoginData] = useState({})
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const router = useRouter()
 
@@ -168,16 +169,25 @@ const Login = () => {
 
                       <div>
                         <label htmlFor="password" className="block mb-2 text-sm font-medium text-[#344054]">Password</label>
-                        <input
-                          type="password"
-                          name="password"
-                          id="password"
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          value={formik.values.password}
-                          placeholder="Enter password"
-                          className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px]"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            id="password"
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            value={formik.values.password}
+                            placeholder="Enter password"
+                            className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          >
+                            <Icon icon={showPassword ? "tabler:eye-off-filled" : "tabler:eye-filled"} width="20" height="20" />
+                          </button>
+                        </div>
                         {formik.touched.password && formik.errors.password && (
                           <p className='text-red-500 text-sm mt-1'>{formik.errors.password}</p>
                         )}

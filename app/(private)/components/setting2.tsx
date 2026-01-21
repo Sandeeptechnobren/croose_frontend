@@ -25,22 +25,18 @@ const SettingTwo = () => {
 
   const handlelogout = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('No token found. Please login again.');
-        router.push('/login');
-        return;
-      }
-
-      await logoutapi({}); // You can pass token here if API expects it
-      localStorage.removeItem('token');
-      localStorage.removeItem('password'); // Optional: clear password
+      // Close the modal immediately
       setOpenSetting2(false);
+
+      await logoutapi({});
+      localStorage.removeItem('token');
+      localStorage.removeItem('userdata');
       setSnackbarMessage('Logout successful');
       setOpenSnackbar(true);
+
       setTimeout(() => {
         router.push('/login');
-      }, 1000);
+      }, 800);
     } catch (err: any) {
       setSnackbarMessage(err.message || 'Logout failed');
       setOpenSnackbar(true);

@@ -9,6 +9,7 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertColor } from '@mui/material/Alert';
 import PublicRoute from '../component/publiroute';
 import { useRouter } from 'next/navigation';
+import { Icon } from '@iconify/react/dist/iconify.js';
 
 type SignupFormValues = {
   name: string;
@@ -25,6 +26,7 @@ const Signupform = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [registeredEmail, setRegisteredEmail] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -259,16 +261,25 @@ const Signupform = () => {
                 {currentStep === 3 && (
                   <div>
                     <label htmlFor="password" className="block mb-2 text-sm font-medium select-none text-[#344054]">Set Password (Min of 8 characters)</label>
-                    <input
-                      type="password"
-                      name="password"
-                      id="password"
-                      value={formik.values.password}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      placeholder="Enter Password"
-                      className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        id="password"
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        placeholder="Enter Password"
+                        className="w-full h-[44px] p-[16px] text-sm border border-gray-300 rounded-[12px] outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        <Icon icon={showPassword ? "tabler:eye-off-filled" : "tabler:eye-filled"} width="20" height="20" />
+                      </button>
+                    </div>
                     {formik.touched.password && formik.errors.password && <p className="text-red-500 text-sm mt-1">{formik.errors.password}</p>}
                   </div>
                 )}

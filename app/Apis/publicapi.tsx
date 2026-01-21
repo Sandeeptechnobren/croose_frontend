@@ -1911,9 +1911,13 @@ export const spaceLiveChats = async (spaceId: number) => {
     const token = localStorage.getItem("token");
     console.log(' Token:', token ? 'Token exists' : 'No token found');
     console.log(' Making API call with spaceId:', spaceId);
+
+    // Instead of throwing error, return empty array if no token
     if (!token) {
-      throw new Error("No authentication token found");
+      console.warn("⚠️ No authentication token found, returning empty array");
+      return [];
     }
+
     const res = await axios({
       method: 'get',
       url: `${BASE_URL}/api/space_chat_list`,
@@ -1947,7 +1951,8 @@ export const spaceLiveChats = async (spaceId: number) => {
       console.error('Error Response Status:', err.response.status);
       console.error('Error Response Data:', err.response.data);
     }
-    throw err;
+    // Return empty array instead of throwing error to prevent auto-logout
+    return [];
   }
 };
 
