@@ -5,6 +5,8 @@ import { HiDotsVertical } from "react-icons/hi";
 import PurpleButton from "../../components/PurpleButton";
 import SubscriptionModal from "./SubscriptionModal";
 import ActionModal from "../../components/buttons/ActionModal";
+import { toast } from "react-toastify";
+import { getSubscriptions, archiveSubscription, deleteSubscription } from "../../../Apis/publicapi";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -15,10 +17,9 @@ interface ManageSubModalProps {
 }
 
 interface ApiResponse {
-  status: number;
-  description: string;
-  name: string;
-  subscriptions_list: Subscription[];
+  status: boolean;
+  filter: string;
+  data: Subscription[];
 }
 
 interface Subscription {
@@ -38,6 +39,8 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
   const [activeActionId, setActiveActionId] = useState<number | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showArchived, setShowArchived] = useState(0); // 0 for active, 1 for archived
+  const [editingSubscription, setEditingSubscription] = useState<any>(null);
 
   // Handle escape key
   useEffect(() => {
@@ -53,18 +56,50 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
     setSubscriptions((prev) => [...prev, newSub]);
   };
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this subscription?")) return;
+    try {
+      await deleteSubscription(id);
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
+      toast.success("Subscription deleted successfully");
+    } catch (err) {
+      console.error("Error deleting subscription:", err);
+      toast.error("Failed to delete subscription");
+    }
+  };
+
+  const handleArchive = async (id: number) => {
+    try {
+      await archiveSubscription(id);
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
+      toast.success(showArchived === 0 ? "Subscription archived successfully" : "Subscription unarchived successfully");
+    } catch (err) {
+      console.error("Error archiving/unarchiving subscription:", err);
+      toast.error(showArchived === 0 ? "Failed to archive subscription" : "Failed to unarchive subscription");
+    }
+  };
+
+  const handleEdit = (sub: Subscription) => {
+    setEditingSubscription(sub);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateList = (updatedSub: any) => {
+    setSubscriptions((prev) => {
+      const exists = prev.find(s => s.id === updatedSub.id);
+      if (exists) {
+        return prev.map(s => s.id === updatedSub.id ? updatedSub : s);
+      }
+      return [...prev, updatedSub];
+    });
+  };
+
   useEffect(() => {
     const fetchSubscriptions = async () => {
+      setLoading(true);
       try {
-        const res = await axios.get<ApiResponse>(
-          `${BASE_URL}/api/subscription_list`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        setSubscriptions(res.data.subscriptions_list || []);
+        const res = await getSubscriptions(showArchived);
+        setSubscriptions(res.data || []);
       } catch (err) {
         console.error("Error fetching subscriptions:", err);
         setSubscriptions([]);
@@ -74,7 +109,7 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
     };
 
     fetchSubscriptions();
-  }, []);
+  }, [showArchived]);
 
   if (!isOpen) return null;
 
@@ -94,18 +129,29 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
           <h2 className="text-lg font-semibold" id="manage-payments-title">
             Manage Subscriptions
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center cursor-pointer justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
-          >
-            <X className="w-4 h-4 text-gray-600" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex items-center cursor-pointer justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
+            >
+              <X className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
         </div>
 
-        <p className=" text-[#0F172A] font-inter text-medium mb-4 tracking-normal">
-          Here's a list of all your subscriptions
-        </p>
+        <div className="mb-4">
+          <p className=" text-[#0F172A] font-inter text-medium tracking-normal mb-2">
+            Here's a list of all your {showArchived === 0 ? "active" : "archived"} subscriptions
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowArchived(showArchived === 0 ? 1 : 0)}
+            className="px-4 py-2 bg-[#F6F8FA] border border-[#F1F2F3] text-[#685BC7] font-inter text-sm font-semibold rounded-xl hover:bg-gray-100 transition cursor-pointer"
+          >
+            {showArchived === 0 ? "Show Archived" : "Show Active"}
+          </button>
+        </div>
 
         {/* Scrollable container for subscriptions */}
         <div className="flex-grow  overflow-y-auto mb-4 pr-2 -mr-2">
@@ -136,6 +182,10 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
                     <ActionModal
                       isActionOpen={true}
                       onClose={() => setActiveActionId(null)}
+                      onArchive={() => handleArchive(sub.id)}
+                      onDelete={() => handleDelete(sub.id)}
+                      onEdit={() => handleEdit(sub)}
+                      isArchived={showArchived === 1}
                     />
                   )}
 
@@ -143,8 +193,8 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
                 <p className="text-[#475467] font-inter text-base tracking-tight">{sub.description}</p>
                 <span
                   className={`inline-block mt-3 px-4 py-2  font-inter text-base tracking-tight rounded-full border border-[#ABEFC6] ${sub.status === "active"
-                      ? "text-[#067647] bg-green-100 "
-                      : "text-[#067647] bg-gray-200"
+                    ? "text-[#067647] bg-green-100 "
+                    : "text-[#067647] bg-gray-200"
                     }`}
                 >
                   {sub.status}
@@ -160,12 +210,25 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
 
         <button
           className="w-full py-3 bg-[#F1F5F9] text-[#0F172A] font-inter rounded-xl text-base font-semibold tracking-wide hover:bg-gray-100 cursor-pointer"
-          onClick={onNewSubscription}
+          onClick={() => {
+            setEditingSubscription(null);
+            setIsModalOpen(true);
+          }}
         >
           New Subscription
         </button>
 
-
+        {isModalOpen && (
+          <SubscriptionModal
+            isModalOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+              setEditingSubscription(null);
+            }}
+            onSave={handleUpdateList}
+            editData={editingSubscription}
+          />
+        )}
       </div>
     </div>
   );
