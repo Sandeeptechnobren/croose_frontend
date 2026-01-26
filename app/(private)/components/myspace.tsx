@@ -18,19 +18,19 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
-  
+
   const [messages, setMessages] = useState<any[]>([]);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const getInitials = (name: string = '') =>
-  name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
+    name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
 
   // Log the actual API data to see its structure
   useEffect(() => {
@@ -188,17 +188,17 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                   </span>
                 </div> */}
                 {chat.profilePic ? (
-                    <img
-                      src={chat.profilePic}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-[#DFE5E7] flex items-center justify-center">
-                      <span className="text-[#54656F] font-semibold text-sm">
-                        {getInitials(chat.name)}
-                      </span>
-                    </div>
-                  )}
+                  <img
+                    src={chat.profilePic}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-[#DFE5E7] flex items-center justify-center">
+                    <span className="text-[#54656F] font-semibold text-sm">
+                      {getInitials(chat.name)}
+                    </span>
+                  </div>
+                )}
                 {chat.online && (
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#25D366] rounded-full border-2 border-white"></div>
                 )}
@@ -252,17 +252,17 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                     </span>
                   </div> */}
                   {selectedChat.profilePic ? (
-                      <img
-                        src={selectedChat.profilePic}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center">
-                        <span className="text-[#54656F] font-semibold text-sm">
-                          {getInitials(selectedChat.name)}
-                        </span>
-                      </div>
-                    )}
+                    <img
+                      src={selectedChat.profilePic}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-[#DFE5E7] flex items-center justify-center">
+                      <span className="text-[#54656F] font-semibold text-sm">
+                        {getInitials(selectedChat.name)}
+                      </span>
+                    </div>
+                  )}
                   {selectedChat.online && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#25D366] rounded-full border-2 border-white"></div>
                   )}
@@ -304,7 +304,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                         </span>
                       </div>
                     </div>
-                    
+
                   ))
                 ) : (
                   <div className="flex justify-start">
@@ -427,6 +427,15 @@ const Myspace = () => {
   useEffect(() => {
     const fetchLiveChats = async () => {
       try {
+        // Check if token exists before making API call
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No authentication token found");
+          // console.warn("⚠️ No token found, skipping live chats fetch");
+          setSpaceLiveChatsData([]);
+          return;
+        }
+
         console.log("📡 Fetching live chats for space ID:", id);
         const res = await spaceLiveChats(Number(id));
         console.log("📡 Live Chats API Response:", res);
@@ -435,6 +444,7 @@ const Myspace = () => {
         setSpaceLiveChatsData(res);
       } catch (err) {
         console.error("❌ Error fetching live chats:", err);
+        setSpaceLiveChatsData([]);
       }
     };
     if (id) fetchLiveChats();

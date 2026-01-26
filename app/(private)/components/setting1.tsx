@@ -403,8 +403,11 @@ const Setting1 = () => {
 
   const handleLogout = async () => {
     await logoutapi({})
+    // Close settings modal
+    setOpenSetting1(false)
+    // Clear all authentication data
     localStorage.removeItem('token')
-    localStorage.removeItem('userdata') // Good practice to clear this too
+    localStorage.removeItem('userdata')
     setSnackbarMessage('Logout successful')
     setOpenSnackbar(true)
     setTimeout(() => router.push('/login'), 800)

@@ -17,24 +17,23 @@ const Setting3 = () => {
 
 
   const handlelogout = async () => {
-
-
     try {
+      // Close the modal immediately
+      setOpenSetting3(false);
+
       await logoutapi({});
       localStorage.removeItem("token");
-      setOpenSetting3(false);
+      localStorage.removeItem("userdata");
       setSnackbarMessage('Logout successful');
       setOpenSnackbar(true);
 
-
       setTimeout(() => {
         router.push("/login");
-      }, 1000);
+      }, 800);
     } catch (err: any) {
       setSnackbarMessage(err.message || "Logout failed");
       setOpenSnackbar(true);
     }
-
   };
   return (
     <div>

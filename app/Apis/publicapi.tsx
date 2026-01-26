@@ -1911,9 +1911,13 @@ export const spaceLiveChats = async (spaceId: number) => {
     const token = localStorage.getItem("token");
     console.log(' Token:', token ? 'Token exists' : 'No token found');
     console.log(' Making API call with spaceId:', spaceId);
+
+    // Instead of throwing error, return empty array if no token
     if (!token) {
-      throw new Error("No authentication token found");
+      console.warn("⚠️ No authentication token found, returning empty array");
+      return [];
     }
+
     const res = await axios({
       method: 'get',
       url: `${BASE_URL}/api/space_chat_list`,
@@ -1947,7 +1951,8 @@ export const spaceLiveChats = async (spaceId: number) => {
       console.error('Error Response Status:', err.response.status);
       console.error('Error Response Data:', err.response.data);
     }
-    throw err;
+    // Return empty array instead of throwing error to prevent auto-logout
+    return [];
   }
 };
 
@@ -2348,6 +2353,119 @@ export const sendWhatsapp = async (data: any, spaceId: any) => {
     return res.data;
   } catch (error: any) {
     console.error('Error sending WhatsApp message:', error);
+    throw error;
+  }
+};
+
+export const getSubscriptions = async (archived: number = 0) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `${BASE_URL}/api/subscriptions?archived=${archived}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error fetching subscriptions:', error);
+    throw error;
+  }
+};
+
+export const getSubscriptionById = async (id: number | string) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `${BASE_URL}/api/subscriptions/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error fetching subscription details:', error);
+    throw error;
+  }
+};
+
+export const createSubscription = async (data: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      `${BASE_URL}/api/create_subscription`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error creating subscription:', error);
+    throw error;
+  }
+};
+
+export const updateSubscription = async (id: number | string, data: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.put(
+      `${BASE_URL}/api/subscriptions/${id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error updating subscription:', error);
+    throw error;
+  }
+};
+
+export const archiveSubscription = async (id: number | string) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      `${BASE_URL}/api/subscriptions/${id}/archive`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error archiving subscription:', error);
+    throw error;
+  }
+};
+
+export const deleteSubscription = async (id: number | string) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.delete(
+      `${BASE_URL}/api/subscriptions/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error deleting subscription:', error);
     throw error;
   }
 };

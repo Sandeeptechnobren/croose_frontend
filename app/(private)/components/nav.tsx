@@ -1,3 +1,22 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 "use client";
 
 import React, { useEffect } from 'react';
@@ -107,13 +126,17 @@ export const Nav = ({ show, setShow }: any) => {
   const handlelogout = async () => {
     try {
       await logoutapi({});
+      // Close all settings modals
+      closeAllSettings();
+      // Clear all authentication data
       localStorage.removeItem("token");
+      localStorage.removeItem("userdata");
       setSnackbarMessage('Logout successful');
       setOpenSnackbar(true);
 
       setTimeout(() => {
         router.push("/login");
-      }, 1000);
+      }, 800);
     } catch (err: any) {
       setSnackbarMessage(err.message || "Logout failed");
       setOpenSnackbar(true);
