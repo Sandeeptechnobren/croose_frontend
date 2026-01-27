@@ -93,7 +93,6 @@ const AppointmentTable = () => {
       );
       setAppointments(updatedAppointments);
     } catch (err) {
-      console.error("Failed to update appointment status", err);
     }
   };
   const subheading = {
@@ -440,7 +439,11 @@ const AppointmentTable = () => {
                     <td className="px-4 py-3">
                       <select
                         value={appt.status}
-                        onChange={(e) => handleStatusUpdate(appt.id, e.target.value)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleStatusUpdate(appt.id, e.target.value);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                         className="border p-1 rounded-md text-sm"
                       >
                         {statusOptions.map((opt) => (

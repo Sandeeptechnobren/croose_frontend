@@ -66,17 +66,17 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
       const chatId = selectedChat?.phone || selectedChat?.name;
 
       if (!spaceId) {
-        console.error("Cannot fetch messages: spaceId is null or undefined");
+        // console.error("Cannot fetch messages: spaceId is null or undefined");
         setMessages([]);
         return;
       }
 
-      console.log("Fetching messages for:", chatId, "SpaceID:", spaceId);
+      // console.log("Fetching messages for:", chatId, "SpaceID:", spaceId);
 
       if (chatId && spaceId) {
         try {
           const res = await getMessage(chatId, spaceId);
-          console.log("getMessage response:", res);
+          // console.log("getMessage response:", res);
 
           // Check if the response contains messages in the expected format
           if (res?.messages && Array.isArray(res.messages)) {
@@ -90,10 +90,10 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             setMessages(res);
           } else {
             setMessages([]);
-            console.log("No messages found in response", res);
+            // console.log("No messages found in response", res);
           }
         } catch (err) {
-          console.error("Error fetching messages:", err);
+          // console.error("Error fetching messages:", err);
           setMessages([]);
         }
       }
@@ -107,7 +107,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
   const handleSendMessage = async () => {
     if (messageInput.trim() && selectedChat?.phone) {
       try {
-        console.log('Sending message to:', selectedChat.phone);
+        // console.log('Sending message to:', selectedChat.phone);
         const payload = {
           message: messageInput,
           phone: selectedChat.phone
@@ -124,7 +124,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
 
         setMessageInput('');
       } catch (error) {
-        console.error('Failed to send message:', error);
+        // console.error('Failed to send message:', error);
       }
     }
   };
@@ -165,7 +165,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             <input
               type="text"
               placeholder="Search or start new chat"
-              className="flex-1 outline-none text-sm text-[#111B21]"
+              className="flex-1 outline-none  text-sm text-[#111B21]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -178,7 +178,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             <div
               key={chat.id}
               onClick={() => setSelectedChat(chat)}
-              className={`px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-[#F5F6F6] ${selectedChat?.id === chat.id ? 'bg-[#F0F2F5]' : ''
+              className={`px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-[#F5F6F6] border-b border-gray-200 ${selectedChat?.id === chat.id ? 'bg-[#F0F2F5]' : ''
                 }`}
             >
               <div className="relative flex-shrink-0">
@@ -223,14 +223,6 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                   )}
                 </div>
                 <div className="mt-1 flex flex-col gap-1">
-                  {/* <span className="text-xs text-[#667781] bg-[#F0F2F5] px-2 py-0.5 rounded">
-                    {chat.category}
-                  </span> */}
-                  {/* {chat.chat_id && (
-                    <span className="text-[10px] text-[#8696A0] font-mono">
-                      ID: {chat.chat_id}
-                    </span>
-                  )} */}
                 </div>
               </div>
             </div>
