@@ -635,7 +635,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   </label>
                   <div className="space-y-2">
                     {/* Free Access */}
-                    <label className="flex items-center space-x-2">
+                    {/* <label className="flex items-center space-x-2">
                       <input
                         type="radio"
                         name="access_type"
@@ -647,10 +647,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         className="accent-indigo-500"
                       />
                       <span>Free access to all products/services</span>
-                    </label>
+                    </label> */}
 
                     {/* Individual */}
-                    <label className="flex items-center space-x-2">
+                    {/* <label className="flex items-center space-x-2">
                       <input
                         type="radio"
                         name="access_type"
@@ -662,7 +662,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         className="accent-indigo-500"
                       />
                       <span>Subscribers still pay individually</span>
-                    </label>
+                    </label> */}
 
                     {/* discount_rate */}
                     <label className="flex items-center space-x-2">

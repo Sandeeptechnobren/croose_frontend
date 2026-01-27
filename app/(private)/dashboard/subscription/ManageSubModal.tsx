@@ -5,8 +5,9 @@ import { HiDotsVertical } from "react-icons/hi";
 import PurpleButton from "../../components/PurpleButton";
 import SubscriptionModal from "./SubscriptionModal";
 import ActionModal from "../../components/buttons/ActionModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 import { toast } from "react-toastify";
-import { getSubscriptions, archiveSubscription, deleteSubscription } from "../../../Apis/publicapi";
+import { getSubscriptions, archiveSubscription, deleteSubscription, UnarchiveSubscription } from "../../../Apis/publicapi";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -41,6 +42,12 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
   const [loading, setLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(0); // 0 for active, 1 for archived
   const [editingSubscription, setEditingSubscription] = useState<any>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingUnarchiveId, setPendingUnarchiveId] = useState<number | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [pendingArchiveId, setPendingArchiveId] = useState<number | null>(null);
 
   // Handle escape key
   useEffect(() => {
@@ -57,26 +64,83 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this subscription?")) return;
+    setPendingDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDeleteId === null) return;
+    setShowDeleteModal(false);
     try {
-      await deleteSubscription(id);
-      setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
+      await deleteSubscription(pendingDeleteId);
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== pendingDeleteId));
       toast.success("Subscription deleted successfully");
     } catch (err) {
       console.error("Error deleting subscription:", err);
       toast.error("Failed to delete subscription");
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setPendingDeleteId(null);
+  };
+
   const handleArchive = async (id: number) => {
-    try {
-      await archiveSubscription(id);
-      setSubscriptions((prev) => prev.filter((sub) => sub.id !== id));
-      toast.success(showArchived === 0 ? "Subscription archived successfully" : "Subscription unarchived successfully");
-    } catch (err) {
-      console.error("Error archiving/unarchiving subscription:", err);
-      toast.error(showArchived === 0 ? "Failed to archive subscription" : "Failed to unarchive subscription");
+    // Show confirmation dialog for unarchive
+    if (showArchived === 1) {
+      setPendingUnarchiveId(id);
+      setShowConfirmModal(true);
+      return;
     }
+
+    // Show confirmation dialog for archive
+    setPendingArchiveId(id);
+    setShowArchiveModal(true);
+  };
+
+  const confirmArchive = async () => {
+    if (pendingArchiveId === null) return;
+    setShowArchiveModal(false);
+    try {
+      await archiveSubscription(pendingArchiveId);
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== pendingArchiveId));
+      toast.success("Subscription archived successfully");
+    } catch (err) {
+      console.error("Error archiving subscription:", err);
+      toast.error("Failed to archive subscription");
+    } finally {
+      setPendingArchiveId(null);
+    }
+  };
+
+  const cancelArchive = () => {
+    setShowArchiveModal(false);
+    setPendingArchiveId(null);
+  };
+
+  const confirmUnarchive = async () => {
+    if (pendingUnarchiveId === null) return;
+
+    setShowConfirmModal(false);
+
+    try {
+      await UnarchiveSubscription(pendingUnarchiveId);
+      setSubscriptions((prev) => prev.filter((sub) => sub.id !== pendingUnarchiveId));
+      toast.success("Subscription unarchived successfully");
+    } catch (err) {
+      console.error("Error unarchiving subscription:", err);
+      toast.error("Failed to unarchive subscription");
+    } finally {
+      setPendingUnarchiveId(null);
+    }
+  };
+
+  const cancelUnarchive = () => {
+    setShowConfirmModal(false);
+    setPendingUnarchiveId(null);
   };
 
   const handleEdit = (sub: Subscription) => {
@@ -229,6 +293,30 @@ const ManageSubModal: React.FC<ManageSubModalProps> = ({ isOpen, onClose, onNewS
             editData={editingSubscription}
           />
         )}
+
+        <ConfirmationModal
+          isOpen={showConfirmModal}
+          title="Unarchive Subscription"
+          message="Are you sure you want to unarchive this subscription?"
+          onConfirm={confirmUnarchive}
+          onCancel={cancelUnarchive}
+        />
+
+        <ConfirmationModal
+          isOpen={showDeleteModal}
+          title="Delete Subscription"
+          message="Are you sure you want to delete this subscription? This action cannot be undone."
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+
+        <ConfirmationModal
+          isOpen={showArchiveModal}
+          title="Archive Subscription"
+          message="Are you sure you want to archive this subscription?"
+          onConfirm={confirmArchive}
+          onCancel={cancelArchive}
+        />
       </div>
     </div>
   );

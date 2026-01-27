@@ -2451,6 +2451,24 @@ export const archiveSubscription = async (id: number | string) => {
     throw error;
   }
 };
+export const UnarchiveSubscription = async (id: number | string) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      `${BASE_URL}/api/subscriptions/${id}/unarchive`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    console.error('Error archiving subscription:', error);
+    throw error;
+  }
+};
 
 export const deleteSubscription = async (id: number | string) => {
   try {
