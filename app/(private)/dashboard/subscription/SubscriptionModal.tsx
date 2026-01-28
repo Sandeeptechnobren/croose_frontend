@@ -343,31 +343,72 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               {/* Form content - your existing form fields */}
               <div className="p-5 space-y-5 overflow-y-auto flex-1 ">
 
-                <div >
+                <div>
                   <label className="block font-inter text-base tracking-normal  mb-1">
                     Space Name
                   </label>
-                  <div className="relative">
+                  <Listbox
+                    value={formState.space_id}
+                    onChange={(spaceId) => {
+                      const selectedSpace = spaces.find(s => String(s.id) === spaceId);
+                      setFormState(f => ({
+                        ...f,
+                        space_id: spaceId,
+                        space_name: selectedSpace?.name || "",
+                        product_ids: [],
+                        service_ids: [],
+                      }));
+                    }}
+                    disabled={loadingSpaces}
+                  >
+                    <div className="relative">
+                      <Listbox.Button className="w-full flex justify-between items-center p-2.5 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <span className={formState.space_id ? "text-black" : "text-[#98A2B3]"}>
+                          {
+                            loadingSpaces
+                              ? "Loading spaces..."
+                              : formState.space_id
+                                ? spaces.find(s => String(s.id) === formState.space_id)?.name
+                                : "Select the space the subscription is for"
+                          }
+                        </span>
+                        <ChevronDown className="text-gray-600" size={20} />
+                      </Listbox.Button>
 
-                    <select
-                      className="w-full p-2.5 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-                      value={formState.space_id}
-                      onChange={handleSpaceChange}
-                      disabled={loadingSpaces}
-                    >
-                      <option value="">
-                        {loadingSpaces ? "Loading spaces..." : "Select the space the subscription is for"}
-                      </option>
-                      {spaces.map(space => (
-                        <option key={space.id} value={String(space.id)}>{space.name}</option>
-                      ))}
-                    </select>
-
-                    {/* <ChevronDown
-    className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600"
-    size={22}
-  /> */}
-                  </div></div>
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-10">
+                          {spaces.map((space) => (
+                            <Listbox.Option
+                              key={space.id}
+                              value={String(space.id)}
+                              className={({ active }) =>
+                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
+                              }
+                            >
+                              {({ selected }) => (
+                                <>
+                                  <div>
+                                    <p className="font-medium text-gray-900">{space.name}</p>
+                                  </div>
+                                  {selected && (
+                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
+                                      <Check size={18} />
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
+                </div>
 
                 {/* Subscription Name + Type in one row */}
                 <div className="grid grid-cols-2 gap-4">
@@ -549,25 +590,72 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 {/* Variant */}
                 <div>
                   <label className="block font-inter text-base tracking-normal mb-1">Variant</label>
-                  <div className="relative">
-                    <select
-                      value={formState.variant}
-                      onChange={(e) =>
-                        setFormState((f) => ({
-                          ...f,
-                          variant: e.target.value,
-                        }))
-                      }
-                      className="w-full p-2.5 pr-10 rounded-lg border text-black placeholder:text-[#98A2B3]border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-                    >
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Yearly</option>
-                    </select>
-                    <ChevronDown
-                      className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600"
-                      size={22}
-                    />
-                  </div>
+                  <Listbox
+                    value={formState.variant}
+                    onChange={(value) =>
+                      setFormState((f) => ({
+                        ...f,
+                        variant: value,
+                      }))
+                    }
+                  >
+                    <div className="relative">
+                      <Listbox.Button className="w-full flex justify-between items-center p-2.5 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <span className="text-black">
+                          {formState.variant === "monthly" ? "Monthly" : "Yearly"}
+                        </span>
+                        <ChevronDown className="text-gray-600" size={20} />
+                      </Listbox.Button>
+
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                          <Listbox.Option
+                            value="monthly"
+                            className={({ active }) =>
+                              `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
+                            }
+                          >
+                            {({ selected }) => (
+                              <>
+                                <div>
+                                  <p className="font-medium text-gray-900">Monthly</p>
+                                </div>
+                                {selected && (
+                                  <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
+                                    <Check size={18} />
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </Listbox.Option>
+                          <Listbox.Option
+                            value="yearly"
+                            className={({ active }) =>
+                              `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
+                            }
+                          >
+                            {({ selected }) => (
+                              <>
+                                <div>
+                                  <p className="font-medium text-gray-900">Yearly</p>
+                                </div>
+                                {selected && (
+                                  <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
+                                    <Check size={18} />
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </Listbox.Option>
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
                 </div>
 
                 {/* Currency + Price */}
@@ -578,23 +666,88 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   {/* Currency Dropdown */}
                   <div>
                     <label className="block font-inter text-base tracking-normal mb-1">Currency</label>
-                    <div className="relative">
-                      <select
-                        value={formState.currency}
-                        onChange={(e) =>
-                          setFormState((f) => ({ ...f, currency: e.target.value }))
-                        }
-                        className="w-full p-2.5 pr-10 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-                      >
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                        <option value="GBP">GBP (£)</option>
-                      </select>
-                      <ChevronDown
-                        className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600"
-                        size={22}
-                      />
-                    </div>
+                    <Listbox
+                      value={formState.currency}
+                      onChange={(value) =>
+                        setFormState((f) => ({ ...f, currency: value }))
+                      }
+                    >
+                      <div className="relative">
+                        <Listbox.Button className="w-full flex justify-between items-center p-2.5 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                          <span className="text-black">
+                            {formState.currency === "USD" ? "USD ($)" : formState.currency === "EUR" ? "EUR (€)" : "GBP (£)"}
+                          </span>
+                          <ChevronDown className="text-gray-600" size={20} />
+                        </Listbox.Button>
+
+                        <Transition
+                          as={Fragment}
+                          leave="transition ease-in duration-100"
+                          leaveFrom="opacity-100"
+                          leaveTo="opacity-0"
+                        >
+                          <Listbox.Options className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                            <Listbox.Option
+                              value="USD"
+                              className={({ active }) =>
+                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
+                              }
+                            >
+                              {({ selected }) => (
+                                <>
+                                  <div>
+                                    <p className="font-medium text-gray-900">USD ($)</p>
+                                  </div>
+                                  {selected && (
+                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
+                                      <Check size={18} />
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </Listbox.Option>
+                            <Listbox.Option
+                              value="EUR"
+                              className={({ active }) =>
+                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
+                              }
+                            >
+                              {({ selected }) => (
+                                <>
+                                  <div>
+                                    <p className="font-medium text-gray-900">EUR (€)</p>
+                                  </div>
+                                  {selected && (
+                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
+                                      <Check size={18} />
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </Listbox.Option>
+                            <Listbox.Option
+                              value="GBP"
+                              className={({ active }) =>
+                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
+                              }
+                            >
+                              {({ selected }) => (
+                                <>
+                                  <div>
+                                    <p className="font-medium text-gray-900">GBP (£)</p>
+                                  </div>
+                                  {selected && (
+                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
+                                      <Check size={18} />
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </Listbox.Option>
+                          </Listbox.Options>
+                        </Transition>
+                      </div>
+                    </Listbox>
                   </div>
 
                   {/* Price Input with prefix & suffix */}

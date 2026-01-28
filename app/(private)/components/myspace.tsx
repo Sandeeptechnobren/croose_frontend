@@ -146,7 +146,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
   );
 
   return (
-    <div className="w-full h-[600px] bg-white rounded-lg border border-gray-200 overflow-hidden flex">
+    <div className="w-full h-[600px] bg-white rounded-lg border border-gray-300 border-b-2 overflow-hidden flex">
       {/* Left Sidebar - Chat List */}
       <div className="w-[400px] border-r border-gray-200 flex flex-col">
         {/* Header */}
@@ -178,7 +178,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             <div
               key={chat.id}
               onClick={() => setSelectedChat(chat)}
-              className={`px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-[#F5F6F6] border-b border-gray-200 ${selectedChat?.id === chat.id ? 'bg-[#F0F2F5]' : ''
+              className={`px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-[#E5E7EB] border-b border-gray-200 ${selectedChat?.id === chat.id ? 'bg-[#DFE5E7]' : ''
                 }`}
             >
               <div className="relative flex-shrink-0">
