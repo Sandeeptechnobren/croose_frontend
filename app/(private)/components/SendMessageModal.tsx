@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { getTargetList, addNewMessage, GetSpaceId } from '@/app/Apis/publicapi';
+import CustomDropdown from "./CustomDropdown";
 
 interface SendMessageModalProps {
   isOpen: boolean;
@@ -101,38 +102,24 @@ const SendMessageModal: React.FC<SendMessageModalProps> = ({ isOpen, onClose, on
             <div className="w-full">
               <label className="block mb-1 font-medium text-[14px] leading-[20px] text-[#344054]">Target</label>
               <div className="relative">
-                <select
+                <CustomDropdown
                   value={target}
-                  onChange={(e) => setTarget(e.target.value)}
-                  className="w-full h-[44px] rounded-[12px] border border-[#D0D5DD] px-[16px] font-normal text-[14px] leading-[20px] font-sans focus:outline-none appearance-none pr-10 bg-white"
-                >
-                  <option value="" disabled>Select target</option>
-                  {targetList.map((t: any, index: number) => (
-                    <option key={index} value={t.id || t.name}>
-                      {t.name || 'Unnamed Target'}
-                    </option>
-                  ))}
-                </select>
-                <Icon icon="ri:arrow-down-s-line" width="20" height="20" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#344054] pointer-events-none" />
+                  onChange={(val: string) => setTarget(val)}
+                  options={targetList.map((t: any) => ({ value: String(t.id || t.name), label: t.name || 'Unnamed Target' }))}
+                  placeholder="Select target"
+                />
               </div>
             </div>
 
             <div className="w-full">
               <label className="block mb-1 font-medium text-[14px] leading-[20px] text-[#344054]">Space</label>
               <div className="relative">
-                <select
+                <CustomDropdown
                   value={space}
-                  onChange={(e) => setSpace(e.target.value)}
-                  className="w-full h-[44px] rounded-[12px] border border-[#D0D5DD] px-[16px] font-normal text-[14px] leading-[20px] font-sans focus:outline-none appearance-none pr-10 bg-white"
-                >
-                  <option value="" disabled>Select space</option>
-                  {spaceList.map((s: any, index: number) => (
-                    <option key={index} value={s.id || s.spaceId || s.space_id}>
-                      {s.name || s.spaceName || s.space_name || 'Unnamed Space'}
-                    </option>
-                  ))}
-                </select>
-                <Icon icon="ri:arrow-down-s-line" width="20" height="20" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#344054] pointer-events-none" />
+                  onChange={(val: string) => setSpace(val)}
+                  options={spaceList.map((s: any) => ({ value: String(s.id || s.spaceId || s.space_id), label: s.name || s.spaceName || s.space_name || 'Unnamed Space' }))}
+                  placeholder="Select space"
+                />
               </div>
             </div>
 

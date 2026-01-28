@@ -2,8 +2,8 @@ import React, { useState, useEffect, Fragment } from "react";
 import { X, ChevronDown, Check } from "lucide-react";
 import { toast } from "react-toastify";
 import { getAllProducts, getAllServices, getProductsBySpace, getServicesBySpace, GetSpaceId, createSubscription, updateSubscription } from "@/app/Apis/publicapi";
-import { Listbox, Transition } from "@headlessui/react";
 import { Icon } from "@iconify/react";
+import CustomDropdown from "../../components/CustomDropdown";
 import axios from "axios";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 interface SubscriptionModalProps {
@@ -132,21 +132,10 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       });
     }
   }, [editData, isModalOpen, spaceName]);
-  // Handle space dropdown change
-  const handleSpaceChange = (e: any) => {
-    const spaceId = e.target.value;
-    const selectedSpace = spaces.find(s => String(s.id) === spaceId);
-    setFormState(f => ({
-      ...f,
-      space_id: spaceId,
-      space_name: selectedSpace?.name || "",
-      product_ids: [], // ✅ fix here
-      service_ids: [],
-    }));
-  };
+
   // Handle subscription type change (General, Product, Service)
   const handlesubscription_typeChange = (value: any) => {
-    setFormState(f => ({
+    setFormState((f: any) => ({
       ...f,
       subscription_type: value,
       product_ids: [],
@@ -347,7 +336,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   <label className="block font-inter text-base tracking-normal  mb-1">
                     Space Name
                   </label>
-                  <Listbox
+                  <CustomDropdown
                     value={formState.space_id}
                     onChange={(spaceId) => {
                       const selectedSpace = spaces.find(s => String(s.id) === spaceId);
@@ -359,55 +348,11 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         service_ids: [],
                       }));
                     }}
+                    options={spaces.map(s => ({ value: String(s.id), label: s.name }))}
+                    placeholder="Select the space the subscription is for"
+                    loading={loadingSpaces}
                     disabled={loadingSpaces}
-                  >
-                    <div className="relative">
-                      <Listbox.Button className="w-full flex justify-between items-center p-2.5 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <span className={formState.space_id ? "text-black" : "text-[#98A2B3]"}>
-                          {
-                            loadingSpaces
-                              ? "Loading spaces..."
-                              : formState.space_id
-                                ? spaces.find(s => String(s.id) === formState.space_id)?.name
-                                : "Select the space the subscription is for"
-                          }
-                        </span>
-                        <ChevronDown className="text-gray-600" size={20} />
-                      </Listbox.Button>
-
-                      <Transition
-                        as={Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <Listbox.Options className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-10">
-                          {spaces.map((space) => (
-                            <Listbox.Option
-                              key={space.id}
-                              value={String(space.id)}
-                              className={({ active }) =>
-                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
-                              }
-                            >
-                              {({ selected }) => (
-                                <>
-                                  <div>
-                                    <p className="font-medium text-gray-900">{space.name}</p>
-                                  </div>
-                                  {selected && (
-                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
-                                      <Check size={18} />
-                                    </span>
-                                  )}
-                                </>
-                              )}
-                            </Listbox.Option>
-                          ))}
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  </Listbox>
+                  />
                 </div>
 
                 {/* Subscription Name + Type in one row */}
@@ -437,96 +382,33 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       Subscription Type
                     </label>
 
-
-
-                    <Listbox
+                    <CustomDropdown
                       value={formState.subscription_type}
-                      onChange={handlesubscription_typeChange
-                      }
-                    >
-                      <div className="relative">
-                        <Listbox.Button className=" w-full flex justify-between items-center p-2.5 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                          <span>
-                            {
-                              subscriptionOptions.find(
-                                (opt) => opt.value === formState.subscription_type
-                              )?.label
-                            }
-                          </span>
-                          <ChevronDown className="text-gray-600" size={20} />
-                        </Listbox.Button>
-
-                        <Transition
-                          as={Fragment}
-                          leave="transition ease-in duration-100"
-                          leaveFrom="opacity-100"
-                          leaveTo="opacity-0"
-                        >
-                          <Listbox.Options
-                            className="absolute mt-1 min-w-[380px] w-auto bg-white border border-gray-200 rounded-lg shadow-lg 
-              -translate-x-1/2"
-                          >  {subscriptionOptions.map((opt: SubscriptionOption) => (
-
-                            <Listbox.Option
-                              key={opt.value}
-                              value={opt.value}
-                              className={({ active }) =>
-                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white "
-
-                                }`
-                              }
-                            >
-                              {({ selected }) => (
-                                <>
-                                  <div>
-                                    <p className="font-medium text-gray-900">{opt.title}</p>
-                                    <p className="text-xs text-gray-500  ">{opt.description}</p>
-                                  </div>
-                                  {selected && (
-                                    <span className="ml-2 flex-shrink-0 text-white  bg-[#685BC7] rounded-xl ">
-                                      <Check size={18} />
-                                    </span>
-                                  )}
-                                </>
-                              )}
-
-                            </Listbox.Option>
-                          ))}
-                          </Listbox.Options>
-                        </Transition>
-                      </div>
-                    </Listbox>
+                      onChange={handlesubscription_typeChange}
+                      options={subscriptionOptions}
+                      showDescriptions={true}
+                      optionsClassName="min-w-[380px] w-auto -translate-x-1/2"
+                    />
                   </div>
                 </div>
 
                 {formState.subscription_type === "Product" && (
                   <div className="mt-4">
                     <label className="block font-inter  text-base tracking-normal text-gray-700 mb-1">Product</label>
-                    <div className="">
-                      <select
-                        multiple
-                        value={formState.product_ids.map(String)}
-                        onChange={(e) => {
-
-                          setFormState(f => ({
-                            ...f,
-                            product_ids: Array.from(e.target.selectedOptions, opt => Number(opt.value)),
-                          }))
-                        }
-                        }
-                        className="w-full px-3 py-2 border border-gray-300  bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-                        disabled={!formState.space_id || loadingProducts}
-                      >
-                        <option value="">
-                          {!formState.space_id ? "Select a space first" : loadingProducts ? "Loading products..." : productError || (products.length === 0 ? "No products available" : "Search or select product from your inventory")}
-                        </option>
-                        {products?.map((product: any) => (
-                          <option key={product.id} value={product.id}>{product.name}</option>
-                        ))}
-                      </select>
-                      {loadingProducts && <div className="absolute right-8 top-2.5"><Icon icon="eos-icons:loading" className="w-5 h-5 animate-spin text-indigo-500" /></div>}
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600" size={20} />
-                    </div>
+                    <CustomDropdown
+                      value={formState.product_ids.map(String)}
+                      onChange={(values: string[]) => {
+                        setFormState((f: any) => ({
+                          ...f,
+                          product_ids: values.map(Number),
+                        }))
+                      }}
+                      options={products.map((product: any) => ({ value: String(product.id), label: product.name }))}
+                      placeholder={!formState.space_id ? "Select a space first" : loadingProducts ? "Loading products..." : productError || (products.length === 0 ? "No products available" : "Search or select product from your inventory")}
+                      loading={loadingProducts}
+                      disabled={!formState.space_id || loadingProducts}
+                      multiple={true}
+                    />
                     {productError && <p className="text-sm text-red-600 mt-1">{productError}</p>}
                   </div>
                 )}
@@ -534,35 +416,20 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 {formState.subscription_type === "Service" && (
                   <div className="mt-4">
                     <label className="block font-inter text-base tracking-normal mb-1">Select Service</label>
-                    <div className="">
-                      <select
-                        multiple
-                        value={formState.service_ids.map(String)}
-                        onChange={(e) => {
-                          const values = Array.from(e.target.selectedOptions, opt => Number(opt.value));
-
-                          setFormState(f => ({
-                            ...f,
-                            service_ids: values,
-                          }));
-                        }}
-
-
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white
-           focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none  z-10">
-
-                        <option value="">Select a service</option>
-                        {services?.map((service: any) => (
-                          <option key={service.id} value={service.id}>
-                            {service.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown
-                        className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600"
-                        size={22}
-                      />
-                    </div>
+                    <CustomDropdown
+                      value={formState.service_ids.map(String)}
+                      onChange={(values: string[]) => {
+                        setFormState((f: any) => ({
+                          ...f,
+                          service_ids: values.map(Number),
+                        }));
+                      }}
+                      options={services.map((service: any) => ({ value: String(service.id), label: service.name }))}
+                      placeholder="Select a service"
+                      loading={loadingServices}
+                      disabled={loadingServices}
+                      multiple={true}
+                    />
                   </div>
                 )}
 
@@ -590,7 +457,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 {/* Variant */}
                 <div>
                   <label className="block font-inter text-base tracking-normal mb-1">Variant</label>
-                  <Listbox
+                  <CustomDropdown
                     value={formState.variant}
                     onChange={(value) =>
                       setFormState((f) => ({
@@ -598,64 +465,11 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         variant: value,
                       }))
                     }
-                  >
-                    <div className="relative">
-                      <Listbox.Button className="w-full flex justify-between items-center p-2.5 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <span className="text-black">
-                          {formState.variant === "monthly" ? "Monthly" : "Yearly"}
-                        </span>
-                        <ChevronDown className="text-gray-600" size={20} />
-                      </Listbox.Button>
-
-                      <Transition
-                        as={Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <Listbox.Options className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                          <Listbox.Option
-                            value="monthly"
-                            className={({ active }) =>
-                              `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
-                            }
-                          >
-                            {({ selected }) => (
-                              <>
-                                <div>
-                                  <p className="font-medium text-gray-900">Monthly</p>
-                                </div>
-                                {selected && (
-                                  <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
-                                    <Check size={18} />
-                                  </span>
-                                )}
-                              </>
-                            )}
-                          </Listbox.Option>
-                          <Listbox.Option
-                            value="yearly"
-                            className={({ active }) =>
-                              `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
-                            }
-                          >
-                            {({ selected }) => (
-                              <>
-                                <div>
-                                  <p className="font-medium text-gray-900">Yearly</p>
-                                </div>
-                                {selected && (
-                                  <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
-                                    <Check size={18} />
-                                  </span>
-                                )}
-                              </>
-                            )}
-                          </Listbox.Option>
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  </Listbox>
+                    options={[
+                      { value: "monthly", label: "Monthly" },
+                      { value: "yearly", label: "Yearly" },
+                    ]}
+                  />
                 </div>
 
                 {/* Currency + Price */}
@@ -666,88 +480,17 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   {/* Currency Dropdown */}
                   <div>
                     <label className="block font-inter text-base tracking-normal mb-1">Currency</label>
-                    <Listbox
+                    <CustomDropdown
                       value={formState.currency}
                       onChange={(value) =>
                         setFormState((f) => ({ ...f, currency: value }))
                       }
-                    >
-                      <div className="relative">
-                        <Listbox.Button className="w-full flex justify-between items-center p-2.5 rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                          <span className="text-black">
-                            {formState.currency === "USD" ? "USD ($)" : formState.currency === "EUR" ? "EUR (€)" : "GBP (£)"}
-                          </span>
-                          <ChevronDown className="text-gray-600" size={20} />
-                        </Listbox.Button>
-
-                        <Transition
-                          as={Fragment}
-                          leave="transition ease-in duration-100"
-                          leaveFrom="opacity-100"
-                          leaveTo="opacity-0"
-                        >
-                          <Listbox.Options className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                            <Listbox.Option
-                              value="USD"
-                              className={({ active }) =>
-                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
-                              }
-                            >
-                              {({ selected }) => (
-                                <>
-                                  <div>
-                                    <p className="font-medium text-gray-900">USD ($)</p>
-                                  </div>
-                                  {selected && (
-                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
-                                      <Check size={18} />
-                                    </span>
-                                  )}
-                                </>
-                              )}
-                            </Listbox.Option>
-                            <Listbox.Option
-                              value="EUR"
-                              className={({ active }) =>
-                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
-                              }
-                            >
-                              {({ selected }) => (
-                                <>
-                                  <div>
-                                    <p className="font-medium text-gray-900">EUR (€)</p>
-                                  </div>
-                                  {selected && (
-                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
-                                      <Check size={18} />
-                                    </span>
-                                  )}
-                                </>
-                              )}
-                            </Listbox.Option>
-                            <Listbox.Option
-                              value="GBP"
-                              className={({ active }) =>
-                                `cursor-pointer select-none flex items-center justify-between p-3 rounded-xl last:border-b-0 ${active ? "bg-indigo-50" : "bg-white"}`
-                              }
-                            >
-                              {({ selected }) => (
-                                <>
-                                  <div>
-                                    <p className="font-medium text-gray-900">GBP (£)</p>
-                                  </div>
-                                  {selected && (
-                                    <span className="ml-2 flex-shrink-0 text-white bg-[#685BC7] rounded-xl">
-                                      <Check size={18} />
-                                    </span>
-                                  )}
-                                </>
-                              )}
-                            </Listbox.Option>
-                          </Listbox.Options>
-                        </Transition>
-                      </div>
-                    </Listbox>
+                      options={[
+                        { value: "USD", label: "USD ($)" },
+                        { value: "EUR", label: "EUR (€)" },
+                        { value: "GBP", label: "GBP (£)" },
+                      ]}
+                    />
                   </div>
 
                   {/* Price Input with prefix & suffix */}
