@@ -29,7 +29,7 @@ const Payments = () => {
       return payment.transaction_status === "paid" || payment.transaction_status === "success";
     if (filter === "Pending") return payment.transaction_status === "pending";
     if (filter === "Failed") return payment.transaction_status === "failed";
-    if (filter === "Refunded") return payment.transaction_status === "refunded";
+    // if (filter === "Refunded") return payment.transaction_status === "refunded";
     return true;
   });
   useEffect(() => {
@@ -75,7 +75,7 @@ const Payments = () => {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 sm:px-6">
         <ul className="flex flex-wrap items-center gap-3 sm:gap-6 mb-4">
-          {["All", "Successful", "Pending", "Failed", "Refunded"].map((status) => (
+          {["All", "Successful", "Pending", "Failed"].map((status) => (
             <li
               key={status}
               onClick={() => setFilter(status)}
@@ -89,7 +89,7 @@ const Payments = () => {
             </li>
           ))}
         </ul>
-        <div className="flex flex-wrap gap-3">
+        {/* <div className="flex flex-wrap gap-3">
           <div className="flex items-center border-[2px] border-[#EAECF0] bg-white px-3 py-2 rounded-[8px] w-full sm:w-auto max-w-[320px]">
             <input
               type="text"
@@ -102,11 +102,8 @@ const Payments = () => {
             <Icon icon="mynaui:filter-solid" width="20" height="20" className="text-[#667085]" />
             <span className="text-[#344054] font-semibold text-[14px]">Filters</span>
           </button>
-          {/* <button className="flex items-center gap-2 px-4 py-2 border-[2px] border-[#EAECF0] rounded-[8px]">
-            <Icon icon="bitcoin-icons:export-outline" width="20" height="20" className="text-[#344054]" />
-            <span className="text-[#344054] font-semibold text-[14px]">Export</span>
-          </button> */}
-        </div>
+         
+        </div> */}
       </div>
 
       <div className='w-full p-6' >

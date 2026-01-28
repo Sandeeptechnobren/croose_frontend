@@ -157,8 +157,8 @@ const Customers = () => {
                                 <th className="px-6 py-3">Status</th>
                                 <th className="px-6 py-3">Phone Number</th>
                                 <th className="px-6 py-3">Address</th>
-                                <th className="px-6 py-3">Pin Code</th>
-                                <th className="px-6 py-3">Actions</th>
+                                {/* <th className="px-6 py-3">Pin Code</th> */}
+                                {/* <th className="px-6 py-3">Actions</th>/ */}
                             </tr>
                         </thead>
                         <tbody>
@@ -177,9 +177,9 @@ const Customers = () => {
                                     <td className="px-6 py-4 text-[#101828]">{user.whatsapp_number}</td>
                                     <td className="px-6 py-4 text-[#475467]">{user.address}</td>
                                     <td className="px-6 py-4 text-[#475467]">{user.pin_code}</td>
-                                    <td className="px-6 py-4 text-[#475467]">
+                                    {/* <td className="px-6 py-4 text-[#475467]">
                                         <Icon icon="bi:three-dots-vertical" width="16" height="16" />
-                                    </td>
+                                    </td> */}
                                 </tr>
                             ))}
                         </tbody>
