@@ -146,7 +146,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
   );
 
   return (
-    <div className="w-full h-[600px] bg-white rounded-lg border border-gray-300 border-b-2 overflow-hidden flex">
+    <div className="w-full h-[600px] bg-white rounded-lg border border-gray-300 border-b-2 mb-8 overflow-hidden flex">
       {/* Left Sidebar - Chat List */}
       <div className="w-[400px] border-r border-gray-200 flex flex-col">
         {/* Header */}

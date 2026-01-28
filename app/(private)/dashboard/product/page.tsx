@@ -5,6 +5,8 @@ import axios from "axios";
 import { Icon } from "@iconify/react";
 import { toast } from 'react-toastify';
 import Select from "react-select";
+import CustomDropdown from "../../components/CustomDropdown";
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { addProduct, addServices, deleteProduct, deleteService, getAllProducts, getAllServices, GetSpaceId, searchProducts, searchServices, updateProduct, updateServices, uploadBulkFile } from '@/app/Apis/publicapi';
@@ -731,26 +733,19 @@ const ProductServiceTabs = () => {
             <div className="transition-all duration-300 ease-in-out overflow-hidden">
               {!showBulkModal ? (
                 <form onSubmit={handleAddItem} className="grid grid-cols-2 gap-2">
-                  <select
-                    className="col-span-2 border border-[#D0D5DD]   rounded px-3 py-3"
+                  <CustomDropdown
                     value={formState.space_id}
-                    onChange={(e) => {
-                      const space_id = e.target.value;
-                      const selectedSpace = spaces.find((s) => String(s.id) === space_id);
+                    onChange={(val: string) => {
+                      const selectedSpace = spaces.find((s) => String(s.id) === val);
                       setFormState((f) => ({
                         ...f,
-                        space_id,
+                        space_id: val,
                         space_name: selectedSpace?.name || '',
                       }));
                     }}
-                  >
-                    <option value="">Select Space Name</option>
-                    {spaces.map((space) => (
-                      <option key={space.id} value={String(space.id)}>
-                        {space.name}
-                      </option>
-                    ))}
-                  </select>
+                    options={spaces.map((space) => ({ value: String(space.id), label: space.name }))}
+                    placeholder="Select Space Name"
+                  />
 
                   <label className="col-span-2">
                     <span>Name</span>
@@ -766,19 +761,13 @@ const ProductServiceTabs = () => {
                   {activeTab === 'products' && (
                     <>
                       <label className='col-span-2'>
-                        <span>Type</span>
-                        <select
+                        <span className="mb-1 block">Type</span>
+                        <CustomDropdown
                           value={formState.type}
-                          onChange={(e) => setFormState((f) => ({ ...f, type: e.target.value }))}
-                          className=" border border-[#D0D5DD]   p-2 py-4 rounded w-full mt-1"
-                        >
-                          <option value="" >Select Type</option>
-                          {productTypes.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={(val: string) => setFormState((f) => ({ ...f, type: val }))}
+                          options={productTypes.map(type => ({ value: type, label: type }))}
+                          placeholder="Select Type"
+                        />
                       </label>
 
                       <label>
@@ -947,26 +936,20 @@ const ProductServiceTabs = () => {
                     If you have done that already, then you can proceed to do your Bulk upload.
                   </p>
 
-                  <select
-                    className="w-full border border-bg-gray-100 rounded px-3 py-4 mb-6"
+                  <CustomDropdown
                     value={formState.space_id}
-                    onChange={(e) => {
-                      const space_id = e.target.value;
-                      const selectedSpace = spaces.find((s) => String(s.id) === space_id);
+                    onChange={(val: string) => {
+                      const selectedSpace = spaces.find((s) => String(s.id) === val);
                       setFormState((f) => ({
                         ...f,
-                        space_id,
+                        space_id: val,
                         space_name: selectedSpace?.name || '',
                       }));
                     }}
-                  >
-                    <option value="">Select Space Name</option>
-                    {spaces.map((space) => (
-                      <option key={space.id} value={String(space.id)}>
-                        {space.name}
-                      </option>
-                    ))}
-                  </select>
+                    options={spaces.map((space) => ({ value: String(space.id), label: space.name }))}
+                    placeholder="Select Space Name"
+                    className="mb-6"
+                  />
 
                   {selectedFile && <p className="text-green-600 text-xs mb-2">Selected File: {selectedFile.name}</p>}
 

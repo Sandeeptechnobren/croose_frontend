@@ -5,6 +5,7 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import toast, { Toaster } from 'react-hot-toast';
 import SendMessageModal from './SendMessageModal';
 import { getBroadcastList, getTargetList, addBroadcast } from '@/app/Apis/publicapi';
+import CustomDropdown from './CustomDropdown';
 
 
 const users = [
@@ -463,23 +464,11 @@ const Page = () => {
                         Target
                       </label>
                       <div className="relative h-[44px]">
-                        <select
+                        <CustomDropdown
                           value={selectedTarget}
-                          onChange={(e) => setSelectedTarget(e.target.value)}
-                          className="w-full h-full rounded-[12px] border border-[#D0D5DD] px-[16px] font-normal text-[14px] leading-[20px] font-sans focus:outline-none appearance-none bg-white text-[#101828]"
-                        >
-                          <option value="" disabled>Select target</option>
-                          {targetList.map((target: any, index: number) => (
-                            <option key={index} value={target.id || target.name}>
-                              {target.name || 'Unnamed Target'}
-                            </option>
-                          ))}
-                        </select>
-                        <Icon
-                          icon="ri:arrow-down-s-line"
-                          width="24"
-                          height="24"
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#344054] pointer-events-none"
+                          onChange={(val: string) => setSelectedTarget(val)}
+                          options={targetList.map((target: any) => ({ value: String(target.id || target.name), label: target.name || 'Unnamed Target' }))}
+                          placeholder="Select target"
                         />
                       </div>
                     </div>
@@ -490,22 +479,16 @@ const Page = () => {
                         Frequency
                       </label>
                       <div className="relative h-[44px]">
-                        <select
+                        <CustomDropdown
                           value={frequency}
-                          onChange={(e) => setFrequency(e.target.value)}
-                          className="w-full h-full rounded-[12px] border border-[#D0D5DD] px-[16px] font-normal text-[14px] leading-[20px] font-sans focus:outline-none appearance-none bg-white text-[#101828]"
-                        >
-                          <option value="" disabled>Select frequency</option>
-                          <option value="daily">Daily</option>
-                          <option value="weekly">Weekly</option>
-                          <option value="monthly">Monthly</option>
-                          <option value="once">Once</option>
-                        </select>
-                        <Icon
-                          icon="ri:arrow-down-s-line"
-                          width="24"
-                          height="24"
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#344054] pointer-events-none"
+                          onChange={(val: string) => setFrequency(val)}
+                          options={[
+                            { value: 'daily', label: 'Daily' },
+                            { value: 'weekly', label: 'Weekly' },
+                            { value: 'monthly', label: 'Monthly' },
+                            { value: 'once', label: 'Once' },
+                          ]}
+                          placeholder="Select frequency"
                         />
                       </div>
                     </div>

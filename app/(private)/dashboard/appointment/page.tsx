@@ -6,8 +6,8 @@ import { X } from "lucide-react";
 import appointmentImg from "@/assets/appointment.png";
 import { Icon } from "@iconify/react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import { dividerClasses } from "@mui/material/Divider";
 import Navbar from "../../components/Navbar";
+import CustomDropdown from "../../components/CustomDropdown";
 // import { getTotalAppointment } from '../api'; 
 // import { getTotalAppointment } from "@/app/Apis/publicapi";
 
@@ -182,6 +182,12 @@ const AppointmentTable = () => {
     { value: "cancelled", label: "🔴 Cancelled" },
     { value: "completed", label: "🔵 Completed" },
   ];
+
+  const serviceOptions = [
+    { value: "Dental Cleaning", label: "Dental Cleaning" },
+    { value: "Eye Checkup", label: "Eye Checkup" },
+    { value: "Skin Consultation", label: "Skin Consultation" },
+  ];
   const rowsPerPage = 10;
   const indexOfLastAppointment = currentPage * itemsPerPage;
   const indexOfFirstAppointment = indexOfLastAppointment - itemsPerPage;
@@ -321,18 +327,18 @@ const AppointmentTable = () => {
 
 
                 {/* DateTime input */}
-                <select className="w-full border p-2  font-Inter rounded-md fd"
-                  value={formData.service} onChange={(e) => setFormData({ ...formData, service: e.target.value })}>
-                  <option>Dental Cleaning</option>
-                  <option>Eye Checkup</option>
-                  <option>Skin Consultation</option>
-                </select>
-                <select className="w-full border p-2 rounded-md"
-                  value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
-                  {statusOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <CustomDropdown
+                  value={formData.service}
+                  onChange={(val: string) => setFormData({ ...formData, service: val })}
+                  options={serviceOptions}
+                  placeholder="Select Service"
+                />
+                <CustomDropdown
+                  value={formData.status}
+                  onChange={(val: string) => setFormData({ ...formData, status: val })}
+                  options={statusOptions}
+                  placeholder="Select Status"
+                />
                 <textarea placeholder="Notes" className="w-full border p-2 rounded-md"
                   value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}></textarea>
                 <div className="flex justify-end gap-2">
@@ -354,18 +360,18 @@ const AppointmentTable = () => {
                                         <Icon icon="mynaui:filter-solid" width="20" height="20" style={{ color: "#667085" }} />
                                         <p className='text-[#344054] font-Inter font-semibold text-[14px] ' >Filters</p>
                                     </button> */}
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="text-[#344054] font-Inter font-semibold text-[14px]  px-[14px] py-[10px] flex gap-[4px] border-[2px] rounded-[8px] border-[#EAECF0]">
-                <option value="">All Status</option>
-                {statusOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-              <select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)} className="text-[#344054] font-Inter font-semibold text-[14px]  px-[14px] py-[10px] flex gap-[4px] border-[2px] rounded-[8px] border-[#EAECF0]">
-                <option value="">All Services</option>
-                <option value="Dental Cleaning">Dental Cleaning</option>
-                <option value="Eye Checkup">Eye Checkup</option>
-                <option value="Skin Consultation">Skin Consultation</option>
-              </select>
+              <CustomDropdown
+                value={statusFilter}
+                onChange={(val: string) => setStatusFilter(val)}
+                options={[{ value: "", label: "All Status" }, ...statusOptions]}
+                className="w-40"
+              />
+              <CustomDropdown
+                value={serviceFilter}
+                onChange={(val: string) => setServiceFilter(val)}
+                options={[{ value: "", label: "All Services" }, ...serviceOptions]}
+                className="w-48"
+              />
 
             </li>
             <li className='flex gap-[12px] ' >
@@ -437,21 +443,12 @@ const AppointmentTable = () => {
 
                     <td className="px-4 py-3" style={defaultTypography}>{appt.customer_name}</td>
                     <td className="px-4 py-3">
-                      <select
+                      <CustomDropdown
                         value={appt.status}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          handleStatusUpdate(appt.id, e.target.value);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="border p-1 rounded-md text-sm"
-                      >
-                        {statusOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(newStatus: string) => handleStatusUpdate(appt.id, newStatus)}
+                        options={statusOptions}
+                        className="w-36"
+                      />
 
                     </td>
                     <td className="px-4 py-3 text-[#101828] " style={{
