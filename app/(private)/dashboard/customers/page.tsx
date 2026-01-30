@@ -92,7 +92,7 @@ const Customers = () => {
                                 </div>
 
                             </div>
-                            <ul className=' w-[full] flex flex-wrap gap-[16px] ' >
+                            <ul className=' w-full flex flex-wrap gap-[16px] ' >
                                 <li className='w-full  lg:w-[32.2%] border-[2px] rounded-[12px] border-[#EAECF0] p-[24px] ' >
                                     <p className='text-[#475467] text-[14px] font-medium font-Inter' >New Customers</p>
                                     <div className='flex items-center gap-[16px] justify-between  '>
@@ -153,12 +153,10 @@ const Customers = () => {
                     <table className="min-w-[700px] w-[100%] border border-[#EAECF0] text-sm text-left ">
                         <thead className="bg-[#F9FAFB] text-[#475467]  max-w-full  font-medium">
                             <tr>
-                                <th className="px-6 py-3">Customer</th>
-                                <th className="px-6 py-3">Status</th>
-                                <th className="px-6 py-3">Phone Number</th>
-                                <th className="px-6 py-3">Address</th>
-                                {/* <th className="px-6 py-3">Pin Code</th> */}
-                                {/* <th className="px-6 py-3">Actions</th>/ */}
+                                <th className="px-6 py-3 w-1/4">Customer</th>
+                                <th className="px-6 py-3 w-1/4">Status</th>
+                                <th className="px-6 py-3 w-1/4">Phone Number</th>
+                                <th className="px-6 py-3 w-1/4">Address</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -176,10 +174,6 @@ const Customers = () => {
                                     <td className="px-6 py-4">Active</td>
                                     <td className="px-6 py-4 text-[#101828]">{user.whatsapp_number}</td>
                                     <td className="px-6 py-4 text-[#475467]">{user.address}</td>
-                                    <td className="px-6 py-4 text-[#475467]">{user.pin_code}</td>
-                                    {/* <td className="px-6 py-4 text-[#475467]">
-                                        <Icon icon="bi:three-dots-vertical" width="16" height="16" />
-                                    </td> */}
                                 </tr>
                             ))}
                         </tbody>

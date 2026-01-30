@@ -986,6 +986,26 @@ export const InstanceActivationStatus = async (spaceId: number) => {
   }
 }
 
+export const getUserStatus = async (id: number | string) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/user-status/${id}`);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching user status:", err);
+    throw err;
+  }
+}
+
+export const getUserTyping = async (id: number | string) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/user-typing/${id}`);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching user status:", err);
+    throw err;
+  }
+}
+
 
 export const findAccountByEmail = async (email: string) => {
   try {
