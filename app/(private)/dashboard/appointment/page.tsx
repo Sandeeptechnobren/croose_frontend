@@ -442,14 +442,18 @@ const AppointmentTable = () => {
 
 
                     <td className="px-4 py-3" style={defaultTypography}>{appt.customer_name}</td>
-                    <td className="px-4 py-3">
-                      <CustomDropdown
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <select
                         value={appt.status}
-                        onChange={(newStatus: string) => handleStatusUpdate(appt.id, newStatus)}
-                        options={statusOptions}
-                        className="w-36"
-                      />
-
+                        onChange={(e) => handleStatusUpdate(appt.id, e.target.value)}
+                        className="w-36 p-2 border border-[#EAECF0] rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#685BC7]"
+                      >
+                        {statusOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-3 text-[#101828] " style={{
                       font: "Inter",

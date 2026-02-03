@@ -6,7 +6,7 @@ import Spaceiqcolor from './spaceiqcolor'
 import Upgradetopro from './upgradetopro'
 import Scanqrpage from './scanqr'
 import Spacenav from './spacenav'
-import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp } from "@/app/Apis/publicapi";
+import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp, getUserStatus } from "@/app/Apis/publicapi";
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
@@ -18,6 +18,25 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const [userOnlineStatus, setUserOnlineStatus] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      if (spaceId) {
+        try {
+          const res = await getUserStatus(spaceId);
+          console.log("User Status API response:", res);
+          setUserOnlineStatus(res.online); // Corrected property
+        } catch (err) {
+          console.error("Failed to fetch user status", err);
+        }
+      }
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 30000); // Poll every 30s
+    return () => clearInterval(interval);
+  }, [spaceId]);
 
   const [messages, setMessages] = useState<any[]>([]);
   useEffect(() => {
@@ -263,9 +282,19 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                   <h3 className="font-semibold text-[#111B21] text-sm">
                     {selectedChat.name}
                   </h3>
-                  <p className="text-xs text-[#667781]">
-                    {selectedChat.phone || selectedChat.name}
-                  </p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-xs text-[#667781]">
+                      {selectedChat.phone || selectedChat.name}
+                    </p>
+                    <span className="text-[10px] text-gray-300">•</span>
+                    <p className="text-xs">
+                      {userOnlineStatus === true ? (
+                        <span className="text-[#25D366] font-medium">Online</span>
+                      ) : (
+                        <span className="text-gray-400">Offline</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-4">
