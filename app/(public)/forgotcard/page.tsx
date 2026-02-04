@@ -146,7 +146,7 @@ const Forgotcard = (props: any) => {
       <div className="flex justify-between items-center w-full border-b border-[#EAECF0] py-4 px-5">
         <img
           className="w-36 sm:w-44 md:w-[173px] mt-2"
-          src="Vector.png"
+          src="/Vector.png"
           alt="crooselogo"
         />
         <Link href={'/signup'}>

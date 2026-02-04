@@ -130,10 +130,10 @@ const Login = () => {
             <div className='flex flex-col md:flex-row w-full min-h-screen'>
               <div className='hidden w-[685px] h-[900px] bg-[#EDEBF8] md:block'>
                 <div className="w-[190px] h-[67.05px] mt-[40.94px] ml-[45px]">
-                  <img className="w-[173.52px] h-[40.24px]" src="Vector.png" alt="Logo" />
+                  <img className="w-[173.52px] h-[40.24px]" src="/Vector.png" alt="Logo" />
                 </div>
                 <div className='flex flex-col justify-center items-center'>
-                  <img className='mb-[40px] w-[260px] h-[463px]' src="mobile.png" />
+                  <img className='mb-[40px] w-[260px] h-[463px]' src="/mobile.png" />
                   <div className='w-[532px] mb-[100px] h-[184px]'>
                     <p className='text-[#1D2939] font-bold text-center text-[40px] leading-[44px]'>
                       Log in. Ignite your enterprise.
@@ -224,11 +224,11 @@ const Login = () => {
                       </div>
 
                       <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm text-[#344054] border-[#EAECF0]">
-                        <img src="google.png" alt="Google" className="w-5 h-5" />
+                        <img src="/google.png" alt="Google" className="w-5 h-5" />
                         Continue with Google
                       </button>
                       <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm text-[#344054] border-[#EAECF0]">
-                        <img src="apple.jpeg" alt="Apple" className="w-9 h-auto" />
+                        <img src="/apple.jpeg" alt="Apple" className="w-9 h-auto" />
                         Continue with Apple
                       </button>
                     </form>

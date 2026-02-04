@@ -185,10 +185,10 @@ const Signupform = () => {
       <div className="flex">
         <div className="hidden select-none pt-[11px] pl-[7px] w-[684px] h-[1000px] bg-[#685BC71F] md:block">
           <div className="w-[190px] h-[67.05px] mt-[40.94px] ml-[45px]">
-            <img className="w-[173.52px] h-[40.24px] mt-[11.05px] ml-[7.66px]" src="Vector.png" alt="Logo" />
+            <img className="w-[173.52px] h-[40.24px] mt-[11.05px] ml-[7.66px]" src="/Vector.png" alt="Logo" />
           </div>
           <div className="flex justify-center items-center flex-col gap-[47px] mt-[20px] w-full h-auto">
-            <img className="w-[440px] h-[431px]" src="cover.png" alt="cover" />
+            <img className="w-[440px] h-[431px]" src="/cover.png" alt="cover" />
             <div className="flex items-center flex-col w-[532px] h-auto gap-[16px]">
               <p className="text-[#1D2939] font-bold text-[40px] text-center leading-[40px]">
                 The fastest way to automate your business
@@ -305,11 +305,11 @@ const Signupform = () => {
 
                     <div className='cursor-pointer' >
                       <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
-                        <img src="google.png" alt="Google" className="w-5 h-5" />
+                        <img src="/google.png" alt="Google" className="w-5 h-5" />
                         Continue with Google
                       </button>
                       <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] mt-2 border rounded-[12px] text-sm font-medium text-[#344054] border-[#EAECF0]">
-                        <img src="apple.jpeg" alt="Apple" className="w-9 h-auto" />
+                        <img src="/apple.jpeg" alt="Apple" className="w-9 h-auto" />
                         Continue with Apple
                       </button>
                     </div>
