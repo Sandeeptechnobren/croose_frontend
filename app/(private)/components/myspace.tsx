@@ -559,7 +559,8 @@ const Myspace = () => {
 
             {imageUrl && (
               <img
-                src={decodeURIComponent(imageUrl)}
+                // src={decodeURIComponent(imageUrl)}
+                src={imageUrl}
                 alt="Space image"
                 className="w-[48px]  h-[48px] rounded-full"
               />
