@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react'
-import { Plus, Minus, MessageCircle, Search, Bell } from 'lucide-react'
+import { Plus, Minus, MessageCircle, Search, Bell, X, Menu, Maximize2, Mic, Send } from 'lucide-react'
 
 interface FAQItem {
     title: string
@@ -19,29 +19,24 @@ const Accordion: React.FC<AccordionProps> = ({ index, value, toggleAccordion, op
     const isOpen = openIndex === index
 
     return (
-        <div className="w-full rounded-lg bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="border-b border-gray-200 last:border-b-0">
             <button
                 onClick={() => toggleAccordion(index)}
                 className="w-full flex justify-between items-center p-6 text-left"
                 aria-expanded={isOpen}
             >
-                <span className="font-semibold text-base text-gray-900 pr-4">
-                    {value.title}
-                </span>
-                <div className="flex-shrink-0">
+                <span className="font-medium text-gray-900">{value.title}</span>
+                <div className="ml-4 flex-shrink-0">
                     {isOpen ? (
-                        <Minus className="w-5 h-5 text-purple-600" />
+                        <Minus className="h-5 w-5 text-purple-600" />
                     ) : (
-                        <Plus className="w-5 h-5 text-gray-600" />
+                        <Plus className="h-5 w-5 text-gray-400" />
                     )}
                 </div>
             </button>
-
             {isOpen && (
-                <div className="px-6 pb-6 animate-slideDown">
-                    <p className="text-gray-600 leading-relaxed">
-                        {value.description}
-                    </p>
+                <div className="px-6 pb-6">
+                    <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
                 </div>
             )}
         </div>
@@ -49,7 +44,7 @@ const Accordion: React.FC<AccordionProps> = ({ index, value, toggleAccordion, op
 }
 
 const Support: React.FC = () => {
-    const [crooseOpen, setCrooseOpen] = useState<boolean>(false)
+    const [crooseOpen, setCrooseOpen] = useState(false)
     const [openIndex, setOpenIndex] = useState<number | null>(null)
 
     const toggleAccordion = (index: number): void => {
@@ -110,70 +105,77 @@ const Support: React.FC = () => {
     ]
 
     return (
-        <div className='w-full min-h-screen bg-gray-50'>
+        <div className="min-h-screen bg-gray-50">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Support</h1>
-                <div className="flex items-center gap-4">
-                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Search className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Bell className="w-5 h-5 text-gray-600" />
-                    </button>
+            <header className="bg-white shadow-sm sticky top-0 z-40">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-16">
+                        <h1 className="text-2xl font-bold text-purple-600">Support</h1>
+                        <div className="flex items-center gap-4">
+                            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                <Search className="h-5 w-5 text-gray-600" />
+                            </button>
+                            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                <Bell className="h-5 w-5 text-gray-600" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </header>
 
             {/* Main Content */}
-            <div className='max-w-7xl mx-auto px-8 py-8'>
+            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Section Header */}
-                <div className='mb-8'>
-                    <h2 className='font-semibold text-xl text-gray-900 mb-2'>
+                <div className="text-center mb-12">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-4">
                         How can we help you today?
                     </h2>
-                    <p className='text-gray-600 text-sm'>
+                    <p className="text-lg text-gray-600">
                         Find answers to common questions about CROOSE features, billing, and setup.
                     </p>
                 </div>
 
                 {/* Tab Buttons */}
-                <div className='flex gap-3 mb-8'>
-                    <button className='bg-purple-50 text-purple-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-100 transition-colors'>
+                <div className="flex gap-3 mb-8">
+                    <button className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm">
+                        <MessageCircle className="h-4 w-4" />
                         FAQ
                     </button>
                     <button
                         onClick={() => setCrooseOpen(true)}
                         className='flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors'
                     >
-                        <MessageCircle className="w-4 h-4" />
+                        <MessageCircle className="h-4 w-4" />
                         Live Bot
                     </button>
                 </div>
 
                 {/* FAQ Title */}
-                <h3 className='font-bold text-3xl text-gray-900 mb-6'>
-                    Frequently Asked Questions
-                </h3>
+                <div className="mb-6">
+                    <h3 className="text-2xl font-bold text-gray-900">
+                        Frequently Asked Questions
+                    </h3>
+                </div>
 
                 {/* Accordion Section */}
-                <div className="flex flex-col gap-4">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                     {faqData.map((value, index) => (
                         <Accordion
                             key={index}
-                            value={value}
                             index={index}
-                            openIndex={openIndex}
+                            value={value}
                             toggleAccordion={toggleAccordion}
+                            openIndex={openIndex}
                         />
                     ))}
                 </div>
 
                 {/* Help Footer */}
-                <div className="mt-12 p-6 bg-purple-50 rounded-lg border border-purple-100">
-                    <h4 className="font-semibold text-lg text-gray-900 mb-2">
+                <div className="mt-12 text-center bg-purple-50 rounded-lg p-8 border border-purple-100">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
                         Still need help?
-                    </h4>
-                    <p className="text-gray-600 text-sm mb-4">
+                    </h3>
+                    <p className="text-gray-600 mb-6">
                         Can't find the answer you're looking for? Our support team is here to assist you.
                     </p>
                     <button
@@ -183,23 +185,83 @@ const Support: React.FC = () => {
                         Contact Support
                     </button>
                 </div>
-            </div>
+            </main>
 
-            <style jsx>{`
-                @keyframes slideDown {
-                    from {
-                        opacity: 0;
-                        transform: translateY(-10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                .animate-slideDown {
-                    animation: slideDown 0.2s ease-out;
-                }
-            `}</style>
+            {/* Live Bot Popup */}
+            {crooseOpen && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0"
+                        onClick={() => setCrooseOpen(false)}
+                    />
+
+                    {/* Popup */}
+                    <div className="fixed bottom-6 right-6 w-[450px] h-[550px] bg-white rounded-[2.5rem] shadow-2xl z-50 flex flex-col overflow-hidden border border-gray-100 font-sans">
+                        {/* Popup Header */}
+                        <div className="flex items-center justify-between px-6 py-5 bg-white">
+                            <div className="flex items-center gap-4">
+                                <button className="p-1 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <Menu className="h-5 w-5 text-gray-700" />
+                                </button>
+                                <h3 className="font-semibold text-lg text-gray-900">Live Bot</h3>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button className="p-1 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <Maximize2 className="h-5 w-5 text-gray-400 rotate-90" />
+                                </button>
+                                <button
+                                    onClick={() => setCrooseOpen(false)}
+                                    className="p-1 hover:bg-gray-50 rounded-lg transition-colors"
+                                >
+                                    <X className="h-6 w-6 text-gray-500" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Popup Content - Chat Area */}
+                        <div className="flex-1 overflow-auto bg-white px-6 py-4 flex flex-col gap-6">
+                            {/* Dummy Messages to match the design */}
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="bg-[#F2F4F7] text-gray-800 px-5 py-3 rounded-2xl rounded-tr-none max-w-[85%] text-[0.95rem] leading-snug">
+                                    Please give me a report of all your bookings, remove the ones where there's conflict, and only include the confirmed ones. Then create a download CSV containing all the information
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                                <div className="h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0 mt-1">
+                                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <div className="text-gray-500 text-sm">Getting information from Croose HQ ...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Popup Footer - Input Area */}
+                        <div className="p-6 bg-white">
+                            <div className="relative flex items-center bg-white border border-gray-200 rounded-[1.5rem] px-4 py-3 shadow-sm">
+                                <input
+                                    type="text"
+                                    placeholder="Ask a question, perform an action, or give instructions..."
+                                    className="flex-1 bg-transparent border-none focus:ring-0 text-[0.95rem] text-gray-600 placeholder:text-gray-400"
+                                />
+                                <div className="flex items-center gap-2 ml-2">
+                                    <button className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors">
+                                        <Plus className="h-5 w-5" />
+                                    </button>
+                                    <button className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors">
+                                        <Mic className="h-5 w-5" />
+                                    </button>
+                                    <button className="h-8 w-8 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
+                                        <div className="h-4 w-4 border-2 border-white rounded-full" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }

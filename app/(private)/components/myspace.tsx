@@ -400,8 +400,8 @@ const Myspace = () => {
   // Support both 'id' and 'space_id' from URL
   const paramId = searchParams.get('id');
   const paramSpaceId = searchParams.get('space_id');
-  // TEMPORARY: Hardcoded fallback ID for testing (REMOVE THIS IN PRODUCTION)
-  const id = paramId || paramSpaceId || "189";
+  // No hardcoded fallback ID to ensure we don't load the wrong space on slow hydration
+  const id = paramId || paramSpaceId;
 
   const uuid = searchParams.get('uuid');
 
@@ -536,8 +536,10 @@ const Myspace = () => {
         console.log(err)
       }
     }
-    handleActivationStatus()
-  }, [])
+    if (id) {
+      handleActivationStatus();
+    }
+  }, [id])
 
 
 
@@ -559,7 +561,8 @@ const Myspace = () => {
 
             {imageUrl && (
               <img
-                src={decodeURIComponent(imageUrl)}
+                // src={decodeURIComponent(imageUrl)}
+                src={imageUrl}
                 alt="Space image"
                 className="w-[48px]  h-[48px] rounded-full"
               />
