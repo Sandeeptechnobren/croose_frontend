@@ -487,7 +487,7 @@ const Myspace = () => {
       const instanceActivationStatus = response?.data?.instance_activation_status;
 
       setActivationStatus(instanceActivationStatus);
-      if (instanceActivationStatus === 0) {
+      if (instanceActivationStatus === 1) {
         setUnderReviewPopupOpen(true);
         return;
       }
