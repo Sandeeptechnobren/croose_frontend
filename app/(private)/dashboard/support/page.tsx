@@ -1,6 +1,7 @@
-'use client'
-import React, { useState } from 'react'
-import { Plus, Minus, MessageCircle, Search, Bell, X, Menu, Maximize2, Mic, Send } from 'lucide-react'
+'use client';
+import React, { useState, useRef, useEffect } from 'react';
+import { Plus, Minus, MessageCircle, Search, Bell, X, Menu, Maximize2, Mic, Send } from 'lucide-react';
+import { liveBotChat } from '@/app/Apis/publicapi';
 
 interface FAQItem {
     title: string
@@ -46,6 +47,38 @@ const Accordion: React.FC<AccordionProps> = ({ index, value, toggleAccordion, op
 const Support: React.FC = () => {
     const [crooseOpen, setCrooseOpen] = useState(false)
     const [openIndex, setOpenIndex] = useState<number | null>(null)
+    const [messages, setMessages] = useState<{ text: string; sender: 'user' | 'bot' }[]>([
+        { text: 'Hello! I am your Croose assistant. How can I help you today?', sender: 'bot' }
+    ])
+    const [input, setInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+
+    useEffect(() => {
+        scrollToBottom()
+    }, [messages])
+
+    const handleSendMessage = async () => {
+        if (!input.trim() || isLoading) return
+
+        const userMessage = input.trim()
+        setMessages(prev => [...prev, { text: userMessage, sender: 'user' }])
+        setInput('')
+        setIsLoading(true)
+
+        try {
+            const response = await liveBotChat(userMessage)
+            setMessages(prev => [...prev, { text: response.reply, sender: 'bot' }])
+        } catch (error) {
+            setMessages(prev => [...prev, { text: 'Sorry, I encountered an error. Please try again.', sender: 'bot' }])
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     const toggleAccordion = (index: number): void => {
         setOpenIndex(prev => (prev === index ? null : index))
@@ -221,21 +254,25 @@ const Support: React.FC = () => {
 
                         {/* Popup Content - Chat Area */}
                         <div className="flex-1 overflow-auto bg-white px-6 py-4 flex flex-col gap-6">
-                            {/* Dummy Messages to match the design */}
-                            <div className="flex flex-col items-end gap-2">
-                                <div className="bg-[#F2F4F7] text-gray-800 px-5 py-3 rounded-2xl rounded-tr-none max-w-[85%] text-[0.95rem] leading-snug">
-                                    Please give me a report of all your bookings, remove the ones where there's conflict, and only include the confirmed ones. Then create a download CSV containing all the information
+                            {messages.map((msg, idx) => (
+                                <div key={idx} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} gap-2`}>
+                                    <div className={`${msg.sender === 'user' ? 'bg-[#F2F4F7] text-gray-800' : 'bg-purple-600 text-white'} px-5 py-3 rounded-2xl ${msg.sender === 'user' ? 'rounded-tr-none' : 'rounded-tl-none'} max-w-[85%] text-[0.95rem] leading-snug`}>
+                                        {msg.text}
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
 
-                            <div className="flex items-start gap-3">
-                                <div className="h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0 mt-1">
-                                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            {isLoading && (
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-full bg-black flex items-center justify-center flex-shrink-0 mt-1">
+                                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <div className="text-gray-500 text-sm">Bot is thinking...</div>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col gap-1">
-                                    <div className="text-gray-500 text-sm">Getting information from Croose HQ ...</div>
-                                </div>
-                            </div>
+                            )}
+                            <div ref={messagesEndRef} />
                         </div>
 
                         {/* Popup Footer - Input Area */}
@@ -243,6 +280,9 @@ const Support: React.FC = () => {
                             <div className="relative flex items-center bg-white border border-gray-200 rounded-[1.5rem] px-4 py-3 shadow-sm">
                                 <input
                                     type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                                     placeholder="Ask a question, perform an action, or give instructions..."
                                     className="flex-1 bg-transparent border-none focus:ring-0 text-[0.95rem] text-gray-600 placeholder:text-gray-400"
                                 />
@@ -253,8 +293,12 @@ const Support: React.FC = () => {
                                     <button className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors">
                                         <Mic className="h-5 w-5" />
                                     </button>
-                                    <button className="h-8 w-8 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition-colors">
-                                        <div className="h-4 w-4 border-2 border-white rounded-full" />
+                                    <button
+                                        onClick={handleSendMessage}
+                                        disabled={isLoading}
+                                        className={`h-8 w-8 bg-black rounded-full flex items-center justify-center text-white hover:bg-gray-800 transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <Send className="h-4 w-4" />
                                     </button>
                                 </div>
                             </div>

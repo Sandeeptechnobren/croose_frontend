@@ -2507,3 +2507,18 @@ export const deleteSubscription = async (id: number | string) => {
     throw error;
   }
 };
+
+export const liveBotChat = async (message: string) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(`${BASE_URL}/api/chat`, { message }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Live Bot Chat Error:', err);
+    throw err;
+  }
+};
