@@ -6,7 +6,6 @@ import { useFormik } from 'formik';
 import { loginApi, verifyToken } from '@/app/Apis/publicapi';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-// import { useRouter } from 'next/router';
 import { useRouter } from 'next/navigation';
 import Loader from '@/app/(private)/components/loading';
 import { Icon } from '@iconify/react/dist/iconify.js';
@@ -24,17 +23,10 @@ const Login = () => {
 
   const isLogin = async () => {
     try {
-
       setLoading(true)
-
       let token: any = localStorage.getItem('token')
-      // console.log(token, 28)
-      // router.push("/dashboard/space")
       setLoading(false)
-
       if (!token) {
-        // console.log("inif")
-
         return router.push("/login")
       }
       router.push("/dashboard/overview")
@@ -46,16 +38,9 @@ const Login = () => {
   useEffect(() => {
     isLogin()
   }, [loginData])
-
-
-
-
-
-
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
-
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -83,14 +68,10 @@ const Login = () => {
           setSnackbarMessage(data.message || 'Login successful');
           setSnackbarSeverity('success');
           setSnackbarOpen(true);
-
-
-
         }
         if (data?.data) {
           localStorage.setItem('userdata', JSON.stringify(data))
         }
-
         else {
           throw new Error(data?.message || 'Login failed');
         }
@@ -101,16 +82,11 @@ const Login = () => {
       }
     },
   });
-
-
-
   return (
     <>
       {
-
         loading ? <Loader />
           : <>
-
             <Snackbar
               open={snackbarOpen}
               autoHideDuration={5000}
@@ -126,7 +102,6 @@ const Login = () => {
                 {snackbarMessage}
               </Alert>
             </Snackbar>
-
             <div className='flex flex-col md:flex-row w-full min-h-screen'>
               <div className='hidden w-[685px] h-[900px] bg-[#EDEBF8] md:block'>
                 <div className="w-[190px] h-[67.05px] mt-[40.94px] ml-[45px]">
@@ -144,7 +119,6 @@ const Login = () => {
                   </div>
                 </div>
               </div>
-
               <div className="flex-1 flex bg-white md:-mt-[40px] md:p-[80px_160px]">
                 <section className="w-full md:w-[435px] mt-[70px]">
                   <div className="p-6 space-y-4 sm:p-8">
@@ -166,7 +140,6 @@ const Login = () => {
                           <p className='text-red-500 text-sm mt-1'>{formik.errors.email}</p>
                         )}
                       </div>
-
                       <div>
                         <label htmlFor="password" className="block mb-2 text-sm font-medium text-[#344054]">Password</label>
                         <div className="relative">
@@ -192,11 +165,9 @@ const Login = () => {
                           <p className='text-red-500 text-sm mt-1'>{formik.errors.password}</p>
                         )}
                       </div>
-
                       <div className='text-right'>
                         <Link href="/forgotcard" className='text-[#685BC7] text-sm font-semibold'>Forgot Password?</Link>
                       </div>
-
                       <button
                         type="submit"
                         disabled={formik.isSubmitting}
@@ -211,18 +182,15 @@ const Login = () => {
                           'Sign in'
                         )}
                       </button>
-
                       <div className="text-center text-sm text-[#101828] mt-2">
                         Don’t have an account?{' '}
                         <Link href="/signup" className="text-[#685BC7] font-medium hover:underline">Sign up</Link>
                       </div>
-
                       <div className="flex items-center justify-center gap-4 my-4">
                         <hr className="flex-grow border-t border-gray-300" />
                         <span className="text-gray-500 text-sm font-medium">OR</span>
                         <hr className="flex-grow border-t border-gray-300" />
                       </div>
-
                       <button type="button" className="flex cursor-pointer items-center justify-center gap-2 w-full h-[48px] border rounded-[12px] text-sm text-[#344054] border-[#EAECF0]">
                         <img src="/google.png" alt="Google" className="w-5 h-5" />
                         Continue with Google
@@ -236,10 +204,8 @@ const Login = () => {
                 </section>
               </div>
             </div>
-
           </>}
     </>
   );
 };
-
 export default Login;
