@@ -35,7 +35,7 @@ const Customisespace = () => {
         try {
             const res = await createSpace(formData);
             console.log("Space created:", res);
-            router.push("/dashboard/createnewspace");
+            router.push("/dashboard/yourspace");
         } catch (err) {
             console.log("Space not created:", err);
         } finally {

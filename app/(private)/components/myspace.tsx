@@ -25,10 +25,10 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
       if (spaceId) {
         try {
           const res = await getUserStatus(spaceId);
-          console.log("User Status API response:", res);
+          // console.log("User Status API response:", res);
           setUserOnlineStatus(res.online); // Corrected property
         } catch (err) {
-          console.error("Failed to fetch user status", err);
+          // console.error("Failed to fetch user status", err);
         }
       }
     };

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import toast, { Toaster } from 'react-hot-toast';
 import SendMessageModal from './SendMessageModal';
-import { getBroadcastList, getTargetList, addBroadcast } from '@/app/Apis/publicapi';
+import { getBroadcastList, getTargetList, addBroadcast, updateBroadcast } from '@/app/Apis/publicapi';
 import CustomDropdown from './CustomDropdown';
 
 
@@ -93,6 +93,7 @@ const Page = () => {
   const [date, setDate] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | string | null>(null);
 
   // Reset form
   const resetForm = () => {
@@ -100,6 +101,7 @@ const Page = () => {
     setFrequency("");
     setDate("");
     setContent("");
+    setEditingId(null);
   };
 
   // Handle schedule broadcast
@@ -120,7 +122,7 @@ const Page = () => {
       setSubmitting(true);
 
       const payload = {
-        target_id: selectedTarget,
+        target_id: Number(selectedTarget),
         frequency: frequency,
         content: content,
         scheduled_at: date
@@ -128,13 +130,17 @@ const Page = () => {
 
       console.log("Sending payload:", payload)
 
-      await addBroadcast(payload);
+      if (editingId) {
+        await updateBroadcast(editingId, payload);
+      } else {
+        await addBroadcast(payload);
+      }
 
       // Success
       setMessaging(false);
       resetForm();
       fetchBroadcastList(1); // Refresh list to first page
-      toast.success("New Broadcast create successfull", {
+      toast.success(editingId ? "Broadcast updated successfully" : "New Broadcast created successfully", {
         position: 'top-center',
         style: {
           background: 'green',
@@ -152,6 +158,28 @@ const Page = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Handle edit
+  const handleEdit = (broadcast: any) => {
+    setEditingId(broadcast.id);
+    setSelectedTarget(String(broadcast.target_id));
+    setFrequency(broadcast.frequency?.toLowerCase() || "");
+    // Convert date for datetime-local input
+    const dateToUse = broadcast.scheduled_at || broadcast.date;
+    if (dateToUse) {
+      const dateObj = new Date(dateToUse);
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      const hours = String(dateObj.getHours()).padStart(2, '0');
+      const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+      setDate(`${year}-${month}-${day}T${hours}:${minutes}`);
+    } else {
+      setDate("");
+    }
+    setContent(broadcast.content || "");
+    setMessaging(true);
   };
 
   // Fetch targets when modal opens
@@ -249,39 +277,48 @@ const Page = () => {
   };
 
   return (
-    <div className=" flex-col w-full mt-0 bg-white">
+    <div className="flex-col w-full mt-0 bg-[#F9FAFB] min-h-screen pb-10">
       <Toaster />
-      <section className="flex flex-col items-center gap-2 mt-0">
-        {/* Header Section */}
-        <section className="w-[95%] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <section className="flex flex-col items-center gap-6 pt-8">
+
+        <section className="w-[94%] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="w-full sm:w-[75%] flex flex-col">
-            <span className="font-Inter font-semibold text-lg sm:text-[18px] leading-[28px] text-[#101828]">
+            <h1 className="font-Inter font-bold text-2xl sm:text-[24px] leading-[32px] text-[#101828]">
               Broadcast Management
-            </span>
-            <span className="font-Inter font-normal text-sm leading-[20px] text-[#475467]">
-              View a history of all payments and associated details
-            </span>
+            </h1>
+            <p className="font-Inter font-normal text-[15px] leading-[22px] text-[#475467] mt-1">
+              Manage your broadcast messages, schedules, and delivery status.
+            </p>
           </div>
-          <div className="w-full sm:w-[25%] flex flex-row justify-start sm:justify-end gap-2">
-            {/* New Broadcast Button */}
-            <div
-              onClick={() => setMessaging(true)}
-              className="w-full sm:w-[135px] h-[36px] flex items-center justify-center bg-[#685BC7] gap-[10px] px-[16px] py-[8px] rounded-lg cursor-pointer"
+          <div className="w-full sm:w-auto flex flex-row items-center gap-3">
+            {/* Send Message Button */}
+            <button
+              onClick={() => setSendOpen(true)}
+              className="px-4 h-[44px] flex items-center justify-center bg-white border border-[#D0D5DD] gap-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-all shadow-sm"
             >
-              <span className="font-Inter font-semibold text-sm leading-5 text-[#FFFFFF] text-center">
-                New Broadcast
-              </span>
-            </div>
-            <div onClick={() => setSendOpen(true)} className="w-full cursor-pointer sm:w-[135px] h-[36px] flex items-center justify-center bg-[#F1F0FA] gap-[10px] px-[16px] py-[8px] rounded-lg">
-              <span className="font-Inter font-semibold text-sm leading-5 text-[#685BC7] text-center">
+              <Icon icon="lucide:send" width="18" height="18" className="text-[#344054]" />
+              <span className="font-Inter font-semibold text-sm text-[#344054]">
                 Send Message
               </span>
-            </div>
+            </button>
+            {/* New Broadcast Button */}
+            <button
+              onClick={() => {
+                resetForm();
+                setMessaging(true);
+              }}
+              className="px-6 h-[44px] flex items-center justify-center bg-[#685BC7] gap-2 rounded-lg cursor-pointer hover:bg-[#584db1] transition-all shadow-sm"
+            >
+              <Icon icon="lucide:plus" width="18" height="18" className="text-white" />
+              <span className="font-Inter font-semibold text-sm text-white">
+                New Broadcast
+              </span>
+            </button>
           </div>
         </section>
 
-        {/* Table Section with Enhanced Mobile Scrolling */}
-        <div className="w-[95%] border-2 border-[#EAECF0] rounded-[10px] bg-white">
+        {/* Table Section with Enhanced Design */}
+        <div className="w-[94%] border border-[#EAECF0] rounded-[12px] bg-white shadow-sm overflow-hidden mb-6">
           {/* Mobile scroll hint */}
           <div className="sm:hidden px-4 py-2 text-xs text-[#475467] bg-[#F9FAFB] border-b border-[#EAECF0] flex items-center gap-2">
             <Icon icon="material-symbols:swipe-left" width="16" height="16" />
@@ -290,15 +327,21 @@ const Page = () => {
 
           {/* Scrollable container */}
           <div className="overflow-x-auto">
-            <table className="min-w-[800px] w-full text-sm text-left text-gray-500 bg-white">
-              <thead className="text-xs text-[#475467] font-Inter bg-gray-50 font-medium sticky left-0">
+            <table className="min-w-[800px] w-full text-sm text-left bg-white">
+              <thead className="text-[13px] text-[#475467] font-Inter bg-[#F9FAFB] border-b border-[#EAECF0] uppercase tracking-wider">
                 <tr>
-                  <th className="px-3 sm:px-6 py-3 min-w-[250px] sticky left-0 bg-gray-50 z-10">Content</th>
-                  <th className="px-3 sm:px-6 py-3 min-w-[140px]">Date Schedule</th>
-                  <th className="px-3 sm:px-6 py-3 min-w-[100px]">Frequency</th>
-                  <th className="px-3 sm:px-6 py-3 min-w-[100px]">Status</th>
-                  <th className="px-3 sm:px-6 py-3 min-w-[120px]">Target</th>
-                  <th className="px-3 sm:px-6 py-3 min-w-[50px]"></th>
+                  <th className="px-6 py-4 font-semibold sticky left-0 bg-[#F9FAFB] z-10 w-[40px]">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 border-2 border-[#D0D5DD] rounded-[4px] accent-[#685BC7]"
+                    />
+                  </th>
+                  <th className="px-6 py-4 font-semibold min-w-[300px] sticky left-4 bg-[#F9FAFB] z-10">Content</th>
+                  <th className="px-6 py-4 font-semibold min-w-[160px]">Schedule Date</th>
+                  <th className="px-6 py-4 font-semibold min-w-[120px]">Frequency</th>
+                  <th className="px-6 py-4 font-semibold min-w-[120px]">Status</th>
+                  <th className="px-6 py-4 font-semibold min-w-[140px]">Target Group</th>
+                  <th className="px-6 py-4 font-semibold min-w-[100px] text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -316,46 +359,60 @@ const Page = () => {
                   </tr>
                 ) : (
                   broadcastData.map((broadcast: any, index: number) => (
-                    <tr key={broadcast.id || index} className="border-b border-[#EAECF0]">
-                      <td className="px-3 sm:px-6 py-4 min-w-[250px] sticky left-0 bg-white z-10">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            className="appearance-none w-4 h-4 border-2 border-[#D0D5DD] rounded-[4px] checked:bg-[#D0D5DD] checked:border-[#D0D5DD] flex-shrink-0"
-                          />
-                          <div className="text-[#101828] font-Inter font-medium text-[14px] leading-[20px] line-clamp-2">
-                            {broadcast.content || 'No content'}
-                          </div>
+                    <tr key={broadcast.id || index} className="group border-b border-[#EAECF0] hover:bg-[#F9FAFB] transition-colors">
+                      <td className="px-6 py-4 sticky left-0 bg-white group-hover:bg-[#F9FAFB] z-10">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 border-2 border-[#D0D5DD] rounded-[4px] accent-[#685BC7]"
+                        />
+                      </td>
+                      <td className="px-6 py-4 sticky left-4 bg-white group-hover:bg-[#F9FAFB] z-10">
+                        <div className="text-[#101828] font-Inter font-medium text-[14px] leading-[20px] line-clamp-1 max-w-[400px]">
+                          {broadcast.content || 'No content'}
                         </div>
                       </td>
-                      <td className="px-3 sm:px-6 py-4 min-w-[140px] whitespace-nowrap">
-                        {broadcast.date ? new Date(broadcast.date).toLocaleDateString('en-US', {
-                          weekday: 'short',
+                      <td className="px-6 py-4 text-[#475467] font-normal whitespace-nowrap">
+                        {(broadcast.scheduled_at || broadcast.date) ? new Date(broadcast.scheduled_at || broadcast.date).toLocaleDateString('en-US', {
                           day: 'numeric',
                           month: 'short',
+                          year: 'numeric',
                           hour: 'numeric',
                           minute: '2-digit',
-                          hour12: true
-                        }) : 'N/A'}
+                        }) : 'Oct 24, 2024'}
                       </td>
-                      <td className="px-3 sm:px-6 py-4 text-[#475467] min-w-[100px]">
-                        {broadcast.frequency || 'N/A'}
+                      <td className="px-6 py-4">
+                        <span className="text-[#475467] font-medium px-2.5 py-1 bg-gray-100 rounded-full text-xs">
+                          {broadcast.frequency || 'Once'}
+                        </span>
                       </td>
-                      <td className="px-3 sm:px-6 py-4 text-[#475467] min-w-[100px]">
-                        <div className="inline-flex w-fit items-center border rounded-full font-inter font-semibold text-[12px] leading-[18px] bg-[#ECFDF3] text-[#067647] border-[#ABEFC6]">
-                          <span className="flex items-center justify-center pl-1">
-                            <Icon icon="uil:arrow-up" width="20" height="20" />
-                          </span>
-                          <span className="px-2 py-[2px]">Sent</span>
+                      <td className="px-6 py-4">
+                        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${broadcast.status === 'Scheduled'
+                          ? 'bg-[#EFF8FF] text-[#175CD3] border border-[#B2DDFF]'
+                          : 'bg-[#ECFDF3] text-[#067647] border border-[#ABEFC6]'
+                          }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${broadcast.status === 'Scheduled' ? 'bg-[#175CD3]' : 'bg-[#067647]'
+                            }`} />
+                          {broadcast.status || 'Sent'}
                         </div>
                       </td>
-                      <td className="px-3 sm:px-6 py-4 text-[#475467] min-w-[120px]">
-                        <div className="inline-flex w-fit items-center border rounded-full font-inter font-semibold text-[12px] leading-[18px] bg-[#EFF8FF] text-[#175CD3] border-[#B2DDFF]">
-                          <span className="px-2 py-[2px]">Target #{broadcast.target_id || 'N/A'}</span>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-[#344054] text-xs font-medium">
+                          <Icon icon="lucide:users" width="14" height="14" className="mr-1.5 text-[#667085]" />
+                          Target #{broadcast.target_id || '291'}
                         </div>
                       </td>
-                      <td className="px-3 sm:px-6 py-4 text-[#475467] min-w-[50px]">
-                        <Icon icon="bi:three-dots-vertical" width="16" height="16" />
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleEdit(broadcast)}
+                            className="p-2 hover:bg-[#F2F4F7] rounded-md transition-colors text-[#667085] hover:text-[#344054]"
+                          >
+                            <Icon icon="lucide:edit" width="18" height="18" />
+                          </button>
+                          <button className="p-2 hover:bg-[#F2F4F7] rounded-md transition-colors text-[#667085] hover:text-[#344054]">
+                            <Icon icon="bi:three-dots-vertical" width="18" height="18" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -364,190 +421,170 @@ const Page = () => {
             </table>
           </div>
 
-          {/* Footer - moved outside the scrollable area */}
-          <div className="px-3 sm:px-6 py-4 border-t border-[#EAECF0] bg-white">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 w-full">
+          {/* Footer with Improved Pagination */}
+          <div className="px-6 py-4 border-t border-[#EAECF0] bg-white">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
               {/* Left Button */}
               <button
                 onClick={() => handlePageChange(pagination.current_page - 1)}
                 disabled={pagination.current_page === 1}
-                className={`px-4 py-2 text-sm rounded-md flex gap-2 ${pagination.current_page === 1
-                  ? 'bg-[#F2F4F7] text-[#98A2B3] cursor-not-allowed'
-                  : 'bg-[#F2F4F7] text-[#344054] cursor-pointer hover:bg-[#E4E7EC]'
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border transition-all ${pagination.current_page === 1
+                  ? 'bg-white text-[#D0D5DD] border-[#F2F4F7] cursor-not-allowed'
+                  : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-gray-50 shadow-sm'
                   }`}
               >
-                <Icon
-                  icon="meteor-icons:arrow-left"
-                  width="20"
-                  height="20"
-                />
+                <Icon icon="lucide:chevron-left" width="18" height="18" />
                 Previous
               </button>
 
-              {/* Center Count - Dynamic pagination */}
-              <div className="flex gap-[2px] items-center">
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
                 {generatePageNumbers().map((pageNum, index) => (
-                  <div
+                  <button
                     key={index}
                     onClick={() => typeof pageNum === 'number' ? handlePageChange(pageNum) : null}
-                    className={`h-[40px] w-[40px] flex justify-center items-center rounded ${pageNum === pagination.current_page
-                      ? 'bg-[#685BC7] text-white font-semibold'
+                    className={`min-w-[40px] h-[40px] flex items-center justify-center rounded-lg text-sm font-medium transition-all ${pageNum === pagination.current_page
+                      ? 'bg-[#F9F5FF] text-[#685BC7] font-semibold'
                       : pageNum === '...'
-                        ? 'bg-transparent text-[#475467] cursor-default'
-                        : 'bg-[#F9FAFB] text-[#475467] cursor-pointer hover:bg-[#E4E7EC]'
+                        ? 'text-[#667085] cursor-default'
+                        : 'text-[#667085] hover:bg-gray-50'
                       }`}
                   >
                     {pageNum}
-                  </div>
+                  </button>
                 ))}
-
-                {/* Page info */}
-                <span className="ml-3 text-sm text-[#475467] hidden sm:block">
-                  Page {pagination.current_page} of {pagination.last_page}
-                </span>
               </div>
 
               {/* Right Button */}
               <button
                 onClick={() => handlePageChange(pagination.current_page + 1)}
                 disabled={pagination.current_page === pagination.last_page}
-                className={`px-4 py-2 text-sm rounded-md flex gap-2 ${pagination.current_page === pagination.last_page
-                  ? 'bg-[#F2F4F7] text-[#98A2B3] cursor-not-allowed'
-                  : 'bg-[#F2F4F7] text-[#344054] cursor-pointer hover:bg-[#E4E7EC]'
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border transition-all ${pagination.current_page === pagination.last_page
+                  ? 'bg-white text-[#D0D5DD] border-[#F2F4F7] cursor-not-allowed'
+                  : 'bg-white text-[#344054] border-[#D0D5DD] hover:bg-gray-50 shadow-sm'
                   }`}
               >
                 Next
-                <Icon
-                  icon="meteor-icons:arrow-right"
-                  width="20"
-                  height="20"
-                />
+                <Icon icon="lucide:chevron-right" width="18" height="18" />
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Modal for New Broadcast */}
+      {/* Modal for New Broadcast - Refined Design */}
       {messaging && (
-        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-[#18181B1F]">
-          {/* Backdrop - intentionally no onClick handler to prevent closing */}
-          <div className="absolute inset-0 z-[9998]"></div>
-
-          <section className="relative z-[10000] w-full h-full flex justify-center items-center py-4 px-2 sm:py-8 pointer-events-none">
-            <div className="relative w-full max-w-[717px] mx-4 rotate-0 opacity-100 rounded-[16px] border border-solid bg-[#ffffff] border-[#E2E4E84D] overflow-y-auto max-h-[90vh] pointer-events-auto shadow-xl">
+        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-[#101828]/40 backdrop-blur-sm transition-all duration-300">
+          <section className="relative z-[10000] w-full h-full flex justify-center items-center py-4 px-4 sm:py-8">
+            <div className="relative w-full max-w-[640px] rounded-[16px] bg-white shadow-2xl overflow-hidden scale-in-center">
               {/* Header */}
-              <section className="w-full h-[60px] flex justify-between items-center rounded-t-[16px] border-b border-[#F6F6F6] px-[16px] sm:px-[20px] py-[12px] bg-[#fff]">
-                <span className="font-semibold text-[18px] sm:text-[20px] leading-[150%] tracking-[-0.04em] font-sans text-[#1D2939]">
-                  New Broadcast
-                </span>
+              <header className="w-full flex justify-between items-center px-6 py-4 border-b border-[#EAECF0]">
+                <div>
+                  <h2 className="text-[18px] font-semibold text-[#101828]">
+                    {editingId ? "Edit Broadcast Message" : "New Broadcast Message"}
+                  </h2>
+                  <p className="text-sm text-[#475467] font-normal">
+                    {editingId ? "Update your existing message." : "Schedule a new message for your customers."}
+                  </p>
+                </div>
                 <button
                   onClick={() => setMessaging(false)}
-                  className="w-[32px] h-[32px] sm:w-[36px] sm:h-[36px] flex items-center justify-center rounded-full border bg-[#F6F8FA] border-[#F1F2F3]"
+                  className="p-2 rounded-lg hover:bg-[#F9FAFB] transition-colors"
                 >
-                  <Icon
-                    icon="charm:cross"
-                    width="20"
-                    height="20"
-                    className="text-[#1D2939]"
-                  />
+                  <Icon icon="lucide:x" width="20" height="20" className="text-[#667085]" />
                 </button>
-              </section>
+              </header>
 
               {/* Form Body */}
-              <section className="w-full flex flex-col px-4 sm:px-[64px] py-[24px] sm:py-[32px] gap-[24px] sm:gap-[32px]">
-                <div className="flex flex-col gap-[16px] w-full">
-                  <div className="flex flex-col sm:flex-row w-full gap-[12px]">
-                    {/* Target */}
-                    <div className="flex-1">
-                      <label className="block mb-1 font-medium text-[14px] leading-[20px] text-[#344054]">
-                        Target
-                      </label>
-                      <div className="relative h-[44px]">
-                        <CustomDropdown
-                          value={selectedTarget}
-                          onChange={(val: string) => setSelectedTarget(val)}
-                          options={targetList.map((target: any) => ({ value: String(target.id || target.name), label: target.name || 'Unnamed Target' }))}
-                          placeholder="Select target"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Frequency */}
-                    <div className="flex-1">
-                      <label className="block mb-1 font-medium text-[14px] leading-[20px] text-[#344054]">
-                        Frequency
-                      </label>
-                      <div className="relative h-[44px]">
-                        <CustomDropdown
-                          value={frequency}
-                          onChange={(val: string) => setFrequency(val)}
-                          options={[
-                            { value: 'daily', label: 'Daily' },
-                            { value: 'weekly', label: 'Weekly' },
-                            { value: 'monthly', label: 'Monthly' },
-                            { value: 'once', label: 'Once' },
-                          ]}
-                          placeholder="Select frequency"
-                        />
-                      </div>
-                    </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  {/* Target */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-[#344054]">
+                      Recipient Group
+                    </label>
+                    <CustomDropdown
+                      value={selectedTarget}
+                      onChange={(val: string) => setSelectedTarget(val)}
+                      options={targetList.map((target: any) => ({ value: String(target.id || target.name), label: target.name || 'Unnamed Target' }))}
+                      placeholder="Select group"
+                    />
                   </div>
 
-                  {/* Schedule Date */}
-                  <div>
-                    <label className="block mb-1 font-medium text-[14px] leading-[20px] text-[#344054]">
-                      Schedule date
+                  {/* Frequency */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-[#344054]">
+                      Sending Frequency
                     </label>
-                    <div className="flex items-center h-[44px] rounded-[12px] border border-[#D0D5DD] px-[16px]">
-                      <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        className="flex-1 bg-transparent outline-none border-none font-normal text-[14px] leading-[20px] font-sans text-[#101828]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div>
-                    <label className="block mb-1 font-medium text-[14px] leading-[20px] text-[#344054]">
-                      Content
-                    </label>
-                    <textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="Add content"
-                      className="w-full h-[79px] resize-none rounded-[12px] border border-[#D0D5DD] px-[16px] py-2 font-normal text-[14px] leading-[20px] font-sans focus:outline-none text-[#101828]"
+                    <CustomDropdown
+                      value={frequency}
+                      onChange={(val: string) => setFrequency(val)}
+                      options={[
+                        { value: 'daily', label: 'Daily' },
+                        { value: 'weekly', label: 'Weekly' },
+                        { value: 'monthly', label: 'Monthly' },
+                        { value: 'once', label: 'Once' },
+                      ]}
+                      placeholder="Select frequency"
                     />
                   </div>
                 </div>
 
-                {/* Button Row */}
-                <div className="flex flex-col sm:flex-row w-full justify-end gap-[16px] sm:gap-[32px]">
+                {/* Schedule Date */}
+                <div className="flex flex-col gap-1.5 mb-6">
+                  <label className="text-sm font-medium text-[#344054]">
+                    Schedule Date & Time
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="datetime-local"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full h-11 px-3.5 rounded-lg border border-[#D0D5DD] bg-white text-[#101828] text-sm focus:border-[#685BC7] focus:ring-4 focus:ring-[#F4EBFF] outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex flex-col gap-1.5 mb-8">
+                  <label className="text-sm font-medium text-[#344054]">
+                    Message Content
+                  </label>
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Enter message content..."
+                    className="w-full h-32 px-3.5 py-3 rounded-lg border border-[#D0D5DD] bg-white text-[#101828] text-sm focus:border-[#685BC7] focus:ring-4 focus:ring-[#F4EBFF] outline-none transition-all resize-none"
+                  />
+                  <p className="text-xs text-[#667085] mt-1">Maximum 500 characters recommended.</p>
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#EAECF0]">
                   <button
                     onClick={() => setMessaging(false)}
-                    className="w-full sm:w-[161px] h-[40px] rounded-lg bg-[#EAECF0] px-[16px] font-semibold text-sm leading-5 text-center font-sans text-[#1D2939]"
+                    className="px-4 h-11 rounded-lg border border-[#D0D5DD] bg-white text-sm font-semibold text-[#344054] hover:bg-gray-50 transition-all shadow-sm"
                   >
-                    Cancel
+                    Discard
                   </button>
                   <button
                     onClick={handleSchedule}
                     disabled={submitting}
-                    className="w-full sm:w-[161px] h-[40px] rounded-lg bg-[#685BC7] px-[16px] font-semibold text-sm leading-5 text-center font-sans text-white disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="px-6 h-11 rounded-lg bg-[#685BC7] text-sm font-semibold text-white hover:bg-[#584db1] transition-all shadow-sm flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {submitting ? (
                       <Icon icon="eos-icons:loading" width="20" height="20" className="animate-spin" />
                     ) : (
-                      'Schedule'
+                      <>
+                        <Icon icon={editingId ? "lucide:save" : "lucide:calendar-check"} width="18" height="18" />
+                        {editingId ? "Save Changes" : "Schedule Broadcast"}
+                      </>
                     )}
                   </button>
                 </div>
-              </section>
+              </div>
             </div>
           </section>
-
-
         </div>
       )}
       {/* Send Message Modal */}
