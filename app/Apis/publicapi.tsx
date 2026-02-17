@@ -2269,6 +2269,28 @@ export const addBroadcast = async (data: any) => {
     throw error;
   }
 };
+
+export const updateBroadcast = async (id: number | string, data: any) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.put(
+      `${BASE_URL}/api/broadcast/update/${id}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    console.error('Error updating broadcast:', error);
+    throw error;
+  }
+};
 export const addNewMessage = async (data: any) => {
   try {
     const token = localStorage.getItem("token");
@@ -2465,6 +2487,7 @@ export const archiveSubscription = async (id: number | string) => {
         },
       }
     );
+    // '.this is a'
     return res.data;
   } catch (error: any) {
     console.error('Error archiving subscription:', error);

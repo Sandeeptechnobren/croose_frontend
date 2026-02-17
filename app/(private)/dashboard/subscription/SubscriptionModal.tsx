@@ -5,7 +5,9 @@ import { getAllProducts, getAllServices, getProductsBySpace, getServicesBySpace,
 import { Icon } from "@iconify/react";
 import CustomDropdown from "../../components/CustomDropdown";
 import axios from "axios";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 interface SubscriptionModalProps {
   isModalOpen: boolean;
   onClose: () => void;
@@ -13,13 +15,16 @@ interface SubscriptionModalProps {
   spaceName?: string; // optional, to prefill a space name
   editData?: any; // subscription data for editing
 }
+
 const initialData = {
   products: [],
   services: [],
 };
+
 interface Space {
   id: number;
   name: string;
+  currency?: string;
 }
 
 interface Product {
@@ -32,12 +37,14 @@ interface Service {
   id: number;
   name: string;
 }
+
 interface SubscriptionOption {
   value: string;
   title: string;
   label: string;
   description: string;
 }
+
 const subscriptionOptions: SubscriptionOption[] = [
   {
     value: "General",
@@ -58,10 +65,12 @@ const subscriptionOptions: SubscriptionOption[] = [
     description: "Subscription to a specific service",
   },
 ];
+
 const currencySymbols: Record<string, string> = {
   USD: "$",
   EUR: "€",
   GBP: "£",
+  INR: "₹",
 };
 
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
@@ -71,7 +80,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   spaceName = "",
   editData = null,
 }) => {
-  const [spaces, setSpaces] = useState<{ id: number; name: string }[]>([]);
+  const [spaces, setSpaces] = useState<Space[]>([]);
   const [data, setData] = useState<any>(initialData);
   const [products, setProducts] = useState([]);
   const [services, setServices] = useState([]);
@@ -123,7 +132,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         subscription_type: "General",
         description: "",
         variant: "monthly",
-        currency: "USD",
+        currency: "",
         price_per_month: "",
         access_type: "",
         discount_rate: "",
@@ -142,6 +151,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       service_ids: [],
     }));
   };
+
   useEffect(() => {
     const fetchSpaces = async () => {
       setLoadingSpaces(true);
@@ -150,7 +160,11 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         const res = await GetSpaceId();
         const spaceArray = res?.spaces;
         if (Array.isArray(spaceArray) && spaceArray.length > 0) {
-          const simplified = spaceArray.map(item => ({ id: item.id, name: item.name }));
+          const simplified: Space[] = spaceArray.map(item => ({
+            id: item.id,
+            name: item.name,
+            currency: item.currency
+          }));
           setSpaces(simplified);
           if (spaceName) {
             const spaceToSelect = simplified.find(s => s.name === spaceName);
@@ -171,13 +185,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     if (isModalOpen) {
       fetchSpaces();
     }
-  }, [isModalOpen, spaceName]);// DEPENDENCY: This hook runs whenever the modal state changes.
+  }, [isModalOpen, spaceName]);
 
   useEffect(() => {
     const spaceIdNum = Number(formState.space_id);
     const subscription_type = formState.subscription_type;
 
-    // Clear products/services if no space is selected or type is General
     if (!spaceIdNum || subscription_type === "General") {
       setProducts([]);
       setServices([]);
@@ -188,30 +201,24 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       if (subscription_type === "Product") {
         setLoadingProducts(true);
         setProductError('');
-        setServices([]); // Clear services list
+        setServices([]);
         try {
           const productsData = await getProductsBySpace(spaceIdNum);
           setProducts(productsData);
-          if (productsData.length === 0) {
-            setProductError('No products available for this space.');
-          }
         } catch (err) {
-          setProductError('Failed to load products. Please try again.');
+          setProductError('Failed to load products.');
         } finally {
           setLoadingProducts(false);
         }
       } else if (subscription_type === "Service") {
         setLoadingServices(true);
         setServiceError('');
-        setProducts([]); // Clear products list
+        setProducts([]);
         try {
           const servicesData = await getServicesBySpace(spaceIdNum);
           setServices(servicesData);
-          if (servicesData.length === 0) {
-            setServiceError('No services available for this space.');
-          }
         } catch (err) {
-          setServiceError('Failed to load services. Please try again.');
+          setServiceError('Failed to load services.');
         } finally {
           setLoadingServices(false);
         }
@@ -221,32 +228,18 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     fetchData();
   }, [formState.space_id, formState.subscription_type]);
 
-
-
-  // Your existing state and useEffect code
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submission started");
-
-    // Validation
     if (!formState.space_id || !formState.subscription_name || !formState.price_per_month || !formState.access_type) {
-      toast.error("Please fill in all required fields (Space, Name, Price, and Access Settings)");
+      toast.error("Please fill in all required fields");
       return;
     }
 
-    // Map access_type back to string values
     const mappedAccessType =
       formState.access_type === "free" ? "1" :
         formState.access_type === "individual" ? "2" :
           formState.access_type === "discount_rate" ? "3" : "";
 
-    if (!mappedAccessType) {
-      toast.error("Please select an Access Setting");
-      return;
-    }
-
-    // Prepare payload
     const payload: any = {
       space_id: formState.space_id,
       space_name: formState.space_name,
@@ -266,37 +259,19 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
       payload.service_ids = formState.service_ids || [];
     }
 
-    console.log("Submitting payload:", payload);
-
     setLoading(true);
     try {
       let res;
-
       if (editData) {
-        if (!editData.id) {
-          console.error("Missing subscription ID in editData:", editData);
-          toast.error("Error: Subscription ID is missing. Please try closing and reopening the list.");
-          setLoading(false);
-          return;
-        }
         res = await updateSubscription(editData.id, payload);
       } else {
         res = await createSubscription(payload);
       }
-
-      toast.success(editData ? "Subscription updated successfully" : "Subscription saved successfully");
-      const newSub = res.subscription || res;
-      onSave(newSub);
+      toast.success(editData ? "Updated successfully" : "Saved successfully");
+      onSave(res.subscription || res);
       onClose();
-
-
     } catch (err: any) {
-      console.error("API error:", err);
-      toast.error(
-        err?.response?.data?.message ||
-        err.message ||
-        "Failed to save subscription"
-      );
+      toast.error(err?.response?.data?.message || "Failed to save subscription");
     } finally {
       setLoading(false);
     }
@@ -305,36 +280,34 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   return (
     <>
       {isModalOpen && (
-        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 transition-all">
-          <form onSubmit={handleSubmit} className="flex items-center justify-center w-full h-full">
-            <div className="bg-white rounded-2xl w-[420px] max-h-[706px] shadow-lg border border-[#E2E4E84D] flex flex-col overflow-hidden">
-              {/* Header - Fixed at top */}
-              <div className="flex justify-between items-center p-5 border-b border-[#F1F2F3] flex-shrink-0">
-                <h2
-                  className="text-lg font-semibold text-[#1D2939] font-inter"
-                  style={{
-                    fontWeight: 600,
-                    fontSize: "16px",
-                    lineHeight: "150%",
-                  }}
-                >
-                  {editData ? "Edit Subscription" : "New Subscription"}
-                </h2>
+        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-[#101828]/40 backdrop-blur-sm transition-all duration-300">
+          <form onSubmit={handleSubmit} className="relative z-[10000] w-full h-full flex justify-center items-center py-4 px-4 sm:py-8">
+            <div className="relative w-full max-w-[500px] rounded-[24px] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh] scale-in-center">
+              {/* Header */}
+              <header className="flex justify-between items-center px-8 py-6 border-b border-[#EAECF0]">
+                <div>
+                  <h2 className="text-[20px] font-bold text-[#101828] font-inter leading-tight">
+                    {editData ? "Edit Subscription" : "Create Subscription"}
+                  </h2>
+                  <p className="text-sm text-[#475467] mt-1 font-normal">Set up your new subscription plan details.</p>
+                </div>
 
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="flex items-center justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
+                  className="p-2.5 rounded-full bg-[#F9FAFB] border border-[#EAECF0] hover:bg-[#F2F4F7] transition-all"
                 >
-                  <X className="w-4 h-4 text-gray-600" />
+                  <X className="w-4 h-4 text-[#667085]" />
                 </button>
-              </div>
+              </header>
 
-              {/* Form content - your existing form fields */}
-              <div className="p-5 space-y-5 overflow-y-auto flex-1 ">
-
-                <div>
-                  <label className="block font-inter text-base tracking-normal  mb-1">
-                    Space Name
+              {/* Form content */}
+              <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar">
+                {/* Space Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-semibold text-[#344054] flex items-center gap-1.5">
+                    <Icon icon="lucide:layout-grid" width="16" height="16" className="text-[#667085]" />
+                    Space Context
                   </label>
                   <CustomDropdown
                     value={formState.space_id}
@@ -344,23 +317,23 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         ...f,
                         space_id: spaceId,
                         space_name: selectedSpace?.name || "",
+                        currency: selectedSpace?.currency || f.currency,
                         product_ids: [],
                         service_ids: [],
                       }));
                     }}
                     options={spaces.map(s => ({ value: String(s.id), label: s.name }))}
-                    placeholder="Select the space the subscription is for"
+                    placeholder="Select space"
                     loading={loadingSpaces}
                     disabled={loadingSpaces}
                   />
                 </div>
 
-                {/* Subscription Name + Type in one row */}
-                <div className="grid grid-cols-2 gap-4">
-
-                  <div>
-                    <label className="block font-inter text-base tracking-normal mb-1">
-                      Subscription Name
+                {/* Name and Type Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-[#344054]">
+                      Plan Name
                     </label>
                     <input
                       type="text"
@@ -371,30 +344,28 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                           subscription_name: e.target.value,
                         }))
                       }
-                      placeholder="Enter name"
-                      className="w-full p-2.5 rounded-lg border border-[#D0D5DD]  text-black placeholder:text-[#98A2B3] placeholder:font-inter placeholder:text-base placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="e.g. Premium Plan"
+                      className="w-full h-11 px-3.5 rounded-lg border border-[#D0D5DD] bg-white text-[#101828] text-sm focus:border-[#685BC7] focus:ring-4 focus:ring-[#F4EBFF] outline-none transition-all"
                     />
                   </div>
 
-                  {/* Subscription Type */}
-                  <div className="mb-8">
-                    <label className="block font-inter text-base tracking-normal mb-1">
-                      Subscription Type
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-[#344054]">
+                      Plan Type
                     </label>
-
                     <CustomDropdown
                       value={formState.subscription_type}
                       onChange={handlesubscription_typeChange}
                       options={subscriptionOptions}
                       showDescriptions={true}
-                      optionsClassName="min-w-[380px] w-auto -translate-x-1/2"
                     />
                   </div>
                 </div>
 
+                {/* Conditional Fields */}
                 {formState.subscription_type === "Product" && (
-                  <div className="mt-4">
-                    <label className="block font-inter  text-base tracking-normal text-gray-700 mb-1">Product</label>
+                  <div className="space-y-1.5 animate-fade-in">
+                    <label className="text-sm font-semibold text-[#344054]">Associated Products</label>
                     <CustomDropdown
                       value={formState.product_ids.map(String)}
                       onChange={(values: string[]) => {
@@ -404,18 +375,17 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         }))
                       }}
                       options={products.map((product: any) => ({ value: String(product.id), label: product.name }))}
-                      placeholder={!formState.space_id ? "Select a space first" : loadingProducts ? "Loading products..." : productError || (products.length === 0 ? "No products available" : "Search or select product from your inventory")}
+                      placeholder={!formState.space_id ? "Select space first" : loadingProducts ? "Loading..." : "Select products"}
                       loading={loadingProducts}
                       disabled={!formState.space_id || loadingProducts}
                       multiple={true}
                     />
-                    {productError && <p className="text-sm text-red-600 mt-1">{productError}</p>}
                   </div>
                 )}
 
                 {formState.subscription_type === "Service" && (
-                  <div className="mt-4">
-                    <label className="block font-inter text-base tracking-normal mb-1">Select Service</label>
+                  <div className="space-y-1.5 animate-fade-in">
+                    <label className="text-sm font-semibold text-[#344054]">Associated Services</label>
                     <CustomDropdown
                       value={formState.service_ids.map(String)}
                       onChange={(values: string[]) => {
@@ -425,7 +395,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         }));
                       }}
                       options={services.map((service: any) => ({ value: String(service.id), label: service.name }))}
-                      placeholder="Select a service"
+                      placeholder="Select services"
                       loading={loadingServices}
                       disabled={loadingServices}
                       multiple={true}
@@ -433,11 +403,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   </div>
                 )}
 
-
-
                 {/* Description */}
-                <div>
-                  <label className="block font-inter text-base tracking-normal mb-1 ">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-semibold text-[#344054]">
                     Description
                   </label>
                   <textarea
@@ -448,182 +416,138 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         description: e.target.value,
                       }))
                     }
-                    placeholder="Describe the service or benefits the members get"
-                    className="w-full p-2.5 rounded-lg border border-[#D0D5DD] text-black placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    rows={3}
+                    placeholder="Briefly describe the benefits..."
+                    className="w-full h-24 px-3.5 py-3 rounded-lg border border-[#D0D5DD] bg-white text-[#101828] text-sm focus:border-[#685BC7] focus:ring-4 focus:ring-[#F4EBFF] outline-none transition-all resize-none"
                   />
                 </div>
 
-                {/* Variant */}
-                <div>
-                  <label className="block font-inter text-base tracking-normal mb-1">Variant</label>
-                  <CustomDropdown
-                    value={formState.variant}
-                    onChange={(value) =>
-                      setFormState((f) => ({
-                        ...f,
-                        variant: value,
-                      }))
-                    }
-                    options={[
-                      { value: "monthly", label: "Monthly" },
-                      { value: "yearly", label: "Yearly" },
-                    ]}
-                  />
-                </div>
-
-                {/* Currency + Price */}
-
-
-
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Currency Dropdown */}
-                  <div>
-                    <label className="block font-inter text-base tracking-normal mb-1">Currency</label>
-                    <CustomDropdown
-                      value={formState.currency}
-                      onChange={(value) =>
-                        setFormState((f) => ({ ...f, currency: value }))
-                      }
-                      options={[
-                        { value: "USD", label: "USD ($)" },
-                        { value: "EUR", label: "EUR (€)" },
-                        { value: "GBP", label: "GBP (£)" },
-                      ]}
-                    />
+                {/* Pricing Section */}
+                <div className="bg-[#F9FAFB] p-5 rounded-2xl space-y-4 border border-[#EAECF0]">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#667085] uppercase tracking-wider">Currency</label>
+                      <input className="w-full h-10 px-3.5 py-3 rounded-lg border border-[#D0D5DD] bg-white text-[#101828] text-sm focus:border-[#685BC7] focus:ring-4 focus:ring-[#F4EBFF] outline-none transition-all resize-none" type="text" disabled value={formState.currency} onChange={(e) => setFormState((f) => ({ ...f, currency: e.target.value }))} />
+                      {/* <CustomDropdown
+                        value={formState.currency}
+                        onChange={(value) =>
+                          setFormState((f) => ({ ...f, currency: value }))
+                        }
+                        options={[
+                          // { value: "USD", label: "USD ($)" },
+                          // { value: "EUR", label: "EUR (€)" },
+                          // { value: "GBP", label: "GBP (£)" },
+                          // { value: "INR", label: "INR (₹)" },
+                        ]}
+                      /> */}
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-[#667085] uppercase tracking-wider">Variant</label>
+                      <CustomDropdown
+                        value={formState.variant}
+                        onChange={(value) =>
+                          setFormState((f) => ({
+                            ...f,
+                            variant: value,
+                          }))
+                        }
+                        options={[
+                          { value: "monthly", label: "Monthly" },
+                          { value: "yearly", label: "Yearly" },
+                        ]}
+                      />
+                    </div>
                   </div>
 
-                  {/* Price Input with prefix & suffix */}
-                  <div>
-                    <label className="block font-inter text-base tracking-normal mb-1">
-                      Price per Month
-                    </label>
-                    <div className="relative">
-                      {/* Currency symbol on left */}
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                        {currencySymbols[formState.currency]}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#667085] uppercase tracking-wider">Base Price</label>
+                    <div className="relative group">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#667085] font-medium border-r border-[#EAECF0] pr-2.5">
+                        {currencySymbols[formState.currency] || "$"}
                       </span>
-
                       <input
                         type="number"
                         value={formState.price_per_month}
                         onChange={(e) =>
                           setFormState((f) => ({ ...f, price_per_month: e.target.value }))
                         }
-                        placeholder=""
-                        className="w-full pl-8 pr-10 p-2.5 rounded-lg border border-[#D0D5DD] text-black placeholder:text-[#98A2B3] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full h-12 pl-12 pr-14 rounded-xl border border-[#D0D5DD] bg-white text-[#101828] text-lg font-bold focus:border-[#685BC7] focus:ring-4 focus:ring-[#F4EBFF] outline-none transition-all"
                       />
-
-                      {/* /mo on right */}
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#98A2B3]">
-                        /mo
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#667085] font-medium">
+                        /{formState.variant === 'monthly' ? 'mo' : 'yr'}
                       </span>
                     </div>
                   </div>
                 </div>
 
+                {/* Access Settings */}
+
+                <div className="space-y-3 pt-2">
+                  <label className="text-sm font-semibold text-[#344054]">Access Settings</label>
+                  <div
+                    onClick={() => setFormState(f => ({ ...f, access_type: "discount_rate" }))}
+                    className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${formState.access_type === "discount_rate"
+                      ? 'border-[#685BC7] bg-[#F9F5FF]'
+                      : 'border-[#EAECF0] hover:border-[#D0D5DD]'
+                      }`}
+                  >
 
 
 
-                <div>
-                  <label className="block font-inter text-base tracking-normal mb-2">
-                    Access Settings
-                  </label>
-                  <div className="space-y-2">
-                    {/* Free Access */}
-                    {/* <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="access_type"
-                        value="free"
-                        checked={formState.access_type === "free"}
-                        onChange={() =>
-                          setFormState((f) => ({ ...f, access_type: "free" }))
-                        }
-                        className="accent-indigo-500"
-                      />
-                      <span>Free access to all products/services</span>
-                    </label> */}
 
-                    {/* Individual */}
-                    {/* <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="access_type"
-                        value="individual"
-                        checked={formState.access_type === "individual"}
-                        onChange={() =>
-                          setFormState((f) => ({ ...f, access_type: "individual" }))
-                        }
-                        className="accent-indigo-500"
-                      />
-                      <span>Subscribers still pay individually</span>
-                    </label> */}
+                    <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${formState.access_type === "discount_rate" ? 'border-[#685BC7] bg-[#685BC7]' : 'border-[#D0D5DD]'
+                      }`}>
+                      {formState.access_type === "discount_rate" && <div className="w-2 h-2 rounded-full bg-white" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#101828]">Offer Discount</p>
+                      <p className="text-xs text-[#667085] mt-0.5">Subscribers get a percentage discount on items.</p>
+                    </div>
+                  </div>
 
-                    {/* discount_rate */}
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="access_type"
-                        value="discount_rate"
-                        checked={formState.access_type === "discount_rate"}
-                        onChange={() =>
-                          setFormState((f) => ({ ...f, access_type: "discount_rate" }))
-                        }
-                        className="accent-indigo-500"
-                      />
-                      <span>Subscribers get a discount_rate</span>
-                    </label>
-
-                    {/* Conditional discount_rate Input */}
-                    {formState.access_type === "discount_rate" && (
-                      <div className="mt-3">
-                        <label className="block font-inter text-base tracking-normal mb-1">
-                          Discount Percentage
-                        </label>
+                  {formState.access_type === "discount_rate" && (
+                    <div className="pl-4 border-l-2 border-[#D0D5DD] ml-2.5 space-y-1.5 animate-slide-down">
+                      <label className="text-xs font-bold text-[#667085] uppercase tracking-wider">Discount Rate (%)</label>
+                      <div className="relative">
                         <input
                           type="number"
                           value={formState.discount_rate || ""}
                           onChange={(e) =>
                             setFormState((f) => ({ ...f, discount_rate: e.target.value }))
                           }
-                          placeholder="5%"
-                          className="w-full p-2.5 text-[#98A2B3] rounded-lg border border-[#D0D5DD] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          placeholder="e.g. 10"
+                          className="w-full h-11 px-3.5 rounded-lg border border-[#D0D5DD] bg-white text-[#101828] text-sm focus:border-[#685BC7] focus:ring-4 focus:ring-[#F4EBFF] outline-none transition-all"
                         />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#667085] font-bold">%</span>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-
               </div>
 
-              {/* <div className="flex  h-full justify-between items-center p-5 border-b border-[#F1F2F3]">
-              <h2 className="text-lg font-semibold text-[#1D2939] font-inter"
-              style={{
-                fontWeight: 600,
-                fontSize: "16px",
-                lineHeight: "150%",
-              }}>
-                New Subscription
-              </h2>
-              <button
-                onClick={onClose}
-                className="flex items-center justify-center p-2 rounded-full border border-[#F1F2F3] bg-[#F6F8FA] hover:bg-gray-100 transition"
-              >
-                <X className="w-4 h-4 text-gray-600" />
-              </button>
-            </div> */}
-
               {/* Footer */}
-              <div className="p-5 border-t border-[#F1F2F3]">
+              <footer className="px-8 py-6 border-t border-[#EAECF0] bg-[#F9FAFB] flex gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 h-12 rounded-xl border border-[#D0D5DD] bg-white text-sm font-bold text-[#344054] hover:bg-gray-50 transition-all shadow-sm"
+                >
+                  Discard
+                </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-[#685BC7] font-inter text-base tracking-normal text-white rounded-lg hover:bg-[#5747b9] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  className="flex-[2] h-12 rounded-xl bg-[#685BC7] text-sm font-bold text-white hover:bg-[#584db1] transition-all shadow-md shadow-[#685BC7]/20 flex items-center justify-center gap-2 disabled:opacity-70"
                 >
-                  {loading ? "Creating..." : "Save & Publish"}
+                  {loading ? (
+                    <Icon icon="eos-icons:loading" width="20" height="20" className="animate-spin" />
+                  ) : (
+                    <>
+                      <Icon icon="lucide:zap" width="18" height="18" />
+                      Save & Publish Plan
+                    </>
+                  )}
                 </button>
-              </div>
+              </footer>
             </div>
           </form>
         </div>
