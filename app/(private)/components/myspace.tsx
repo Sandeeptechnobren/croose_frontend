@@ -14,6 +14,15 @@ import Link from 'next/link'
 import { MessageCircle, Search, MoreVertical, Send, Paperclip, Smile } from 'lucide-react';
 
 
+const getInitials = (name: string = '') =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+
 const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any, spaceId: any }) => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [messageInput, setMessageInput] = useState('');
@@ -43,13 +52,6 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const getInitials = (name: string = '') =>
-    name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase()
 
   // Log the actual API data to see its structure
   useEffect(() => {
@@ -394,6 +396,7 @@ const Myspace = () => {
   const [paymentStatus, setPaymentStatus] = useState('');
   const [activationStatus, setActivationStatus] = useState(null);
   const [underReviewPopupOpen, setUnderReviewPopupOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [showLiveAgent, setShowLiveAgent] = useState(false);
   const [instanceData, setInstanceData] = useState<any>()
   const searchParams: any = useSearchParams();
@@ -431,8 +434,10 @@ const Myspace = () => {
       setLoading(false)
     }
   };
-  const spaceName = searchParams.get('name');
+  const spaceName = searchParams.get('name') || 'Space';
   const imageUrl = searchParams.get('image')
+
+  const isInvalidImage = !imageUrl || imageUrl === 'null' || imageUrl === 'undefined' || imageError;
   useEffect(() => {
     const fetchSpaceChats = async () => {
       try {
@@ -557,17 +562,21 @@ const Myspace = () => {
               />
             </Link>
           </div>
-          <div className="w-[48px] ml-[10px] h-[48px] rounded-full ">
-
-            {imageUrl && (
+          <div className="w-[48px] ml-[10px] h-[48px] rounded-full overflow-hidden flex-shrink-0">
+            {!isInvalidImage ? (
               <img
-                // src={decodeURIComponent(imageUrl)}
-                src={imageUrl}
-                alt="Space image"
-                className="w-[48px]  h-[48px] rounded-full"
+                src={imageUrl!}
+                alt=""
+                className="w-full h-full object-cover"
+                onError={() => setImageError(true)}
               />
+            ) : (
+              <div className="w-full h-full bg-[#EAECF0] flex items-center justify-center">
+                <span className="text-[#685BC7] font-semibold text-sm">
+                  {getInitials(spaceName)}
+                </span>
+              </div>
             )}
-
           </div>
           <div className="w-[50%] sm:w-[70%] text-[13px] sm:text-[1.125rem] text-[#101828] ml-[18px] font-sans font-semibold text-lg leading-7 tracking-normal align-middle h-[28px]">
             {spaceName}

@@ -330,12 +330,12 @@ const Page = () => {
             <table className="min-w-[800px] w-full text-sm text-left bg-white">
               <thead className="text-[13px] text-[#475467] font-Inter bg-[#F9FAFB] border-b border-[#EAECF0] uppercase tracking-wider">
                 <tr>
-                  <th className="px-6 py-4 font-semibold sticky left-0 bg-[#F9FAFB] z-10 w-[40px]">
+                  {/* <th className="px-6 py-4 font-semibold sticky left-0 bg-[#F9FAFB] z-10 w-[40px]">
                     <input
                       type="checkbox"
                       className="w-4 h-4 border-2 border-[#D0D5DD] rounded-[4px] accent-[#685BC7]"
                     />
-                  </th>
+                  </th> */}
                   <th className="px-6 py-4 font-semibold min-w-[300px] sticky left-4 bg-[#F9FAFB] z-10">Content</th>
                   <th className="px-6 py-4 font-semibold min-w-[160px]">Schedule Date</th>
                   <th className="px-6 py-4 font-semibold min-w-[120px]">Frequency</th>
@@ -360,12 +360,12 @@ const Page = () => {
                 ) : (
                   broadcastData.map((broadcast: any, index: number) => (
                     <tr key={broadcast.id || index} className="group border-b border-[#EAECF0] hover:bg-[#F9FAFB] transition-colors">
-                      <td className="px-6 py-4 sticky left-0 bg-white group-hover:bg-[#F9FAFB] z-10">
+                      {/* <td className="px-6 py-4 sticky left-0 bg-white group-hover:bg-[#F9FAFB] z-10">
                         <input
                           type="checkbox"
                           className="w-4 h-4 border-2 border-[#D0D5DD] rounded-[4px] accent-[#685BC7]"
                         />
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 sticky left-4 bg-white group-hover:bg-[#F9FAFB] z-10">
                         <div className="text-[#101828] font-Inter font-medium text-[14px] leading-[20px] line-clamp-1 max-w-[400px]">
                           {broadcast.content || 'No content'}
