@@ -503,7 +503,7 @@ const ProductServiceTabs = () => {
 
 
                 {activeMenuId === item[id] && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-50">
+                  <div className="absolute right-0 bottom-full mb-1 w-32 bg-white border rounded shadow-lg z-50">
                     <button
                       onClick={() => {
                         setFormState(item);
@@ -559,7 +559,7 @@ const ProductServiceTabs = () => {
 
 
                 {activeMenuId === item[id] && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg z-50">
+                  <div className="absolute right-0 bottom-full mb-1 w-32 bg-white border rounded shadow-lg z-50">
                     <button
                       onClick={() => {
                         setFormState(item);
@@ -662,9 +662,9 @@ const ProductServiceTabs = () => {
 
 
 
-      <div className='w-full p-6 px-8'>
+      <div className='w-full p-6 px-8 overflow-visible'>
 
-        <table className="min-w-full text-sm text-left  text-gray-900 rounded-md bg-white  border border-[#EAECF0]  overflow-hidden p-4">
+        <table className="min-w-full text-sm text-left text-gray-900 rounded-md bg-white border border-[#EAECF0] p-4">
           <thead className="bg-[#F9FAFB] text-[#475467] border-t-2 max-w-full border-[#EAECF0] font-medium">
             <tr>
               <th className="px-4 py-2">Photos</th>
