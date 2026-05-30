@@ -486,26 +486,34 @@ const Myspace = () => {
   }, [spaceChatsData]);
 
   const handleRunAgent = async () => {
-    try {
-      const response = await RunAgent(id);
-      const status = response?.data?.payment_status;
-      const instanceActivationStatus = response?.data?.instance_activation_status;
+  try {
 
-      setActivationStatus(instanceActivationStatus);
-      if (instanceActivationStatus === 1) {
-        setUnderReviewPopupOpen(true);
-        return;
-      }
-      if (status === 'success') {
-        setScanopen(true);
-      } else {
-        setProopen(true);
-      }
+    const statusRes = await InstanceActivationStatus(id);
+    const activation =
+      statusRes?.data?.instance_activation_status;
 
-    } catch (err) {
-      console.error('Failed to run agent', err);
+    setActivationStatus(activation);
+
+    if (activation === 1) {
+      setShowLiveAgent(true);
+      return;
     }
-  };
+
+    const response = await RunAgent(id);
+
+    const paymentStatus =
+      response?.data?.payment_status;
+
+    if (paymentStatus === 'success') {
+      setScanopen(true);
+    } else {
+      setProopen(true);
+    }
+
+  } catch (err) {
+    console.error('Failed to run agent', err);
+  }
+};
 
   useEffect(() => {
     try {
@@ -533,6 +541,7 @@ const Myspace = () => {
 
         if (instanceActivatioValue === 1) {
           setShowLiveAgent(true);
+           setScanopen(false);
         }
 
 
@@ -591,9 +600,13 @@ const Myspace = () => {
                 Spaces IQ
               </div>
             </button>
-            <button onClick={handleRunAgent} className="w-[50%] sm:w-[103px] h-[50px] sm:h-[36px] flex flex-row pt-2 pr-4 pb-2 pl-4 gap-[10px] bg-[#685BC7] rounded-[8px]">
-              <div className="w-[100%] font-sans  text-[10px] sm:text-[12px] font-semibold text-sm leading-5 tracking-normal text-center text-[#FFFFFF] h-[50px] sm:h-[20px] hover:cursor-pointer">
-                Run Agent
+            <button
+              onClick={handleRunAgent}
+              disabled={Number(activationStatus) === 1}
+              className={`w-[50%] sm:w-[103px] h-[50px] sm:h-[36px] flex flex-row pt-2 pr-4 pb-2 pl-4 gap-[10px] rounded-[8px] ${Number(activationStatus) === 1 ? 'bg-[#B0A9E0] opacity-60 cursor-not-allowed' : 'bg-[#685BC7]'}`}
+            >
+              <div className={`w-[100%] font-sans  text-[10px] sm:text-[12px] font-semibold text-sm leading-5 tracking-normal text-center text-[#FFFFFF] h-[50px] sm:h-[20px] ${Number(activationStatus) === 1 ? 'cursor-not-allowed' : 'hover:cursor-pointer'}`}>
+                {Number(activationStatus) === 1 ? 'Active' : 'Run Agent'}
               </div>
             </button>
 
