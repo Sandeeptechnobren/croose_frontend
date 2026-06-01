@@ -2081,7 +2081,7 @@ export const PayApi = async (uuid: any) => {
 
 export const getQr = (space_id: string) => {
   const token = localStorage.getItem("token");
-  return axios.get('https://api.joincroose.com/croose/api/whapi/instance/qr', {
+  return axios.get(`${BASE_URL}/api/whapi/instance/qr`, {
     headers: {
       Authorization: `Bearer ${token}`
     },
