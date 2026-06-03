@@ -7,9 +7,10 @@ import { getQr } from '@/app/Apis/publicapi';
 interface ScanqrpageProps {
   setScanopen: (val: boolean) => void;
   space_id: string;
+  onLinked?: () => void;
 }
 
-const Scanqrpage = ({ setScanopen, space_id }: ScanqrpageProps) => {
+const Scanqrpage = ({ setScanopen, space_id, onLinked }: ScanqrpageProps) => {
   const [qrImage, setQrImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -36,12 +37,19 @@ const fetchQrImage = async () => {
         try {
           const json = JSON.parse(reader.result as string);
 
-          if (json.linked === true || json._whatsapp_linking_status_ === 1) {
+          if (
+            json.linked === true ||
+            json.connected === true ||
+            json._whatsapp_linking_status_ === 1 ||
+            json.instance_activation_status === 1
+          ) {
             setIsLinked(true);
             setErrorMsg(null);
             setQrImage(null);
+            onLinked?.();
           } else {
-            setErrorMsg("Unexpected response.");
+            // QR still generating / transient — keep loading and let polling retry
+            setErrorMsg(null);
           }
         } catch (parseError) {
           setErrorMsg("Failed to parse QR code response.");
@@ -77,15 +85,16 @@ useEffect(() => {
 useEffect(() => {
   if (isLinked) return;
 
+  // Poll fast (2.5s) until the QR first appears, then refresh slowly (20s) to keep it stable.
+  const delay = qrImage ? 20000 : 2500;
   const interval = setInterval(() => {
     fetchQrImage();
-  }, 20000);
+  }, delay);
 
   return () => {
     clearInterval(interval);
-    if (qrImage) URL.revokeObjectURL(qrImage);
   };
-}, [isLinked]);
+}, [isLinked, qrImage]);
 
 
   return (
@@ -118,7 +127,7 @@ useEffect(() => {
           </div>
 
           <div className='bg-white border border-gray-200 rounded-xl p-6 w-[260px] h-[260px] flex items-center justify-center'>
-            {loading ? (
+            {(loading && !qrImage) ? (
               <div className='w-40 h-40 flex items-center justify-center text-gray-500 animate-pulse'>
                 Loading...
               </div>

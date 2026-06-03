@@ -6,7 +6,7 @@ import Spaceiqcolor from './spaceiqcolor'
 import Upgradetopro from './upgradetopro'
 import Scanqrpage from './scanqr'
 import Spacenav from './spacenav'
-import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp, getUserStatus } from "@/app/Apis/publicapi";
+import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp, getUserStatus, GetSpaceId, markChatRead } from "@/app/Apis/publicapi";
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
@@ -25,6 +25,7 @@ const getInitials = (name: string = '') =>
 
 const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any, spaceId: any }) => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [readChats, setReadChats] = useState<Record<string, boolean>>({});
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [userOnlineStatus, setUserOnlineStatus] = useState<boolean | null>(null);
@@ -52,6 +53,13 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // When fresh chat data arrives, drop the optimistic "read" flags so the unread badge
+  // reflects Chatterly's real count again — i.e. a NEW message re-shows the green count,
+  // while a chat we marked read stays at 0.
+  useEffect(() => {
+    setReadChats({});
+  }, [spaceLiveChatsData])
+
 
   // Log the actual API data to see its structure
   useEffect(() => {
@@ -66,17 +74,28 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
 
   // Use actual API data with mapping
   const chats = (spaceLiveChatsData || []).map((chat: any) => ({
-    id: chat.whatsapp_number || Math.random().toString(), // Use whatsapp_number as ID if available
+    // stable key: prefer the raw chat_id (whatsapp_number can be empty for groups/unknown)
+    id: chat.chat_id || chat.whatsapp_number || Math.random().toString(),
     name: chat.customer_name || chat.whatsapp_number || 'Unknown',
     message: chat.user_message || '',
     time: chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-    unread: 0, // Default to 0 as API doesn't seem to return this
-    online: false, // Default to false
+    online: false,
     category: 'WhatsApp',
-    phone: chat.whatsapp_number,
-    chat_id: chat.whatsapp_number, // Ensure we have a chat identifier
-    ...chat // Keep original fields
+    phone: chat.whatsapp_number,   // real phone only (or '')
+    ...chat, // keep original fields (chat_id, is_group, unread, etc.)
+    // clear the unread badge once the chat has been opened
+    unread: readChats[chat.chat_id || chat.whatsapp_number] ? 0 : (chat.unread || 0),
   }));
+
+  // Open a chat: clear its unread badge immediately and mark it read on WhatsApp.
+  const openChat = (chat: any) => {
+    setSelectedChat(chat);
+    const cid = chat.chat_id || chat.whatsapp_number || chat.id;
+    if (cid) {
+      setReadChats((prev) => ({ ...prev, [cid]: true }));
+      markChatRead(chat.chat_id || chat.phone || chat.whatsapp_number, spaceId);
+    }
+  };
 
 
 
@@ -198,7 +217,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
           {filteredChats.map((chat: any) => (
             <div
               key={chat.id}
-              onClick={() => setSelectedChat(chat)}
+              onClick={() => openChat(chat)}
               className={`px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-[#E5E7EB] border-b border-gray-200 ${selectedChat?.id === chat.id ? 'bg-[#DFE5E7]' : ''
                 }`}
             >
@@ -306,7 +325,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             </div>
 
             <div
-              className="flex-1 overflow-y-auto p-4 bg-[#EFEAE2]"
+              className="flex-1 overflow-y-auto overflow-x-hidden p-4 bg-[#EFEAE2]"
               style={{
                 backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'260\' height=\'260\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cpath d=\'M0 0h260v260H0z\'/%3E%3Cpath d=\'M130 0C58.203 0 0 58.203 0 130s58.203 130 130 130 130-58.203 130-130S201.797 0 130 0zm0 252C62.888 252 8 197.112 8 130S62.888 8 130 8s122 54.888 122 122-54.888 122-122 122z\' fill=\'%23000\' fill-opacity=\'.02\'/%3E%3C/g%3E%3C/svg%3E")',
                 backgroundRepeat: 'repeat'
@@ -314,14 +333,14 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
             >
               <div className="space-y-3">
                 {messages && messages.length > 0 ? (
-                  // messages.map((msg: any, index: number) => (
-                  [...messages].reverse().map((msg: any, index: number) => (
+                  // oldest at top, latest at bottom (WhatsApp style); auto-scrolls to bottom
+                  messages.map((msg: any, index: number) => (
                     <div key={msg.id || index} className={`flex ${msg.from_me ? 'justify-end' : 'justify-start'}`}>
                       <div
-                        className={`rounded-lg px-3 py-2 max-w-[65%] shadow-sm ${msg.from_me ? 'bg-[#D9FDD3]' : 'bg-white'
+                        className={`rounded-lg px-3 py-2 max-w-[65%] shadow-sm overflow-hidden ${msg.from_me ? 'bg-[#D9FDD3]' : 'bg-white'
                           }`}
                       >
-                        <p className="text-sm text-[#111B21] whitespace-pre-wrap">{msg.text?.body || msg.body}</p>
+                        <p className="text-sm text-[#111B21] whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{msg.text?.body || msg.body}</p>
                         <span className={`text-[10px] text-[#667781] float-right ml-2 mt-1`}>
                           {formatTime(msg.timestamp)}
                         </span>
@@ -394,7 +413,7 @@ const Myspace = () => {
   const [spaceChatsData, setSpaceChatsData] = useState<any>()
   const [spaceLiveChatsData, setSpaceLiveChatsData] = useState<any>();
   const [paymentStatus, setPaymentStatus] = useState('');
-  const [activationStatus, setActivationStatus] = useState(null);
+  const [activationStatus, setActivationStatus] = useState<any>(null);
   const [underReviewPopupOpen, setUnderReviewPopupOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [showLiveAgent, setShowLiveAgent] = useState(false);
@@ -403,8 +422,9 @@ const Myspace = () => {
   // Support both 'id' and 'space_id' from URL
   const paramId = searchParams.get('id');
   const paramSpaceId = searchParams.get('space_id');
-  // No hardcoded fallback ID to ensure we don't load the wrong space on slow hydration
-  const id = paramId || paramSpaceId;
+  // Prefer the id from the URL; fall back to resolving the user's space (see effect below)
+  const urlId = paramId || paramSpaceId;
+  const [id, setId] = useState<any>(urlId);
 
   const uuid = searchParams.get('uuid');
 
@@ -437,6 +457,23 @@ const Myspace = () => {
   const spaceName = searchParams.get('name') || 'Space';
   const imageUrl = searchParams.get('image')
 
+  // If the URL has no space id (e.g. page opened without ?id=), resolve it from the
+  // user's spaces so Run Agent / QR / Live Chats still work instead of failing with
+  // "The space id field is required."
+  useEffect(() => {
+    if (urlId) { setId(urlId); return; }
+    (async () => {
+      try {
+        const res: any = await GetSpaceId();
+        const spaces = res?.data?.spaces || res?.spaces || [];
+        const match = spaces.find((s: any) => s?.name === spaceName) || spaces[0];
+        if (match?.id) setId(match.id);
+      } catch (e) {
+        console.error('Failed to resolve space id', e);
+      }
+    })();
+  }, [urlId]);
+
   const isInvalidImage = !imageUrl || imageUrl === 'null' || imageUrl === 'undefined' || imageError;
   useEffect(() => {
     const fetchSpaceChats = async () => {
@@ -451,30 +488,27 @@ const Myspace = () => {
   }, [id]);
 
   useEffect(() => {
+    if (!id) return;
     const fetchLiveChats = async () => {
       try {
-        // Check if token exists before making API call
         const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No authentication token found");
-          // console.warn("⚠️ No token found, skipping live chats fetch");
-          setSpaceLiveChatsData([]);
-          return;
-        }
-
-        console.log("📡 Fetching live chats for space ID:", id);
+        if (!token) { setSpaceLiveChatsData([]); return; }
         const res = await spaceLiveChats(Number(id));
-        console.log("📡 Live Chats API Response:", res);
-        console.log("📡 Type of response:", typeof res);
-        console.log("📡 Is Array:", Array.isArray(res));
-        setSpaceLiveChatsData(res);
+        // keep the previous list on an empty/failed transient response (avoids flashing
+        // mystery/empty chats when Chatterly's chats endpoint briefly hiccups)
+        if (Array.isArray(res) && res.length > 0) setSpaceLiveChatsData(res);
       } catch (err) {
-        console.error("❌ Error fetching live chats:", err);
-        setSpaceLiveChatsData([]);
+        console.error("Error fetching live chats:", err);
       }
     };
-    if (id) fetchLiveChats();
-  }, [id]);
+    fetchLiveChats();
+    // While connected, keep refreshing so chats WhatsApp is still syncing show up right away.
+    let interval: any;
+    if (Number(activationStatus) === 1) {
+      interval = setInterval(fetchLiveChats, 5000);
+    }
+    return () => { if (interval) clearInterval(interval); };
+  }, [id, activationStatus]);
 
 
 
@@ -488,26 +522,34 @@ const Myspace = () => {
   const handleRunAgent = async () => {
   try {
 
-    const statusRes = await InstanceActivationStatus(id);
-    const activation =
-      statusRes?.data?.instance_activation_status;
+    // Make sure we have a space id even if the URL didn't carry one
+    let activeId = id;
+    if (!activeId) {
+      const res: any = await GetSpaceId();
+      const spaces = res?.data?.spaces || res?.spaces || [];
+      const match = spaces.find((s: any) => s?.name === spaceName) || spaces[0];
+      activeId = match?.id;
+      if (activeId) setId(activeId);
+    }
+    if (!activeId) {
+      console.error('No space id available to run the agent');
+      return;
+    }
 
-    setActivationStatus(activation);
-
-    if (activation === 1) {
+    // The 2s activation poll keeps activationStatus fresh — if already linked, go to chats.
+    if (Number(activationStatus) === 1) {
       setShowLiveAgent(true);
       return;
     }
 
-    const response = await RunAgent(id);
+    // Open the QR modal immediately (it shows a spinner) so the user isn't staring at a
+    // frozen button while the Chatterly instance is created in the background.
+    setScanopen(true);
 
-    const paymentStatus =
-      response?.data?.payment_status;
-
-    if (paymentStatus === 'success') {
-      setScanopen(true);
-    } else {
-      setProopen(true);
+    const response = await RunAgent(activeId);
+    if (!response) {
+      setScanopen(false);
+      console.error('Run Agent: instance creation failed (no response)');
     }
 
   } catch (err) {
@@ -527,32 +569,29 @@ const Myspace = () => {
   }, [instanceData])
 
   useEffect(() => {
+    if (!id) return;
     const handleActivationStatus = async () => {
       try {
-        let res = await InstanceActivationStatus(id)
-        console.log("instance activation status:", res?.data)
+        const res = await InstanceActivationStatus(id)
         const instanceActivatioValue = res?.data?.instance_activation_status;
         setActivationStatus(instanceActivatioValue)
 
-        //     if(instanceActivatioValue === 0){
-        //       setUnderReviewPopupOpen(true);
-        // return;
-        //     }
-
-        if (instanceActivatioValue === 1) {
+        if (Number(instanceActivatioValue) === 1) {
           setShowLiveAgent(true);
-           setScanopen(false);
+          setScanopen(false);
+        } else {
+          // logged out / not linked -> hide live chats so QR / Run Agent shows again
+          setShowLiveAgent(false);
         }
-
-
       }
       catch (err) {
         console.log(err)
       }
     }
-    if (id) {
-      handleActivationStatus();
-    }
+    handleActivationStatus();
+    // keep polling so the UI reacts when the phone links / unlinks
+    const interval = setInterval(handleActivationStatus, 1500);
+    return () => clearInterval(interval);
   }, [id])
 
 
@@ -768,7 +807,18 @@ const Myspace = () => {
 
       {proopen ? <Upgradetopro setProopen={setProopen} instanceData={instanceData} /> : ""}
 
-      {scanopen ? <Scanqrpage setScanopen={setScanopen} space_id={id} /> : ""}
+      {scanopen ? (
+        <Scanqrpage
+          setScanopen={setScanopen}
+          space_id={id}
+          onLinked={() => {
+            // QR scanned & WhatsApp linked -> jump straight to chats
+            setActivationStatus(1);
+            setShowLiveAgent(true);
+            setScanopen(false);
+          }}
+        />
+      ) : ""}
 
     </div>
 

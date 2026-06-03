@@ -2090,6 +2090,19 @@ export const getQr = (space_id: string) => {
   });
 }
 
+// Mark a chat as read (clears the WhatsApp unread count for that chat)
+export const markChatRead = async (chat_id: string, space_id: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    return await axios.post(`${BASE_URL}/api/whapi/mark-read`,
+      { space_id, chat_id },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const GetSpaceId = async () => {
   try {
     const token = localStorage.getItem("token");
