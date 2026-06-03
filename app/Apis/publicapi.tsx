@@ -2090,6 +2090,20 @@ export const getQr = (space_id: string) => {
   });
 }
 
+// Get a contact's WhatsApp profile-picture URL (null if none / privacy / unavailable)
+export const getProfilePic = async (number: string, space_id: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/api/whapi/profile-pic`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { number, space_id },
+    });
+    return res?.data?.url || null;
+  } catch (err) {
+    return null;
+  }
+};
+
 // Mark a chat as read (clears the WhatsApp unread count for that chat)
 export const markChatRead = async (chat_id: string, space_id: any) => {
   try {

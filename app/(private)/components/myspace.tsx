@@ -6,7 +6,7 @@ import Spaceiqcolor from './spaceiqcolor'
 import Upgradetopro from './upgradetopro'
 import Scanqrpage from './scanqr'
 import Spacenav from './spacenav'
-import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp, getUserStatus, GetSpaceId, markChatRead } from "@/app/Apis/publicapi";
+import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp, getUserStatus, GetSpaceId, markChatRead, getProfilePic } from "@/app/Apis/publicapi";
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
@@ -26,6 +26,7 @@ const getInitials = (name: string = '') =>
 const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any, spaceId: any }) => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [readChats, setReadChats] = useState<Record<string, boolean>>({});
+  const [dps, setDps] = useState<Record<string, string>>({});   // number -> profile-pic URL
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [userOnlineStatus, setUserOnlineStatus] = useState<boolean | null>(null);
@@ -78,14 +79,46 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
     id: chat.chat_id || chat.whatsapp_number || Math.random().toString(),
     name: chat.customer_name || chat.whatsapp_number || 'Unknown',
     message: chat.user_message || '',
-    time: chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+    // WhatsApp-style time of the last message. Prefer the raw UNIX timestamp (UTC) so the
+    // browser shows the correct LOCAL time; fall back to created_at parsed as UTC (append 'Z')
+    // — never let JS parse the tz-less string as local time, which shifts the hour.
+    time: chat.timestamp
+      ? new Date((Number(chat.timestamp) > 10000000000 ? Number(chat.timestamp) : Number(chat.timestamp) * 1000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : (chat.created_at
+          ? new Date(String(chat.created_at).replace(' ', 'T') + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : ''),
     online: false,
     category: 'WhatsApp',
     phone: chat.whatsapp_number,   // real phone only (or '')
     ...chat, // keep original fields (chat_id, is_group, unread, etc.)
     // clear the unread badge once the chat has been opened
     unread: readChats[chat.chat_id || chat.whatsapp_number] ? 0 : (chat.unread || 0),
+    // WhatsApp profile picture (loaded lazily; falls back to initials when absent)
+    profilePic: dps[chat.whatsapp_number] || undefined,
   }));
+
+  // Lazily fetch profile pictures for the chats, throttled (one at a time) so the
+  // single-threaded backend isn't flooded; results are cached. Contacts with no DP
+  // (privacy) just keep their initials.
+  useEffect(() => {
+    if (!spaceId) return;
+    let cancelled = false;
+    (async () => {
+      const numbers = Array.from(new Set(
+        (spaceLiveChatsData || [])
+          .map((c: any) => c.whatsapp_number)
+          .filter((n: any) => n && !(n in dps))
+      )).slice(0, 60); // cap so we don't hammer the backend
+      for (const num of numbers) {
+        if (cancelled) break;
+        const url = await getProfilePic(num as string, spaceId);
+        if (cancelled) break;
+        setDps(prev => ({ ...prev, [num as string]: url || '' }));
+        await new Promise(r => setTimeout(r, 400)); // throttle between contacts
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [spaceLiveChatsData, spaceId]);
 
   // Open a chat: clear its unread badge immediately and mark it read on WhatsApp.
   const openChat = (chat: any) => {
@@ -102,8 +135,10 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
 
   useEffect(() => {
     const fetchMessages = async () => {
-      // Use phone as the primary identifier for the chat API
-      const chatId = selectedChat?.phone || selectedChat?.name;
+      // Open the thread by the chat's Chatterly id (digits) so it matches how the
+      // webhook keys messages; fall back to phone/name.
+      const chatId = (selectedChat?.chat_id || selectedChat?.phone || selectedChat?.name || '')
+        .toString().split('@')[0];
 
       if (!spaceId) {
         // console.error("Cannot fetch messages: spaceId is null or undefined");
@@ -145,27 +180,25 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
   }, [selectedChat, spaceId]);
 
   const handleSendMessage = async () => {
-    if (messageInput.trim() && selectedChat?.phone) {
-      try {
-        // console.log('Sending message to:', selectedChat.phone);
-        const payload = {
-          message: messageInput,
-          phone: selectedChat.phone
-        };
-        await sendWhatsapp(payload, spaceId);
+    const text = messageInput.trim();
+    if (!text || !selectedChat) return;
 
-        // Optimistically update UI
-        const newMessage = {
-          from_me: true,
-          body: messageInput,
-          timestamp: Date.now() / 1000
-        };
-        setMessages(prev => [...prev, newMessage]);
+    // Deliver to the real phone when we know it; fall back to the chat id (groups / LID chats
+    // that have no resolved number) so you can reply from any open chat, like WhatsApp.
+    const sendTarget = (selectedChat.phone || String(selectedChat.chat_id || '').split('@')[0] || '').toString();
+    // Thread key = how this chat's messages are stored/fetched (the chat id's digits).
+    const chatKey = String(selectedChat.chat_id || selectedChat.phone || '').split('@')[0];
+    if (!sendTarget) return;
 
-        setMessageInput('');
-      } catch (error) {
-        // console.error('Failed to send message:', error);
-      }
+    // Show it immediately on the right (green bubble) and clear the input — like WhatsApp.
+    const optimistic = { from_me: true, body: text, timestamp: Date.now() / 1000 };
+    setMessages(prev => [...prev, optimistic]);
+    setMessageInput('');
+
+    try {
+      await sendWhatsapp({ message: text, phone: sendTarget, chat_id: chatKey }, spaceId);
+    } catch (error) {
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -348,14 +381,18 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                     </div>
 
                   ))
-                ) : (
-                  <div className="flex justify-start">
-                    <div className="bg-white rounded-lg px-3 py-2 max-w-[65%] shadow-sm">
-                      <p className="text-sm text-[#111B21]">{selectedChat.message}</p>
+                ) : selectedChat.message ? (
+                  <div className={`flex ${selectedChat.last_from_me ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`rounded-lg px-3 py-2 max-w-[65%] shadow-sm overflow-hidden ${selectedChat.last_from_me ? 'bg-[#D9FDD3]' : 'bg-white'}`}>
+                      <p className="text-sm text-[#111B21] whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{selectedChat.message}</p>
                       <span className="text-[10px] text-[#667781] float-right ml-2 mt-1">
                         {selectedChat.time}
                       </span>
                     </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-sm text-[#667781]">
+                    No messages yet
                   </div>
                 )}
                 <div ref={messagesEndRef} />
@@ -489,25 +526,27 @@ const Myspace = () => {
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
+    let timer: any;
+
     const fetchLiveChats = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) { setSpaceLiveChatsData([]); return; }
+        if (!token) { if (!cancelled) setSpaceLiveChatsData([]); return; }
         const res = await spaceLiveChats(Number(id));
         // keep the previous list on an empty/failed transient response (avoids flashing
         // mystery/empty chats when Chatterly's chats endpoint briefly hiccups)
-        if (Array.isArray(res) && res.length > 0) setSpaceLiveChatsData(res);
+        if (!cancelled && Array.isArray(res) && res.length > 0) setSpaceLiveChatsData(res);
       } catch (err) {
         console.error("Error fetching live chats:", err);
+      } finally {
+        // Self-scheduling refresh (only while connected) so a slow chat-list call can't pile
+        // up behind itself and starve the activation poll on the single-threaded backend.
+        if (!cancelled && Number(activationStatus) === 1) timer = setTimeout(fetchLiveChats, 5000);
       }
     };
     fetchLiveChats();
-    // While connected, keep refreshing so chats WhatsApp is still syncing show up right away.
-    let interval: any;
-    if (Number(activationStatus) === 1) {
-      interval = setInterval(fetchLiveChats, 5000);
-    }
-    return () => { if (interval) clearInterval(interval); };
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [id, activationStatus]);
 
 
@@ -570,28 +609,36 @@ const Myspace = () => {
 
   useEffect(() => {
     if (!id) return;
-    const handleActivationStatus = async () => {
-      try {
-        const res = await InstanceActivationStatus(id)
-        const instanceActivatioValue = res?.data?.instance_activation_status;
-        setActivationStatus(instanceActivatioValue)
+    let cancelled = false;
+    let timer: any;
 
-        if (Number(instanceActivatioValue) === 1) {
-          setShowLiveAgent(true);
-          setScanopen(false);
-        } else {
-          // logged out / not linked -> hide live chats so QR / Run Agent shows again
-          setShowLiveAgent(false);
+    const tick = async () => {
+      try {
+        const res = await InstanceActivationStatus(id);
+        const val = res?.data?.instance_activation_status;
+        // Ignore transient/failed responses (undefined/null) so we never flip the UI on an error.
+        if (!cancelled && val !== undefined && val !== null) {
+          setActivationStatus(val);
+          if (Number(val) === 1) {
+            setShowLiveAgent(true);
+            setScanopen(false);
+          } else {
+            // logged out / not linked -> hide live chats so QR / Run Agent shows again
+            setShowLiveAgent(false);
+          }
         }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        // Self-scheduling: only fire the next poll AFTER the previous one finishes, so polls
+        // can never pile up and saturate the single-threaded backend (the pile-up was what
+        // kept the QR open until a manual refresh). The backend flips the flag instantly via
+        // the session.connected webhook, so this still reacts within ~1s of login.
+        if (!cancelled) timer = setTimeout(tick, 1000);
       }
-      catch (err) {
-        console.log(err)
-      }
-    }
-    handleActivationStatus();
-    // keep polling so the UI reacts when the phone links / unlinks
-    const interval = setInterval(handleActivationStatus, 1500);
-    return () => clearInterval(interval);
+    };
+    tick();
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [id])
 
 
