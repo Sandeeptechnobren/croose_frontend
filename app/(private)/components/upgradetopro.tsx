@@ -1,7 +1,7 @@
 'use client'
 import React, { use, useEffect } from 'react'
 import { Icon } from "@iconify/react";
-import { PayApi, RunAgent, spaceChats } from '@/app/Apis/publicapi';
+import { PayApi, RunAgent, spaceChats, BASE_URL } from '@/app/Apis/publicapi';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -59,7 +59,7 @@ const Upgradetopro = (props: any) => {
       return;
     }
 
-    const qrUrl = `https://api.joincroose.com/croose/api/paystack/whapi/${spaceUuid}`;
+    const qrUrl = `${BASE_URL}/api/paystack/whapi/${spaceUuid}`;
     window.open(qrUrl, '_blank');
   };
 

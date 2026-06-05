@@ -127,11 +127,7 @@ useEffect(() => {
           </div>
 
           <div className='bg-white border border-gray-200 rounded-xl p-6 w-[260px] h-[260px] flex items-center justify-center'>
-            {(loading && !qrImage) ? (
-              <div className='w-40 h-40 flex items-center justify-center text-gray-500 animate-pulse'>
-                Loading...
-              </div>
-            ) : errorMsg ? (
+            {errorMsg ? (
               <div className='flex flex-col items-center text-center text-red-500'>
                 <p className='mb-2'>{errorMsg}</p>
                 <button
@@ -148,12 +144,17 @@ useEffect(() => {
               ⏳ Hang tight — your AI assistant will be up and running in just a moment.
             </div>
 
-            ) : (
+            ) : qrImage ? (
               <img
-                src={qrImage!}
+                src={qrImage}
                 alt='QR Code'
                 className='w-48 h-48 rounded-md shadow-sm'
               />
+            ) : (
+              // No image yet (loading or "QR generating") — show a spinner, NEVER a broken <img>.
+              <div className='w-40 h-40 flex items-center justify-center text-center text-gray-500 text-sm animate-pulse'>
+                Generating QR…
+              </div>
             )}
           </div>
 

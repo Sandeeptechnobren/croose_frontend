@@ -78,6 +78,7 @@ const Page = () => {
   const [messaging, setMessaging] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [broadcastData, setBroadcastData] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -202,10 +203,10 @@ const Page = () => {
   }, [messaging]);
 
   // Fetch broadcast list
-  const fetchBroadcastList = async (page: number = 1) => {
+  const fetchBroadcastList = async (page: number = 1, search: string = '') => {
     try {
       setLoading(true);
-      const response = await getBroadcastList();
+      const response = await getBroadcastList(search);
       console.log('Broadcast list response:', response);
 
       // Extract data and pagination info
@@ -231,14 +232,18 @@ const Page = () => {
     }
   };
 
+  // Fetch from the backend on mount AND whenever the search query changes (debounced 350ms),
+  // so the filtering is server-side (?q=). The client-side filter below stays as a fallback
+  // for instant feedback / in case the backend hasn't added the ?q= support yet.
   useEffect(() => {
-    fetchBroadcastList();
-  }, []);
+    const t = setTimeout(() => { fetchBroadcastList(1, searchQuery); }, 350);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.last_page) {
-      fetchBroadcastList(newPage);
+      fetchBroadcastList(newPage, searchQuery);
     }
   };
 
@@ -275,6 +280,21 @@ const Page = () => {
 
     return pages;
   };
+
+  // Client-side search over the loaded broadcasts (content, frequency, status, target).
+  const q = searchQuery.trim().toLowerCase();
+  const filteredBroadcasts = q
+    ? broadcastData.filter((b: any) =>
+        [
+          b?.content,
+          b?.frequency,
+          b?.status,
+          b?.target_id != null ? `target #${b.target_id}` : '',
+        ]
+          .filter(Boolean)
+          .some((field: any) => String(field).toLowerCase().includes(q))
+      )
+    : broadcastData;
 
   return (
     <div className="flex-col w-full mt-0 bg-[#F9FAFB] min-h-screen pb-10">
@@ -317,6 +337,20 @@ const Page = () => {
           </div>
         </section>
 
+        {/* Search filter */}
+        <div className="w-[94%] flex">
+          <div className="relative w-full sm:w-[360px]">
+            <Icon icon="lucide:search" width="18" height="18" className="absolute left-3 top-1/2 -translate-y-1/2 text-[#667085]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by content, frequency, status, target…"
+              className="w-full h-[42px] pl-10 pr-3 rounded-lg border border-[#D0D5DD] bg-white text-sm text-[#101828] outline-none focus:border-[#685BC7]"
+            />
+          </div>
+        </div>
+
         {/* Table Section with Enhanced Design */}
         <div className="w-[94%] border border-[#EAECF0] rounded-[12px] bg-white shadow-sm overflow-hidden mb-6">
           {/* Mobile scroll hint */}
@@ -351,14 +385,14 @@ const Page = () => {
                       Loading broadcast list...
                     </td>
                   </tr>
-                ) : broadcastData.length === 0 ? (
+                ) : filteredBroadcasts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-8 text-center text-[#475467]">
-                      No broadcast messages found
+                      {searchQuery ? 'No broadcasts match your search' : 'No broadcast messages found'}
                     </td>
                   </tr>
                 ) : (
-                  broadcastData.map((broadcast: any, index: number) => (
+                  filteredBroadcasts.map((broadcast: any, index: number) => (
                     <tr key={broadcast.id || index} className="group border-b border-[#EAECF0] hover:bg-[#F9FAFB] transition-colors">
                       {/* <td className="px-6 py-4 sticky left-0 bg-white group-hover:bg-[#F9FAFB] z-10">
                         <input

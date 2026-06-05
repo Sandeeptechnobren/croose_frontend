@@ -2035,7 +2035,7 @@ export const RunAgentInfo = async (uuid: string) => {
     console.log(`Making RunAgentInfo call with UUID: ${uuid}`);
 
     const res = await axios.get(
-      `https://api.joincroose.com/croose/api/run_agent/${uuid}`,
+      `${BASE_URL}/api/run_agent/${uuid}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -2072,7 +2072,7 @@ export const RunAgentInfo = async (uuid: string) => {
 
 export const PayApi = async (uuid: any) => {
   try {
-    const res = await axios.get(`https://api.joincroose.com/croose/api/paystack/whapi/${uuid}`);
+    const res = await axios.get(`${BASE_URL}/api/paystack/whapi/${uuid}`);
     return res;
   } catch (err) {
     throw err;
@@ -2234,7 +2234,7 @@ export const resetPassword = async (email: string, securityQuestion: string, sec
   }
 };
 
-export const getBroadcastList = async () => {
+export const getBroadcastList = async (search: string = '') => {
   try {
     const token = localStorage.getItem("token");
 
@@ -2245,6 +2245,8 @@ export const getBroadcastList = async () => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        // Server-side search — backend `index()` reads ?q= (see the controller code provided).
+        params: search ? { q: search } : {},
       }
     );
 
