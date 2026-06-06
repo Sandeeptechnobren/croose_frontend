@@ -2035,7 +2035,7 @@ export const RunAgentInfo = async (uuid: string) => {
     console.log(`Making RunAgentInfo call with UUID: ${uuid}`);
 
     const res = await axios.get(
-      `https://api.joincroose.com/croose/api/run_agent/${uuid}`,
+      `${BASE_URL}/api/run_agent/${uuid}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -2072,7 +2072,7 @@ export const RunAgentInfo = async (uuid: string) => {
 
 export const PayApi = async (uuid: any) => {
   try {
-    const res = await axios.get(`https://api.joincroose.com/croose/api/paystack/whapi/${uuid}`);
+    const res = await axios.get(`${BASE_URL}/api/paystack/whapi/${uuid}`);
     return res;
   } catch (err) {
     throw err;
@@ -2089,6 +2089,20 @@ export const getQr = (space_id: string) => {
     responseType: 'blob'
   });
 }
+
+// Get a contact's WhatsApp profile-picture URL (null if none / privacy / unavailable)
+export const getProfilePic = async (number: string, space_id: any) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(`${BASE_URL}/api/whapi/profile-pic`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { number, space_id },
+    });
+    return res?.data?.url || null;
+  } catch (err) {
+    return null;
+  }
+};
 
 // Mark a chat as read (clears the WhatsApp unread count for that chat)
 export const markChatRead = async (chat_id: string, space_id: any) => {
@@ -2220,7 +2234,7 @@ export const resetPassword = async (email: string, securityQuestion: string, sec
   }
 };
 
-export const getBroadcastList = async () => {
+export const getBroadcastList = async (search: string = '') => {
   try {
     const token = localStorage.getItem("token");
 
@@ -2231,6 +2245,8 @@ export const getBroadcastList = async () => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        // Server-side search — backend `index()` reads ?q= (see the controller code provided).
+        params: search ? { q: search } : {},
       }
     );
 

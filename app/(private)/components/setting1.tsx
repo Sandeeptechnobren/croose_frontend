@@ -281,7 +281,8 @@ import { Icon } from '@iconify/react'
 import Snackbar from '@mui/material/Snackbar'
 import { useRouter } from 'next/navigation'
 import { SettingContext } from '@/app/context/SettingContext'
-import { logoutapi, updatePassword, addProfileUpdate } from '@/app/Apis/publicapi'
+import { logoutapi, updatePassword, addProfileUpdate, BASE_URL } from '@/app/Apis/publicapi'
+import { toast } from 'react-toastify'
 
 const Setting1 = () => {
   const router = useRouter()
@@ -369,12 +370,12 @@ const Setting1 = () => {
           email: response.data.email
         })
 
-        setSnackbarMessage('Profile updated successfully!')
-        setOpenSnackbar(true)
+        // Global toast survives the modal unmounting; then close the Settings modal.
+        toast.success('Profile updated successfully')
+        setOpenSetting1(false)
       }
     } catch (err: any) {
-      setSnackbarMessage(err.message || 'Failed to update profile')
-      setOpenSnackbar(true)
+      toast.error(err?.message || 'Failed to update profile')
     } finally {
       setIsLoading(false)
     }
@@ -481,21 +482,15 @@ const Setting1 = () => {
                       />
                     ) : registerData?.data?.profile_photo ? (
                       <img
-                        src={`https://api.joincroose.com/storage/${registerData.data.profile_photo}`}
+                        src={`${BASE_URL}/storage/${registerData.data.profile_photo}`}
                         alt="Profile"
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          console.log("Image failed to load:", target.src);
-
-                          if (target.src.includes('api.joincroose.com/storage/')) {
-                            console.log("Trying path 2: /croose/storage/");
-                            target.src = `https://api.joincroose.com/croose/storage/${registerData.data.profile_photo}`;
-                          } else if (target.src.includes('api.joincroose.com/croose/storage/')) {
-                            console.log("Trying path 3: /croose/public/storage/");
-                            target.src = `https://api.joincroose.com/croose/public/storage/${registerData.data.profile_photo}`;
+                          // Try /storage then /public/storage under the configured API base, then give up.
+                          if (!target.src.includes('/public/storage/')) {
+                            target.src = `${BASE_URL}/public/storage/${registerData.data.profile_photo}`;
                           } else {
-                            console.log("All attempts failed. Showing fallback.");
                             target.style.display = 'none';
                           }
                         }}

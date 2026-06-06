@@ -6,26 +6,45 @@ import Spaceiqcolor from './spaceiqcolor'
 import Upgradetopro from './upgradetopro'
 import Scanqrpage from './scanqr'
 import Spacenav from './spacenav'
-import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, getMessage, sendWhatsapp, getUserStatus, GetSpaceId, markChatRead } from "@/app/Apis/publicapi";
+import { RunAgent, spaceChats, spaceIqCheck, spaceLiveChats, PayApi, InstanceActivationStatus, sendWhatsapp, getUserStatus, GetSpaceId, markChatRead, getProfilePic } from "@/app/Apis/publicapi";
 import { useParams, useSearchParams } from 'next/navigation';
 import { useIq } from '../Iqcontext'
 import LiveAgent2 from './liveagent2'
 import Link from 'next/link'
-import { MessageCircle, Search, MoreVertical, Send, Paperclip, Smile } from 'lucide-react';
+import { MessageCircle, Search, MoreVertical, Send, Paperclip, Smile, CheckCheck } from 'lucide-react';
 
 
 const getInitials = (name: string = '') =>
   name
-    .split(' ')
+    .split(/\s+/)
+    .map(w => w.replace(/[^\p{L}\p{N}]/gu, '')) // drop emojis/symbols so avatars show letters, not boxes
     .filter(Boolean)
-    .map(n => n[0])
+    .map(w => w[0])
     .join('')
     .slice(0, 2)
     .toUpperCase()
 
+// WhatsApp-style last-message preview: show a media label/icon for non-text messages.
+const mediaLabel = (type: string = 'chat', body: string = ''): string => {
+  const b = (body || '').trim();
+  switch (type) {
+    case 'image':    return b ? `📷 ${b}` : '📷 Photo';
+    case 'video':    return b ? `🎥 ${b}` : '🎥 Video';
+    case 'document': return `📄 ${b || 'Document'}`;
+    case 'audio':
+    case 'ptt':      return '🎤 Voice message';
+    case 'sticker':  return 'Sticker';
+    case 'location': return '📍 Location';
+    case 'revoked':  return '🚫 This message was deleted';
+    case 'chat':     return b;
+    default:         return b; // group notifications / unknown -> show body if present
+  }
+};
+
 const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any, spaceId: any }) => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [readChats, setReadChats] = useState<Record<string, boolean>>({});
+  const [dps, setDps] = useState<Record<string, string>>({});   // number -> profile-pic URL
   const [messageInput, setMessageInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const [userOnlineStatus, setUserOnlineStatus] = useState<boolean | null>(null);
@@ -77,15 +96,47 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
     // stable key: prefer the raw chat_id (whatsapp_number can be empty for groups/unknown)
     id: chat.chat_id || chat.whatsapp_number || Math.random().toString(),
     name: chat.customer_name || chat.whatsapp_number || 'Unknown',
-    message: chat.user_message || '',
-    time: chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+    message: mediaLabel(chat.last_type, chat.user_message),
+    // WhatsApp-style time of the last message. Prefer the raw UNIX timestamp (UTC) so the
+    // browser shows the correct LOCAL time; fall back to created_at parsed as UTC (append 'Z')
+    // — never let JS parse the tz-less string as local time, which shifts the hour.
+    time: chat.timestamp
+      ? new Date((Number(chat.timestamp) > 10000000000 ? Number(chat.timestamp) : Number(chat.timestamp) * 1000)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : (chat.created_at
+          ? new Date(String(chat.created_at).replace(' ', 'T') + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : ''),
     online: false,
     category: 'WhatsApp',
     phone: chat.whatsapp_number,   // real phone only (or '')
     ...chat, // keep original fields (chat_id, is_group, unread, etc.)
     // clear the unread badge once the chat has been opened
     unread: readChats[chat.chat_id || chat.whatsapp_number] ? 0 : (chat.unread || 0),
+    // WhatsApp profile picture (loaded lazily; falls back to initials when absent)
+    profilePic: dps[chat.whatsapp_number] || undefined,
   }));
+
+  // Lazily fetch profile pictures for the chats, throttled (one at a time) so the
+  // single-threaded backend isn't flooded; results are cached. Contacts with no DP
+  // (privacy) just keep their initials.
+  useEffect(() => {
+    if (!spaceId) return;
+    let cancelled = false;
+    (async () => {
+      const numbers = Array.from(new Set(
+        (spaceLiveChatsData || [])
+          .map((c: any) => c.whatsapp_number)
+          .filter((n: any) => n && !(n in dps))
+      )).slice(0, 60); // cap so we don't hammer the backend
+      for (const num of numbers) {
+        if (cancelled) break;
+        const url = await getProfilePic(num as string, spaceId);
+        if (cancelled) break;
+        setDps(prev => ({ ...prev, [num as string]: url || '' }));
+        await new Promise(r => setTimeout(r, 400)); // throttle between contacts
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [spaceLiveChatsData, spaceId]);
 
   // Open a chat: clear its unread badge immediately and mark it read on WhatsApp.
   const openChat = (chat: any) => {
@@ -100,72 +151,41 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
 
 
 
+  // Reliable mode: Chatterly's per-message threading is unreliable — it merges different
+  // contacts under one WhatsApp privacy LID, so reconstructing a full in-chat history mixes
+  // other people's messages into the wrong chat. Instead, seed the panel with THIS chat's
+  // latest message (from the live chat list, which IS reliable) and append anything sent in
+  // this session. No call to getMessage, so no contamination.
   useEffect(() => {
-    const fetchMessages = async () => {
-      // Use phone as the primary identifier for the chat API
-      const chatId = selectedChat?.phone || selectedChat?.name;
-
-      if (!spaceId) {
-        // console.error("Cannot fetch messages: spaceId is null or undefined");
-        setMessages([]);
-        return;
-      }
-
-      // console.log("Fetching messages for:", chatId, "SpaceID:", spaceId);
-
-      if (chatId && spaceId) {
-        try {
-          const res = await getMessage(chatId, spaceId);
-          // console.log("getMessage response:", res);
-
-          // Check if the response contains messages in the expected format
-          if (res?.messages && Array.isArray(res.messages)) {
-            // If messages are directly in res.messages
-            setMessages(res.messages);
-          } else if (res?.data?.messages && Array.isArray(res.data.messages)) {
-            // If messages are in res.data.messages
-            setMessages(res.data.messages);
-          } else if (Array.isArray(res)) {
-            // Fallback if the response itself is an array
-            setMessages(res);
-          } else {
-            setMessages([]);
-            // console.log("No messages found in response", res);
-          }
-        } catch (err) {
-          // console.error("Error fetching messages:", err);
-          setMessages([]);
-        }
-      }
-    };
-
-    if (selectedChat) {
-      fetchMessages();
-    }
+    if (!selectedChat) { setMessages([]); return; }
+    const lastBody = selectedChat.user_message || selectedChat.message || '';
+    setMessages(
+      lastBody
+        ? [{ from_me: !!selectedChat.last_from_me, body: lastBody, timestamp: selectedChat.timestamp || null }]
+        : []
+    );
   }, [selectedChat, spaceId]);
 
   const handleSendMessage = async () => {
-    if (messageInput.trim() && selectedChat?.phone) {
-      try {
-        // console.log('Sending message to:', selectedChat.phone);
-        const payload = {
-          message: messageInput,
-          phone: selectedChat.phone
-        };
-        await sendWhatsapp(payload, spaceId);
+    const text = messageInput.trim();
+    if (!text || !selectedChat) return;
 
-        // Optimistically update UI
-        const newMessage = {
-          from_me: true,
-          body: messageInput,
-          timestamp: Date.now() / 1000
-        };
-        setMessages(prev => [...prev, newMessage]);
+    // Deliver to the real phone when we know it; fall back to the chat id (groups / LID chats
+    // that have no resolved number) so you can reply from any open chat, like WhatsApp.
+    const sendTarget = (selectedChat.phone || String(selectedChat.chat_id || '').split('@')[0] || '').toString();
+    // Thread key = how this chat's messages are stored/fetched (the chat id's digits).
+    const chatKey = String(selectedChat.chat_id || selectedChat.phone || '').split('@')[0];
+    if (!sendTarget) return;
 
-        setMessageInput('');
-      } catch (error) {
-        // console.error('Failed to send message:', error);
-      }
+    // Show it immediately on the right (green bubble) and clear the input — like WhatsApp.
+    const optimistic = { from_me: true, body: text, timestamp: Date.now() / 1000 };
+    setMessages(prev => [...prev, optimistic]);
+    setMessageInput('');
+
+    try {
+      await sendWhatsapp({ message: text, phone: sendTarget, chat_id: chatKey }, spaceId);
+    } catch (error) {
+      console.error('Failed to send message:', error);
     }
   };
 
@@ -213,13 +233,17 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
         </div>
 
         {/* Chat List */}
-        <div className="flex-1 overflow-y-auto bg-white">
+        <div className="flex-1 overflow-y-auto bg-[#F0F2F5]">
+          {filteredChats.length === 0 && (
+            <div className="flex items-center justify-center h-full text-sm text-[#667781] px-4 text-center animate-pulse">
+              {searchQuery ? 'No chats found' : 'Loading chats… (WhatsApp is syncing your conversations)'}
+            </div>
+          )}
           {filteredChats.map((chat: any) => (
             <div
               key={chat.id}
               onClick={() => openChat(chat)}
-              className={`px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-[#E5E7EB] border-b border-gray-200 ${selectedChat?.id === chat.id ? 'bg-[#DFE5E7]' : ''
-                }`}
+              className={`mx-2 my-1 px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-xl transition-colors ${selectedChat?.id === chat.id ? 'bg-[#E7F3EB]' : 'bg-white hover:bg-[#F5F6F6]'}`}
             >
               <div className="relative flex-shrink-0">
                 {/* <div className="w-12 h-12 rounded-full bg-[#DFE5E7] flex items-center justify-center">
@@ -248,16 +272,21 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-baseline mb-1">
                   <h3 className="font-semibold text-[#111B21] text-[15px] truncate">
-                    {chat.name}
+                    {chat.name}{chat.is_self ? ' (You)' : ''}
                   </h3>
-                  <span className="text-xs text-[#667781] ml-2 flex-shrink-0">
+                  <span className={`text-xs ml-2 flex-shrink-0 ${chat.unread > 0 ? 'text-[#25D366] font-medium' : 'text-[#667781]'}`}>
                     {chat.time}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-[#667781] truncate">{chat.message}</p>
+                <div className="flex justify-between items-center gap-2">
+                  <p className="text-sm text-[#667781] truncate flex items-center gap-1 min-w-0">
+                    {chat.last_from_me && (
+                      <CheckCheck className="w-4 h-4 text-[#8696A0] flex-shrink-0" />
+                    )}
+                    <span className="truncate">{chat.message}</span>
+                  </p>
                   {chat.unread > 0 && (
-                    <span className="ml-2 bg-[#25D366] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
+                    <span className="bg-[#25D366] text-white text-[11px] font-medium rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center flex-shrink-0">
                       {chat.unread}
                     </span>
                   )}
@@ -301,7 +330,7 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#111B21] text-sm">
-                    {selectedChat.name}
+                    {selectedChat.name}{selectedChat.is_self ? ' (You)' : ''}
                   </h3>
                   <div className="flex items-center gap-1">
                     <p className="text-xs text-[#667781]">
@@ -348,14 +377,18 @@ const WhatsAppChat = ({ spaceLiveChatsData, spaceId }: { spaceLiveChatsData: any
                     </div>
 
                   ))
-                ) : (
-                  <div className="flex justify-start">
-                    <div className="bg-white rounded-lg px-3 py-2 max-w-[65%] shadow-sm">
-                      <p className="text-sm text-[#111B21]">{selectedChat.message}</p>
+                ) : selectedChat.message ? (
+                  <div className={`flex ${selectedChat.last_from_me ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`rounded-lg px-3 py-2 max-w-[65%] shadow-sm overflow-hidden ${selectedChat.last_from_me ? 'bg-[#D9FDD3]' : 'bg-white'}`}>
+                      <p className="text-sm text-[#111B21] whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{selectedChat.message}</p>
                       <span className="text-[10px] text-[#667781] float-right ml-2 mt-1">
                         {selectedChat.time}
                       </span>
                     </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-sm text-[#667781]">
+                    No messages yet
                   </div>
                 )}
                 <div ref={messagesEndRef} />
@@ -489,25 +522,27 @@ const Myspace = () => {
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
+    let timer: any;
+
     const fetchLiveChats = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) { setSpaceLiveChatsData([]); return; }
+        if (!token) { if (!cancelled) setSpaceLiveChatsData([]); return; }
         const res = await spaceLiveChats(Number(id));
         // keep the previous list on an empty/failed transient response (avoids flashing
         // mystery/empty chats when Chatterly's chats endpoint briefly hiccups)
-        if (Array.isArray(res) && res.length > 0) setSpaceLiveChatsData(res);
+        if (!cancelled && Array.isArray(res) && res.length > 0) setSpaceLiveChatsData(res);
       } catch (err) {
         console.error("Error fetching live chats:", err);
+      } finally {
+        // Self-scheduling refresh (only while connected) so a slow chat-list call can't pile
+        // up behind itself and starve the activation poll on the single-threaded backend.
+        if (!cancelled && Number(activationStatus) === 1) timer = setTimeout(fetchLiveChats, 5000);
       }
     };
     fetchLiveChats();
-    // While connected, keep refreshing so chats WhatsApp is still syncing show up right away.
-    let interval: any;
-    if (Number(activationStatus) === 1) {
-      interval = setInterval(fetchLiveChats, 5000);
-    }
-    return () => { if (interval) clearInterval(interval); };
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [id, activationStatus]);
 
 
@@ -570,28 +605,36 @@ const Myspace = () => {
 
   useEffect(() => {
     if (!id) return;
-    const handleActivationStatus = async () => {
-      try {
-        const res = await InstanceActivationStatus(id)
-        const instanceActivatioValue = res?.data?.instance_activation_status;
-        setActivationStatus(instanceActivatioValue)
+    let cancelled = false;
+    let timer: any;
 
-        if (Number(instanceActivatioValue) === 1) {
-          setShowLiveAgent(true);
-          setScanopen(false);
-        } else {
-          // logged out / not linked -> hide live chats so QR / Run Agent shows again
-          setShowLiveAgent(false);
+    const tick = async () => {
+      try {
+        const res = await InstanceActivationStatus(id);
+        const val = res?.data?.instance_activation_status;
+        // Ignore transient/failed responses (undefined/null) so we never flip the UI on an error.
+        if (!cancelled && val !== undefined && val !== null) {
+          setActivationStatus(val);
+          if (Number(val) === 1) {
+            setShowLiveAgent(true);
+            setScanopen(false);
+          } else {
+            // logged out / not linked -> hide live chats so QR / Run Agent shows again
+            setShowLiveAgent(false);
+          }
         }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        // Self-scheduling: only fire the next poll AFTER the previous one finishes, so polls
+        // can never pile up and saturate the single-threaded backend (the pile-up was what
+        // kept the QR open until a manual refresh). The backend flips the flag instantly via
+        // the session.connected webhook, so this still reacts within ~1s of login.
+        if (!cancelled) timer = setTimeout(tick, 1000);
       }
-      catch (err) {
-        console.log(err)
-      }
-    }
-    handleActivationStatus();
-    // keep polling so the UI reacts when the phone links / unlinks
-    const interval = setInterval(handleActivationStatus, 1500);
-    return () => clearInterval(interval);
+    };
+    tick();
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [id])
 
 
